@@ -10,6 +10,9 @@ This copy is the preview for [https://raonehere.github.io/EKA/](https://raoneher
 index.html          the page
 assets/styles.css   layout and design tokens
 assets/main.js      year in the footer, one-open FAQ, map loads on click
+book.html           booking page (see Bookings)
+assets/book.js      availability check, price summary, UPI payment and screenshot upload
+worker/             Cloudflare Worker that reads and writes bookings in Notion
 assets/fonts/       Oswald, Inter, Sankofa Display (woff2, self-hosted)
 assets/img/         logo, wordmark, grain texture, icons, social image
 robots.txt          Disallow: / (see Deployment — crawlers will not read this file here)
@@ -66,6 +69,25 @@ Pages could not be switched on from the import (the token cannot change reposito
 
 Leave that tag in place until the site moves to its real domain and you want it indexed. When `ekaforest.in` is confirmed, update the canonical URL, Open Graph URL, JSON-LD `url`, and `sitemap.xml`, then remove `noindex`.
 
+## Bookings
+
+`book.html` is the booking page. Guests check availability, fill in their details, pay by UPI (QR code or UPI ID) and upload the payment screenshot. Each booking becomes a row in the Notion bookings database with status **Payment submitted**. Check the screenshot in Notion, then set the status to **Confirmed**, or to **Cancelled** to free the tents.
+
+The browser cannot talk to Notion directly, so `worker/` holds a small Cloudflare Worker that does it:
+
+| Endpoint | What it does |
+| --- | --- |
+| `GET /api/availability?checkin=&checkout=&guests=` | Free tents per night and the price |
+| `POST /api/bookings` | Re-checks availability, uploads the screenshot, creates the Notion row |
+
+Rules live at the top of `worker/src/index.js`: ₹1,850 per person per night (dinner and breakfast), lunch ₹250 per person per day, 10 tents, 2 people per tent (a solo guest takes a whole tent), stays of up to 14 nights. Every row that is not Cancelled holds its tents, including rows added by hand in Notion. If a row has no Tents value, it uses Guests ÷ 2, rounded up. The Notion column names are mapped in the `P` object in the same file. The display prices in `assets/book.js` must match.
+
+Notion setup: create an internal integration, connect it to the bookings database (••• → Connections), then copy `worker/.dev.vars.example` to `worker/.dev.vars` and fill in the token and database id. `node scripts/notion-schema.mjs` (run from `worker/`) lists the database columns.
+
+Run locally: `npx wrangler dev` in `worker/` (API on port 8787) alongside the static server on 8080. The booking page uses `localhost:8787` automatically when opened from localhost.
+
+Deploy: `npx wrangler deploy` in `worker/`, then `npx wrangler secret put NOTION_TOKEN` and `npx wrangler secret put NOTION_DB_ID`. Put the deployed URL in `data-api` on the form in `book.html`.
+
 ## Open placeholders
 
 Nothing below is final. Search the repo for the marker before replacing it.
@@ -76,6 +98,9 @@ Nothing below is final. Search the repo for the marker before replacing it.
 | Email | `hello@ekaforest.in` | Footer |
 | Domain | `ekaforest.in` | Canonical link, Open Graph tags, JSON-LD, `sitemap.xml` |
 | Map pin | Vattavada village area, not the property | “How to reach” map and the View on map button. Comment in the HTML is marked A5 |
+| UPI ID and QR | `ekaforest@upi`, grey QR panel | `data-upi` and the QR block in `book.html` |
+| Booking API URL | `https://eka-booking.REPLACE.workers.dev` | `data-api` in `book.html` |
+| Cancellation policy | Not written yet | Stay rules in `book.html` (A7) |
 | Photos | Empty brown panels with a caption | About, stays, and the gallery strip. Every photo is a placeholder until real ones are supplied |
 
 Instagram `@eka_forest_` is a real link and is not a placeholder.
