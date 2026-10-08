@@ -1,0 +1,6 @@
+name = "eka-booking"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+
+[vars]
+ALLOWED_ORIGINS = "https://raonehere.github.io,http://localhost:8080,http://127.0.0.1:8080"

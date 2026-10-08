@@ -148,6 +148,49 @@ details p{margin:0;padding:0 20px 20px;font-size:17px;line-height:28px}
   background:var(--brown);color:var(--paper);box-shadow:0 4px 14px rgba(36,37,36,.25);transition:transform .2s}
 .wa-float:hover{transform:scale(1.06)}
 
+/* ---------- Booking page (book.html) ---------- */
+.book{max-width:1440px;margin:0 auto;padding:120px var(--pad-r) 0 var(--pad-l)}
+.book__inner{max-width:760px}
+.book__intro{margin-bottom:36px}
+.book fieldset{border:0;border-top:1px solid var(--brown);margin:0 0 40px;padding:28px 0 0;min-width:0}
+.book legend{float:left;width:100%;padding:0;margin:0 0 18px;font:400 24px/32px var(--f-head);text-transform:uppercase;letter-spacing:.06em}
+.book legend+*{clear:both}
+.grid2{display:grid;grid-template-columns:1fr 1fr;column-gap:20px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+.field label{font:400 15px/20px var(--f-body);color:var(--text)}
+.book input:not([type=checkbox]),.book select,.book textarea{width:100%;padding:11px 14px;border:1px solid var(--brown);border-radius:0;
+  background:rgba(233,237,239,.35);color:var(--text);font:400 17px/24px var(--f-body)}
+.book input[type=file]{padding:9px 10px;font-size:15px}
+.book textarea{min-height:88px;resize:vertical}
+.check{display:flex;gap:12px;align-items:flex-start;margin:0 0 24px;font-size:16px;line-height:24px;color:var(--text);cursor:pointer}
+.check input{flex:none;width:20px;height:20px;margin:2px 0 0;accent-color:var(--brown)}
+.hint{font-size:14px;line-height:21px;opacity:.9;margin:0}
+button.btn{background:none;cursor:pointer}
+.btn--sm{font-size:24px;line-height:48px;letter-spacing:4.8px;padding:0 22px}
+.btn[disabled]{opacity:.5;cursor:wait}
+.status{margin:16px 0 0;font-size:16px;line-height:24px}
+.status:empty{display:none}
+.status--error{color:#8a2b1a}
+.summary{border:1px solid var(--brown);padding:18px 22px;margin-top:20px}
+.summary dl{display:grid;grid-template-columns:1fr auto;gap:6px 24px;margin:0;font-size:16px;line-height:24px;color:var(--text)}
+.summary dd{margin:0;text-align:right;white-space:nowrap}
+.summary .total{font-weight:600;border-top:1px solid var(--brown);padding-top:10px;margin-top:4px}
+.pay{display:grid;grid-template-columns:220px 1fr;gap:28px;align-items:start;margin-bottom:24px}
+.ph--qr,.pay__qr{width:100%;aspect-ratio:1;border-radius:12px}
+.pay__label{margin:0;font-size:15px}
+.pay__amount{margin:0 0 10px;font:300 40px/48px var(--f-head)}
+.upi{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin:0 0 14px}
+.upi code{font:500 17px/24px var(--f-body);color:var(--brown)}
+.link-btn{background:none;border:0;padding:0;color:inherit;font:400 15px/24px var(--f-body);text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+.pay__app{display:none;margin-bottom:14px}
+@media (hover:none) and (pointer:coarse){.pay__app{display:inline-flex}}
+.book .h3{margin-top:12px}
+.terms{margin:0 0 22px;padding-left:22px;font-size:16px;line-height:26px}
+.terms li{margin-bottom:10px;color:var(--text)}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.done{border:1px solid var(--brown);padding:28px 32px}
+.done:focus{outline:none}
+
 /* ---------- Tablet ---------- */
 @media (max-width:1280px){
   :root{--pad-l:6vw;--pad-r:6vw}
@@ -179,6 +222,10 @@ details p{margin:0;padding:0 20px 20px;font-size:17px;line-height:28px}
   .footer__inner{grid-template-columns:1fr;gap:28px;padding-top:40px}
   .wa-float{width:46px;height:46px;right:14px;bottom:14px}
   .footer__mark{width:90px;grid-column:1/-1}
+  .book{padding-top:56px}
+  .grid2,.pay{grid-template-columns:1fr}
+  .ph--qr,.pay__qr{max-width:220px}
+  .btn--sm{font-size:22px;line-height:46px;letter-spacing:4.4px}
 }
 
 /* Same optical gaps on small screens; only the type size and logo scale down. */

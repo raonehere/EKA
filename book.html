@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Book your stay · EKA Forest, Vattavada</title>
+<meta name="description" content="Check tent availability and book your stay at EKA Forest, Vattavada. Pay by UPI and upload your payment screenshot.">
+<meta name="theme-color" content="#c5b8a5">
+<link rel="icon" href="assets/img/icon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/img/icon-180.png">
+<link rel="preload" href="assets/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="nav" aria-label="Main">
+    <ul class="nav__group nav__group--left">
+      <li><a href="index.html#contact">Contact</a></li>
+      <li><a href="book.html" aria-current="page">Book</a></li>
+    </ul>
+    <a class="nav__logo" href="index.html" aria-label="EKA Forest, home">
+      <img src="assets/img/eka-logo.svg" width="117" height="73" alt="EKA">
+    </a>
+    <ul class="nav__group nav__group--right">
+      <li><a href="index.html#gallery">Gallery</a></li>
+      <li><a href="https://www.instagram.com/eka_forest_/" target="_blank" rel="noopener">Instagram</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main" class="book">
+  <div class="book__inner">
+    <h1 class="h2">Book your stay</h1>
+    <p class="book__intro">₹1,850 per person per night, with dinner and breakfast. Lunch is ₹250 per person per day. Each tent sleeps two, and a solo guest gets a tent to themselves.</p>
+
+    <!-- PLACEHOLDER: data-api is the deployed Worker URL; data-upi is the UPI ID guests pay to -->
+    <form id="booking-form" class="book__form" data-api="https://eka-booking.REPLACE.workers.dev" data-upi="ekaforest@upi">
+
+      <fieldset id="step-stay">
+        <legend>1. Dates &amp; guests</legend>
+        <div class="grid2">
+          <div class="field">
+            <label for="checkin">Check-in</label>
+            <input type="date" id="checkin" name="checkin" required>
+          </div>
+          <div class="field">
+            <label for="checkout">Check-out</label>
+            <input type="date" id="checkout" name="checkout" required>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="guests">Number of people</label>
+            <input type="number" id="guests" name="guests" min="1" max="20" value="2" required>
+          </div>
+        </div>
+        <label class="check"><input type="checkbox" id="lunch" name="lunch" value="1"> Add lunch (₹250 per person per day)</label>
+        <button type="button" class="btn btn--sm" id="check-btn">Check availability</button>
+        <p class="status" id="stay-status" role="status" aria-live="polite"></p>
+        <div class="summary" id="summary" hidden></div>
+      </fieldset>
+
+      <fieldset id="step-details" hidden>
+        <legend>2. Your details</legend>
+        <div class="field">
+          <label for="name">Full name</label>
+          <input type="text" id="name" name="name" autocomplete="name" minlength="2" required>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" autocomplete="email" required>
+          </div>
+          <div class="field">
+            <label for="phone">Phone (WhatsApp)</label>
+            <input type="tel" id="phone" name="phone" autocomplete="tel" pattern="[0-9+\s\-]{10,16}" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="from">Your address (where you're coming from)</label>
+          <textarea id="from" name="from" autocomplete="street-address" required></textarea>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="idType">Address proof</label>
+            <select id="idType" name="idType" required>
+              <option value="">Choose one</option>
+              <option>Aadhaar</option>
+              <option>Passport</option>
+              <option>Driving licence</option>
+              <option>Voter ID</option>
+              <option>PAN</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="idLast4">Last 4 characters of the ID number</label>
+            <input type="text" id="idLast4" name="idLast4" inputmode="text" minlength="4" maxlength="4" pattern="[A-Za-z0-9]{4}" autocomplete="off" required>
+          </div>
+        </div>
+        <p class="hint">We only ask for the last 4 characters. Please bring the original ID for every adult guest. We check it at check-in.</p>
+      </fieldset>
+
+      <fieldset id="step-pay" hidden>
+        <legend>3. Payment</legend>
+        <div class="pay">
+          <!-- PLACEHOLDER: save the UPI QR code as assets/img/upi-qr.png and replace this block with
+               <img class="pay__qr" src="assets/img/upi-qr.png" width="220" height="220" alt="UPI QR code for EKA Forest"> -->
+          <div class="ph ph--qr"><span>UPI QR code</span></div>
+          <div>
+            <p class="pay__label">Amount to pay</p>
+            <p class="pay__amount" id="pay-amount">₹0</p>
+            <p class="upi">UPI ID: <code id="upi-id"></code> <button type="button" class="link-btn" id="copy-upi">Copy</button></p>
+            <a class="btn btn--sm pay__app" id="upi-app" href="#">Pay in UPI app</a>
+            <p class="hint">Scan the QR code or pay to the UPI ID from any UPI app (GPay, PhonePe, Paytm…), then upload the screenshot below.</p>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="screenshot">Payment screenshot</label>
+            <input type="file" id="screenshot" name="screenshot" accept="image/png,image/jpeg,image/webp,image/heic" required>
+          </div>
+          <div class="field">
+            <label for="utr">UPI transaction ID (optional)</label>
+            <input type="text" id="utr" name="utr" maxlength="40" autocomplete="off">
+          </div>
+        </div>
+
+        <h2 class="h3">Stay rules</h2>
+        <!-- ASSUMPTION A7: rules drafted for the client to review; cancellation/refund policy still to be added -->
+        <ol class="terms">
+          <li><strong>Forest and wildlife.</strong> EKA Forest is in a forest area next to Pambadum Shola National Park. Stay on the paths, don't go into the forest alone or after dark, and never feed or disturb animals.</li>
+          <li><strong>Drug-free zone.</strong> Narcotics and illegal substances are strictly banned. Anyone found with them will be asked to leave at once, without a refund, and may be reported to the police.</li>
+          <li><strong>Limited medical help.</strong> The nearest hospital is in Munnar, about 2 hours away by road. Bring any medicines you need and tell us about health conditions before you arrive. Walks and activities are at your own risk.</li>
+          <li><strong>Respect the forest.</strong> Fires only in the campfire pit set up by our staff. No loud music after 10 PM, no littering, and please carry plastic and other non-biodegradable waste back with you.</li>
+          <li><strong>Confirmation and ID.</strong> Your booking is confirmed only after we verify your payment. Every adult guest must show a valid government photo ID at check-in. The Pambadum Shola check-post closes at 6 PM, so plan to arrive before then.</li>
+        </ol>
+        <label class="check"><input type="checkbox" name="terms" value="1" required> I have read and agree to the stay rules above, for myself and everyone in my group.</label>
+
+        <div class="hp" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+        <button type="submit" class="btn btn--sm" id="submit-btn">Confirm booking</button>
+        <p class="status" id="submit-status" role="status" aria-live="polite"></p>
+      </fieldset>
+    </form>
+
+    <div class="done" id="done" hidden tabindex="-1">
+      <h2 class="h3">Booking received</h2>
+      <p>Your booking reference is <strong id="done-id"></strong>.</p>
+      <p id="done-summary"></p>
+      <p>We'll check your payment and confirm your booking on WhatsApp or email. Questions? <a href="https://wa.me/910000000000" target="_blank" rel="noopener">Message us on WhatsApp</a>.</p>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <p class="footer__legal">© <span id="y">2026</span> EKA Forest, Vattavada · <a href="index.html">Back to home</a></p>
+</footer>
+
+<script src="assets/book.js" defer></script>
+</body>
+</html>

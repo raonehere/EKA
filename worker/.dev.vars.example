@@ -1,0 +1,5 @@
+# Copy this file to .dev.vars (never commit .dev.vars) and fill in the values.
+# Notion integration secret, from https://www.notion.so/profile/integrations
+NOTION_TOKEN=ntn_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# The 32-character id in the bookings database URL (the part before ?v=)
+NOTION_DB_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
