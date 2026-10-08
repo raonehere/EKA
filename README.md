@@ -15,6 +15,7 @@ assets/img/         logo, wordmark, grain texture, icons, social image
 robots.txt          Disallow: / (see Deployment — crawlers will not read this file here)
 sitemap.xml         lists the placeholder domain only
 .nojekyll           tells GitHub Pages to skip Jekyll and serve the files as they are
+.github/workflows/pages.yml   publishes this folder to GitHub Pages
 ```
 
 Asset links are relative (`assets/...`, and inside the CSS `fonts/` and `img/`). That is what makes the same files work on your laptop and under `/EKA/` on GitHub Pages. Do not switch them to root-absolute paths such as `/assets/...`; those would look for files on `raonehere.github.io` itself and miss this folder.
