@@ -49,11 +49,13 @@ Then open http://localhost:8080 . Opening `index.html` as a file (`file://`) is 
 
 ## Deployment
 
-GitHub Pages publishes the **`main`** branch, folder **`/`** (the repository root), as a project site:
+The live preview is a GitHub Pages project site:
 
 **https://raonehere.github.io/EKA/**
 
-Pushing to `main` updates the live page. `.nojekyll` is required so Pages does not run the files through Jekyll.
+`.github/workflows/pages.yml` publishes the repository root on every push to `main`. It uses GitHub’s Pages actions (`configure-pages`, `upload-pages-artifact`, `deploy-pages`). `.nojekyll` is included so Pages serves the files as they are and does not run them through Jekyll.
+
+Pages could not be switched on from the import (the token cannot change repository settings). Once, in this repo: **Settings → Pages → Source → GitHub Actions**. After that, the workflow publishes the site. The other option on that screen is **Deploy from a branch**, branch `main`, folder `/` (root); that serves these files directly and does not need the workflow.
 
 `robots.txt` in this repo is not what crawlers consult. On a project site they request `https://raonehere.github.io/robots.txt` (the user site’s root), not `https://raonehere.github.io/EKA/robots.txt`. The tag that actually keeps this preview out of search results is in `index.html`:
 
