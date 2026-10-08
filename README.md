@@ -2,7 +2,7 @@
 
 Static one-page site for **EKA Forest**, a tent stay in the eucalyptus and pine woods of Vattavada (past Top Station, about 45 km from Munnar, Kerala). Visitors book on WhatsApp. There is no build step and no framework: the browser loads `index.html` and the files next to it.
 
-This copy is the preview that GitHub Pages serves at [https://raonehere.github.io/EKA/](https://raonehere.github.io/EKA/). The real domain (`ekaforest.in`) is still a placeholder. The page sends `noindex, nofollow`, so search engines that honour that tag should leave the preview alone.
+This copy is the preview for [https://raonehere.github.io/EKA/](https://raonehere.github.io/EKA/). That address stays a GitHub “site not found” page until Pages is turned on once (see Deployment). The real domain (`ekaforest.in`) is still a placeholder. The page sends `noindex, nofollow`, so search engines that honour that tag should leave the preview alone.
 
 ## File structure
 
