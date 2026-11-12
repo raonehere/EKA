@@ -1,6 +1,7 @@
 /* EKA Forest – Google Sheets CMS loader.
    Reads the sheet "EKA Forest – Website Content" (tabs: contact, about, stays, gallery, reach, faq, footer;
    columns key | value | notes) and fills elements tagged data-cms="tab.key".
+   Journal article bodies use data-cms-body="blog.postN_body" with a simple heading/paragraph/bullet format.
    The HTML text stays as the fallback: if the fetch fails or a cell is empty, nothing changes. */
 (function () {
   var SHEET_ID = '1SGwnRwcCm8O7QgaROm5XQ4jnb8fO22u_ZLt2iEytGUw';
@@ -42,6 +43,108 @@
     })(tpl.content);
     el.replaceChildren(tpl.content);
   }
+
+  // Safe hrefs for journal bodies: http/https/mailto, in-page #, and same-site relative paths.
+  // Protocol-relative (//…), javascript:, data: and other schemes are rejected.
+  function safeHref(href) {
+    href = (href || '').trim();
+    if (/^(https?:\/\/|mailto:)/i.test(href)) return href;
+    if (href.charAt(0) === '#' && !/[\s<>"']/.test(href)) return href;
+    if (/^\/[^/]/.test(href) && !/[\s<>"'\\]/.test(href) && href.indexOf(':') < 0) return href;
+    if (/^(\.\/|\.\.\/)/.test(href) && !/[\s<>"'\\]/.test(href) && href.indexOf(':') < 0) return href;
+    return '';
+  }
+
+  function appendInline(parent, text) {
+    var re = /<br\s*\/?>|<\/?(?:strong|b|em|i)>|<a\s+[^>]*href=["']([^"']+)["'][^>]*>|<\/a>|\*\*([^*]+)\*\*|\[([^\]]+)\]\(([^)]+)\)/gi;
+    var pos = 0, m, stack = [parent];
+    function cur() { return stack[stack.length - 1]; }
+    function addText(s) { if (s) cur().appendChild(document.createTextNode(s)); }
+    while ((m = re.exec(text))) {
+      addText(text.slice(pos, m.index));
+      pos = re.lastIndex;
+      var tok = m[0], lower = tok.toLowerCase();
+      if (/^<br/.test(lower)) {
+        cur().appendChild(document.createElement('br'));
+      } else if (lower === '<strong>' || lower === '<b>') {
+        var strongEl = document.createElement('strong'); cur().appendChild(strongEl); stack.push(strongEl);
+      } else if (lower === '</strong>' || lower === '</b>') {
+        if (stack.length > 1 && cur().tagName === 'STRONG') stack.pop();
+        else addText(tok);
+      } else if (lower === '<em>' || lower === '<i>') {
+        var emEl = document.createElement('em'); cur().appendChild(emEl); stack.push(emEl);
+      } else if (lower === '</em>' || lower === '</i>') {
+        if (stack.length > 1 && cur().tagName === 'EM') stack.pop();
+        else addText(tok);
+      } else if (lower.indexOf('<a') === 0 && lower !== '</a>') {
+        var aEl = document.createElement('a');
+        var href = safeHref(m[1] || '');
+        if (href) aEl.setAttribute('href', href);
+        cur().appendChild(aEl); stack.push(aEl);
+      } else if (lower === '</a>') {
+        if (stack.length > 1 && cur().tagName === 'A') stack.pop();
+        else addText(tok);
+      } else if (tok.slice(0, 2) === '**') {
+        var bold = document.createElement('strong');
+        bold.textContent = m[2];
+        cur().appendChild(bold);
+      } else if (tok.charAt(0) === '[') {
+        var mdHref = safeHref(m[4] || '');
+        if (mdHref) {
+          var mdA = document.createElement('a');
+          mdA.setAttribute('href', mdHref);
+          mdA.textContent = m[3];
+          cur().appendChild(mdA);
+        } else {
+          addText(m[3]);
+        }
+      }
+    }
+    addText(text.slice(pos));
+  }
+
+  function renderBody(el, src) {
+    src = String(src).replace(/\r\n/g, '\n').replace(/^\uFEFF/, '');
+    var lines = src.split('\n');
+    var frag = document.createDocumentFragment();
+    var i = 0, ul = null;
+    function closeList() { if (ul) { frag.appendChild(ul); ul = null; } }
+    function isHeading(line) { return /^##\s+/.test(line); }
+    function isBullet(line) { return /^-\s+/.test(line); }
+    while (i < lines.length) {
+      var line = lines[i];
+      if (line.trim() === '') { closeList(); i++; continue; }
+      if (isHeading(line)) {
+        closeList();
+        var h = document.createElement('h2');
+        appendInline(h, line.replace(/^##\s+/, ''));
+        frag.appendChild(h);
+        i++;
+        continue;
+      }
+      if (isBullet(line)) {
+        if (!ul) ul = document.createElement('ul');
+        var li = document.createElement('li');
+        appendInline(li, line.replace(/^-\s+/, ''));
+        ul.appendChild(li);
+        i++;
+        continue;
+      }
+      closeList();
+      var para = [line];
+      i++;
+      while (i < lines.length && lines[i].trim() !== '' && !isHeading(lines[i]) && !isBullet(lines[i])) {
+        para.push(lines[i]);
+        i++;
+      }
+      var p = document.createElement('p');
+      appendInline(p, para.join(' '));
+      frag.appendChild(p);
+    }
+    closeList();
+    el.replaceChildren(frag);
+  }
+
   function apply(d) {
     var n = 0;
     // Footer Address block removed: never render footer.address from CMS
@@ -76,14 +179,18 @@
       el.classList.add('has-photo');
       var cap = el.querySelector('span, figcaption'); if (cap) cap.classList.add('visually-hidden');
     });
+    document.querySelectorAll('[data-cms-body]').forEach(function (el) {
+      var v = get(el.getAttribute('data-cms-body')); if (v === undefined) return;
+      renderBody(el, v); n++;
+    });
     document.documentElement.setAttribute('data-cms-loaded', '');
     document.documentElement.setAttribute('data-cms-count', n);  // fields filled from the sheet
   }
 
   // Only fetch the tabs this page actually uses (keeps inner pages light)
   var used = { contact: 1 };
-  document.querySelectorAll('[data-cms],[data-cms-href],[data-cms-img],[data-cms-mailto]').forEach(function (el) {
-    ['data-cms', 'data-cms-href', 'data-cms-img', 'data-cms-mailto'].forEach(function (a) {
+  document.querySelectorAll('[data-cms],[data-cms-href],[data-cms-img],[data-cms-mailto],[data-cms-body]').forEach(function (el) {
+    ['data-cms', 'data-cms-href', 'data-cms-img', 'data-cms-mailto', 'data-cms-body'].forEach(function (a) {
       var v = el.getAttribute(a); if (v) used[v.split('.')[0]] = 1;
     });
   });
