@@ -1,0 +1,26 @@
+# Copy to `.dev.vars` for local testing with `wrangler dev`.
+# Never commit `.dev.vars` — it is git-ignored.
+
+NOTION_TOKEN=ntn_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+NOTION_DB=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Your UPI ID (the one that receives the ₹2,000 advance).
+UPI_ID=eka.82200883@hdfcbank
+UPI_NAME=EKA
+
+# Required for /owner/. Your dashboard password.
+OWNER_TOKEN=change-me-to-something-long-and-random
+
+# Property manager's number for the daily update (digits, country code).
+WA_NOTIFY=917012293538
+
+# Optional. Any long random string; signs the guest's private move/cancel link.
+MANAGE_SECRET=change-me-to-something-long-and-random
+
+# Optional. Used to build the manage link that is shown after payment.
+SITE_URL=https://ekaforest.com
+
+UNITS=11
+TENT_CAPACITY=2
+ADVANCE=2000
+CHANGE_CUTOFF_HOURS=48
