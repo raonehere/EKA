@@ -851,7 +851,10 @@ function ownerOk(request, env) {
 }
 
 async function allBookings(env, fromISO) {
-  const filter = { property: 'Check-out', date: { on_or_after: fromISO } };
+  // Notion property names are case-sensitive: the real column is "Check-Out",
+  // and asking for "Check-out" fails the whole dashboard query.
+  const C = await columns(env);
+  const filter = { property: C.checkOut, date: { on_or_after: fromISO } };
   const pages = [];
   let cursor;
   do {
