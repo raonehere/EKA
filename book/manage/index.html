@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your booking · EKA Forest, Vattavada</title>
+<meta name="description" content="Move your EKA Forest dates or cancel your stay using the private link from your booking confirmation.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://ekaforest.com/book/manage/">
+<meta name="theme-color" content="#c5b8a5">
+<link rel="icon" href="../../assets/img/icon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="../../assets/img/icon-180.png">
+<link rel="preload" href="../../assets/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../assets/styles.css">
+<link rel="stylesheet" href="../../assets/book.css">
+<link rel="stylesheet" href="../../assets/manage.css">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="nav" aria-label="Main">
+    <ul class="nav__group nav__group--left">
+      <li><a href="../">Book</a></li>
+      <li><a href="../../blog/">Journals</a></li>
+    </ul>
+    <a class="nav__logo" href="../../" aria-label="EKA Forest, home">
+      <img src="../../assets/img/eka-logo.svg" width="117" height="73" alt="EKA Forest logo">
+    </a>
+    <ul class="nav__group nav__group--right">
+      <li><a href="../../events/">Events</a></li>
+      <li><a href="../../#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main" class="page manage">
+
+  <header class="manage__head">
+    <p class="eyebrow">Your booking</p>
+    <h1 class="h1">Your stay</h1>
+    <p class="page__intro">This is your private booking link. Keep it to yourself — anyone with it can move or cancel this stay. Your ₹2,000 advance carries over if you change dates, and is not refunded if you cancel.</p>
+  </header>
+
+  <!-- loading -->
+  <p class="manage__status" id="m-loading" role="status">Opening your booking…</p>
+
+  <!-- bad link / error -->
+  <section class="manage__panel" id="m-error" hidden aria-labelledby="m-error-title">
+    <h2 class="h2" id="m-error-title">We can't open that link</h2>
+    <p id="m-error-text">Check that you copied the whole link from your confirmation. It should end with <code>?r=EKA-…&amp;k=…</code>.</p>
+    <p class="manage__panel-note">If it still doesn't work, <a data-wa-link href="#" target="_blank" rel="noopener">message us on WhatsApp</a> and we'll find your booking.</p>
+  </section>
+
+  <!-- main -->
+  <div id="m-body" hidden>
+
+    <section class="mcard" aria-labelledby="m-card-title">
+      <p class="mcard__tag" id="m-status">Confirmed</p>
+      <h2 class="visually-hidden" id="m-card-title">Booking details</h2>
+
+      <div class="mcard__ref">
+        <span>Booking reference</span>
+        <strong id="m-ref">—</strong>
+      </div>
+
+      <dl class="mcard__list">
+        <div><dt>Check-in</dt><dd id="m-in">—</dd></div>
+        <div><dt>Check-out</dt><dd id="m-out">—</dd></div>
+        <div><dt>Guests</dt><dd id="m-guests">—</dd></div>
+        <div><dt>Tents</dt><dd id="m-tents">—</dd></div>
+        <div><dt>Advance</dt><dd id="m-advance">—</dd></div>
+      </dl>
+
+      <p class="mcard__policy" id="m-policy"></p>
+    </section>
+
+    <p class="manage__flash" id="m-flash" role="status" hidden></p>
+
+    <!-- actions -->
+    <section class="manage__actions" id="m-actions">
+      <button class="manage__action" type="button" id="m-open-move" aria-expanded="false" aria-controls="m-move">
+        <span class="manage__action-title">Move to other dates</span>
+        <span class="manage__action-note">Same booking, same advance. Subject to tents being free.</span>
+      </button>
+      <button class="manage__action manage__action--quiet" type="button" id="m-open-cancel" aria-expanded="false" aria-controls="m-cancel">
+        <span class="manage__action-title">Cancel this booking</span>
+        <span class="manage__action-note">The advance is not refunded.</span>
+      </button>
+    </section>
+
+    <p class="manage__closed" id="m-closed" hidden></p>
+
+    <!-- move -->
+    <section class="manage__panel" id="m-move" hidden aria-labelledby="m-move-title">
+      <h2 class="h2" id="m-move-title">Choose new dates</h2>
+      <p class="manage__panel-note">Tap your new check-in, then your check-out. Your current nights stay booked until you confirm.</p>
+
+      <div class="cal" id="m-calendar">
+        <div class="cal__bar">
+          <button class="cal__nav" type="button" id="m-prev" aria-label="Previous month">
+            <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+          </button>
+          <p class="cal__month" id="m-month" aria-live="polite">Loading…</p>
+          <button class="cal__nav" type="button" id="m-next" aria-label="Next month">
+            <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+          </button>
+        </div>
+
+        <div class="cal__dow" aria-hidden="true">
+          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+
+        <div class="cal__grid" id="m-grid" role="group" aria-labelledby="m-month">
+          <p class="cal__status" id="m-cal-status">Loading availability…</p>
+        </div>
+
+        <div class="cal__foot">
+          <ul class="cal__legend">
+            <li><span class="key key--open"></span>Free</li>
+            <li><span class="key key--few"></span>Only a few left</li>
+            <li><span class="key key--full"></span>Full</li>
+          </ul>
+          <p class="cal__hint" id="m-hint" aria-live="polite">Tap your new check-in date.</p>
+        </div>
+      </div>
+
+      <div class="manage__confirm">
+        <p class="manage__summary" id="m-summary" aria-live="polite">No new dates chosen yet.</p>
+        <div class="manage__confirm-actions">
+          <button class="btn btn--small" type="button" id="m-move-confirm" disabled>Confirm new dates</button>
+          <button class="linkbtn" type="button" id="m-move-none">Never mind</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- cancel -->
+    <section class="manage__panel manage__panel--danger" id="m-cancel" hidden aria-labelledby="m-cancel-title">
+      <h2 class="h2" id="m-cancel-title">Cancel this booking?</h2>
+      <p>Your dates will be released for other guests and your <strong>₹2,000 advance is not refunded</strong>. If you only need different dates, moving the booking keeps your advance.</p>
+      <div class="manage__confirm-actions">
+        <button class="btn btn--small" type="button" id="m-cancel-confirm">Yes, cancel my booking</button>
+        <button class="linkbtn" type="button" id="m-cancel-none">Keep my booking</button>
+      </div>
+      <p class="field__err" id="m-cancel-error"></p>
+    </section>
+
+  </div>
+
+  <!-- cancelled state -->
+  <section class="manage__panel" id="m-done" hidden aria-labelledby="m-done-title">
+    <h2 class="h2" id="m-done-title">Booking cancelled</h2>
+    <p>Reference <strong id="m-done-ref">—</strong> has been cancelled and the tents are free for other guests. As agreed, the ₹2,000 advance is not refunded.</p>
+    <p class="manage__panel-note">We'd love to host you another time. <a href="../">Check availability for new dates</a>.</p>
+  </section>
+
+  <noscript>
+    <p class="manage__status">This page needs JavaScript. <a data-wa-link href="#" target="_blank" rel="noopener">Message us on WhatsApp</a> to change or cancel.</p>
+  </noscript>
+
+</main>
+
+<footer class="site-footer" id="contact">
+  <div class="footer__inner">
+    <img class="footer__mark" src="../../assets/img/eka-forest-wordmark.svg" width="160" height="146" alt="EKA Forest">
+    <div class="footer__col">
+      <h2 class="h4">Contact</h2>
+      <ul>
+        <li><a data-wa-link href="#" target="_blank" rel="noopener">WhatsApp: <span data-cms="contact.whatsapp_display">+91 70122 93538</span></a></li>
+        <li><a href="https://www.instagram.com/eka_forest_/" target="_blank" rel="noopener">Instagram: <span data-cms="contact.instagram_handle">@eka_forest_</span></a></li>
+        <li><a href="mailto:hello@ekaforest.com">hello@ekaforest.com</a></li>
+      </ul>
+    </div>
+    <div class="footer__col">
+      <h2 class="h4">Explore</h2>
+      <ul>
+        <li><a href="../../">Home</a></li>
+        <li><a href="../../#stays">Stays &amp; experiences</a></li>
+        <li><a href="../">Check availability</a></li>
+        <li><a href="../../blog/">Journal</a></li>
+      </ul>
+    </div>
+  </div>
+  <p class="footer__legal">© <span id="y">2026</span> EKA Forest, Vattavada · Designed by Rahul Janardhanan</p>
+</footer>
+
+<script src="../../assets/booking-config.js?v=4"></script>
+<script src="../../assets/manage.js?v=4" defer></script>
+<script src="../../assets/cms.js" defer></script>
+</body>
+</html>
