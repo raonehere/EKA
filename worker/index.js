@@ -12,6 +12,7 @@
  *   GET  /owner/summary       → numbers for the owner dashboard
  *   GET  /owner/digest        → one WhatsApp-ready message about today
  *   POST /owner/status        → confirm or cancel a booking from the dashboard
+ *   POST /owner/block         → take tents out of sale for some nights (owner only)
  *
  * Money is settled by UPI: the guest scans a QR, pays ₹2,000, and uploads the
  * screenshot. The Worker files it in Notion and marks the row "Payment review"
@@ -55,6 +56,7 @@ export default {
       else if (path === '/owner/summary' && request.method === 'GET') res = await ownerSummary(request, env);
       else if (path === '/owner/digest' && request.method === 'GET') res = await ownerDigest(request, env);
       else if (path === '/owner/status' && request.method === 'POST') res = await ownerStatus(request, env);
+      else if (path === '/owner/block' && request.method === 'POST') res = await ownerBlock(request, env);
       else res = json({ error: 'Not found' }, 404);
 
       if (!Object.keys(cors).length) return res;
@@ -1093,6 +1095,49 @@ async function ownerStatus(request, env) {
     return json({ error: 'Notion rejected that change.' }, 502);
   }
   return json({ ok: true, reference, status });
+}
+
+/** Owner takes some tents out of sale for a run of nights (e.g. booked elsewhere).
+ *  It is stored as a "Blocked" row, which the public calendar counts like a stay.
+ *  Cancel the row from the dashboard to give the tents back. */
+async function ownerBlock(request, env) {
+  if (!ownerOk(request, env)) return json({ error: 'Not found' }, 404);
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Invalid request.' }, 400); }
+
+  const checkIn = clean(body.checkIn, 10);
+  const checkOut = clean(body.checkOut, 10);
+  const tents = Math.floor(Number(body.tents));
+  const note = clean(body.note, 80);
+
+  if (!isDate(checkIn) || !isDate(checkOut) || checkOut <= checkIn) {
+    return json({ error: 'Pick a start date and an end date after it.' }, 400);
+  }
+  if (!(tents >= 1 && tents <= units(env))) {
+    return json({ error: `Tents must be between 1 and ${units(env)}.` }, 400);
+  }
+
+  const reference = `BLK-${checkIn.slice(2).replace(/-/g, '')}-${Math.random().toString(36).slice(2, 6).toUpperCase().padEnd(4, 'X')}`;
+  const C = await columns(env);
+  try {
+    await createPage(env, {
+      [C.name]: { title: [{ text: { content: 'Blocked' + (note ? ': ' + note : '') } }] },
+      [C.reference]: { rich_text: [{ text: { content: reference } }] },
+      [C.checkIn]: { date: { start: checkIn } },
+      [C.checkOut]: { date: { start: checkOut } },
+      [C.guests]: { number: 0 },
+      [C.tents]: { number: tents },
+      [C.status]: { select: { name: 'Confirmed' } },
+      [C.type]: { select: { name: 'Blocked' } },
+      [C.advance]: { number: 0 },
+      [C.notes]: { rich_text: note ? [{ text: { content: note } }] : [] },
+      [C.source]: { select: { name: 'Owner' } }
+    });
+  } catch (err) {
+    console.error('owner block failed', err);
+    return json({ error: 'Notion rejected that block.' }, 502);
+  }
+  return json({ ok: true, reference, checkIn, checkOut, tents });
 }
 
 /* ------------------------------------------------------------------ health */
