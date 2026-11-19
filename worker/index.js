@@ -33,6 +33,8 @@ const NOTION_VERSION = '2022-06-28';
 const NOTION_FILES_VERSION = '2026-03-11';
 const NOTION = 'https://api.notion.com/v1';
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
+// Bigger groups are planned by hand on WhatsApp, not booked online.
+const MAX_ONLINE_GUESTS = 20;
 
 export default {
   async fetch(request, env, ctx) {
@@ -389,6 +391,9 @@ async function createBooking(request, env) {
   const cap = capacity(env);
   const total = units(env);
   if (!guests || guests < 1) return json({ error: 'Tell us how many guests are coming.' }, 400);
+  if (guests > MAX_ONLINE_GUESTS) {
+    return json({ error: `Groups of more than ${MAX_ONLINE_GUESTS} guests need to reach out to us on WhatsApp first.` }, 400);
+  }
   if (guests > total * cap) return json({ error: 'That is more guests than we can host. Message us on WhatsApp.' }, 400);
   const tents = Math.max(1, Math.ceil(guests / cap));
 

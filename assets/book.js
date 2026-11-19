@@ -18,7 +18,7 @@
   var HORIZON = cfg.horizonMonths || 12;
   var MAX_NIGHTS = cfg.maxNights || 10;
   var MIN_NIGHTS = cfg.minNights || 1;
-  var MAX_GUESTS = cfg.maxGuestsOnline || 18;
+  var MAX_GUESTS = cfg.maxGuestsOnline || 20;
   var WA = String(cfg.whatsapp || '').replace(/\D/g, '');
 
   /* ---------------- tiny date helpers (all local, no UTC drift) ---------- */
@@ -400,7 +400,7 @@
 
   function validateStay(showHint) {
     if (paying() > MAX_GUESTS) {
-      el.capacity.textContent = 'For more than ' + MAX_GUESTS + ' paying guests, message us on WhatsApp and we\'ll plan it with you.';
+      el.capacity.textContent = 'Groups of more than ' + MAX_GUESTS + ' guests need to reach out to us on WhatsApp first.';
       el.capacity.className = 'book__capacity is-bad';
       return false;
     }
@@ -446,7 +446,7 @@
       first = first || 'dates';
     }
     if (!paying()) fail('adults', 'At least one paying guest is needed.');
-    else if (paying() > MAX_GUESTS) fail('adults', 'For more than ' + MAX_GUESTS + ' paying guests, message us on WhatsApp.');
+    else if (paying() > MAX_GUESTS) fail('adults', 'Groups of more than ' + MAX_GUESTS + ' guests need to reach out to us on WhatsApp first.');
     if (!el.name.value.trim() || el.name.value.trim().length < 2) fail('name', 'Please tell us your name.');
     var ph = el.phone.value.replace(/\D/g, '');
     if (ph.length !== 10) fail('phone', 'Enter a 10-digit Indian mobile number.');
@@ -860,7 +860,6 @@
   el.adults.addEventListener('blur', function () {
     var v = parseInt(this.value, 10);
     if (!v || v < 1) this.value = '1';
-    else if (v > MAX_GUESTS) this.value = String(MAX_GUESTS);
     updateSummary();
     if (state.start && state.end) validateStay(false);
   });

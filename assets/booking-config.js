@@ -42,7 +42,7 @@ window.EKA_BOOKING = {
   horizonMonths: 12,
 
   /* Paying guests online: 11 tents × 2. Under-10s are free and not counted. */
-  maxGuestsOnline: 22,
+  maxGuestsOnline: 20,
 
   /* Free date change: how many hours before check-in the guest can still
      move the booking from their manage link. */
