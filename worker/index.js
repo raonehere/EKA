@@ -1,5 +1,5 @@
 /**
- * EKA Forest — booking API (Cloudflare Worker)
+ * EKA Forest, booking API (Cloudflare Worker)
  *
  *   GET  /health              → checks Notion access + database schema
  *   GET  /availability        → free tents per night
@@ -149,7 +149,7 @@ async function notion(env, path, init = {}, version) {
 /* ---------------------------------------------------------------- the schema */
 
 /* The columns this Worker needs, and the names they have in the Notion
-   database. If you rename a column in Notion, change the title on the right —
+   database. If you rename a column in Notion, change the title on the right , 
    nothing else in this file mentions a Notion property by name.
 
    optional: true means the Worker works without it. /health will not complain,
@@ -189,7 +189,7 @@ const OPTIONAL = new Set(
 
 /** Notion lets a column be called "reference " or "Reference". Compare names
  *  with the spaces and capitals taken out, so a stray space cannot break a
- *  booking — which is exactly what happened once. */
+ *  booking, which is exactly what happened once. */
 const norm = s => String(s || '').trim().toLowerCase();
 
 function resolveColumns(propertyKeys) {
@@ -667,7 +667,7 @@ async function uploadScreenshot(request, env) {
   }
 
   const note = [booking.notes,
-    `Payment screenshot uploaded ${todayIST()} — please check the ₹${booking.advance || advance(env)} UPI credit.`]
+    `Payment screenshot uploaded ${todayIST()}, please check the ₹${booking.advance || advance(env)} UPI credit.`]
     .filter(Boolean).join(' · ').slice(0, 1800);
 
   const C = await columns(env);
@@ -1024,7 +1024,7 @@ async function ownerSummary(request, env) {
 /** One message the property manager can read on a phone, no jargon. */
 function digestText(s) {
   const lines = [];
-  lines.push(`EKA Forest — ${prettyDate(s.today)}`);
+  lines.push(`EKA Forest, ${prettyDate(s.today)}`);
   lines.push('');
   lines.push(`Tonight: ${s.tonight.tents} of ${s.units} tents, ${s.tonight.guests} guests, ${s.tonight.free} free`);
   lines.push(`Today: ${s.todayArrivals.length} arriving, ${s.todayDepartures.length} leaving`);
@@ -1035,14 +1035,14 @@ function digestText(s) {
     lines.push('Arriving today:');
     s.todayArrivals.forEach(b => {
       const kids = b.children ? `, ${b.children} under 10` : '';
-      lines.push(`• ${b.name} — ${b.guests} guests${kids}, ${b.tents} tent${b.tents === 1 ? '' : 's'} (${b.reference})`);
+      lines.push(`• ${b.name}, ${b.guests} guests${kids}, ${b.tents} tent${b.tents === 1 ? '' : 's'} (${b.reference})`);
     });
     lines.push('');
   }
   if (s.todayDepartures.length) {
     lines.push('Leaving today:');
     s.todayDepartures.forEach(b => {
-      lines.push(`• ${b.name} — ${b.tents} tent${b.tents === 1 ? '' : 's'} (${b.reference})`);
+      lines.push(`• ${b.name}, ${b.tents} tent${b.tents === 1 ? '' : 's'} (${b.reference})`);
     });
     lines.push('');
   }

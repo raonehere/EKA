@@ -1,4 +1,4 @@
-# Booking system — setup
+# Booking system, setup
 
 The site is static (GitHub Pages), so it cannot hold API keys. The booking page
 talks to a small Cloudflare Worker, and the Worker is the only thing that knows
@@ -61,7 +61,7 @@ The Worker never touches `Status`, `Payment Status`, `Purpose of Visit`,
 ### Columns that add detail (optional)
 
 Add these when you want them. The Worker fills them in if they exist and skips
-them if they don't — `/health` never complains about a missing optional column,
+them if they don't, `/health` never complains about a missing optional column,
 and a booking still saves.
 
 | Column | Type | What it buys you |
@@ -71,11 +71,11 @@ and a booking still saves.
 | `Children under 10` | Number | declared children, kept out of `Number of people` |
 | `Manage token` | Text | holds the private move/cancel key. Without it one is derived from `MANAGE_SECRET`, which works just as well |
 | `Moves` | Number | how many times the guest changed dates |
-| `Last change` | Date | **time off** — set when a guest moves their booking; this is what the dashboard counts |
-| `Paid at` | Date | **time on** — stamped when you press Confirm |
+| `Last change` | Date | **time off**, set when a guest moves their booking; this is what the dashboard counts |
+| `Paid at` | Date | **time on**, stamped when you press Confirm |
 | `Type` | Select | `Booking` / `Blocked` |
 | `Source` | Select | `Website` / `WhatsApp` / `Manual` |
-| `Terms accepted` | Date | **time on** — proof the guest accepted the non-refundable advance |
+| `Terms accepted` | Date | **time on**, proof the guest accepted the non-refundable advance |
 
 There is no `Nights` column: the Worker works the nights out from the two dates.
 
@@ -84,7 +84,7 @@ If you rename a column later, change it **once** in `FIELDS` at the top of
 name.
 
 Names are matched ignoring capitals and surrounding spaces, so `Reference`,
-`reference` and `reference ` (with a trailing space — Notion allows it) are all
+`reference` and `reference ` (with a trailing space, Notion allows it) are all
 the same column. You never have to get the capitals exactly right.
 
 **The four statuses mean:**
@@ -138,7 +138,7 @@ You now have two values: `NOTION_TOKEN` and `NOTION_DB`.
 
 ## 3. UPI
 
-You need the UPI ID you actually receive money on — the same one you use in
+You need the UPI ID you actually receive money on, the same one you use in
 GPay / PhonePe / Paytm. For example `ekaforest@okhdfcbank` or
 `9876543210@ybl`.
 
@@ -153,7 +153,7 @@ every guest who reaches the payment step.
 
 ## 4. Deploy the Worker
 
-### Option A — Cloudflare dashboard (no terminal)
+### Option A, Cloudflare dashboard (no terminal)
 
 1. **https://dash.cloudflare.com/?to=/:account/workers-and-pages** →
    **Create application** → **Workers** tab → **Start with Hello World!**
@@ -171,7 +171,7 @@ every guest who reaches the payment step.
    | `SITE_URL` | Text | `https://ekaforest.com` |
    | `MANAGE_SECRET` | Secret | any long random string |
    | `OWNER_TOKEN` | Secret | your dashboard password, e.g. 40 random characters |
-   | `WA_NOTIFY` | Text | `917012293538` — where the daily update goes |
+   | `WA_NOTIFY` | Text | `917012293538`, where the daily update goes |
    | `ALLOWED_ORIGINS` | Text | `https://ekaforest.com,https://www.ekaforest.com` |
    | `UNITS` | Text | `11` |
    | `TENT_CAPACITY` | Text | `2` |
@@ -188,9 +188,9 @@ every guest who reaches the payment step.
 
 Your domain's DNS is at BigRock, not Cloudflare, so **use the `workers.dev`
 URL**. A custom `api.ekaforest.com` would mean moving the whole domain's
-nameservers to Cloudflare — not necessary.
+nameservers to Cloudflare, not necessary.
 
-### Option B — terminal
+### Option B, terminal
 
 ```bash
 npm install -g wrangler
@@ -202,12 +202,12 @@ wrangler secret put MANAGE_SECRET
 wrangler deploy
 ```
 
-`worker/wrangler.toml` holds the non-secret settings — put your `UPI_ID` there
+`worker/wrangler.toml` holds the non-secret settings, put your `UPI_ID` there
 too.
 
 ---
 
-## 5. Check it — what "/health" actually is
+## 5. Check it, what "/health" actually is
 
 `/health` is not a page in the website. It is the **last line of the Worker
 URL**, so if your Worker is at
@@ -223,7 +223,7 @@ https://eka-booking.raonehere.workers.dev/health
 ```
 
 You get raw JSON back, no styling. That is the point: it is a diagnostic, not
-a page. Guest-facing pages are `/book/` and `/book/manage/` on the website —
+a page. Guest-facing pages are `/book/` and `/book/manage/` on the website , 
 the Worker only ever answers `/health`, `/availability`, `/bookings`,
 `/bookings/screenshot`, `/booking`, `/booking/reschedule`, `/booking/cancel`.
 
@@ -303,7 +303,7 @@ https://ekaforest.com/owner/
 
 Paste the `OWNER_TOKEN` you set in the Worker. It is remembered in that browser;
 **Sign out** forgets it. The page is not linked from the site and carries
-`noindex`, but the key is the only lock — treat it like a password.
+`noindex`, but the key is the only lock, treat it like a password.
 
 What it shows:
 
@@ -332,9 +332,9 @@ guest appears in the other within a refresh.
 occupancy, today's arrivals and departures, money received / waiting / unpaid,
 date changes and cancellations. Two ways to send it:
 
-- **One tap** — set `WA_NOTIFY` to the manager's number and the
+- **One tap**, set `WA_NOTIFY` to the manager's number and the
   "Send on WhatsApp" button opens WhatsApp with the whole message typed in.
-- **Copy** — no number set, you paste it anywhere.
+- **Copy**, no number set, you paste it anywhere.
 
 This is deliberately not an automated blast. WhatsApp only lets a business send
 free-form messages inside a 24-hour reply window; outside it you need an
@@ -357,13 +357,13 @@ demo: false,
 ```
 
 Also fix the real WhatsApp number in the same file (`whatsapp`, digits only,
-with country code). The `upi` block there is only used in preview mode — once
+with country code). The `upi` block there is only used in preview mode, once
 live, the Worker sends the UPI ID.
 
 Then commit and push. GitHub Pages redeploys in a minute.
 
 While `demo: true`, the calendar shows sample availability, the QR encodes a
-placeholder UPI ID, and nothing is saved — useful for review.
+placeholder UPI ID, and nothing is saved, useful for review.
 
 ---
 

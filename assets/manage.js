@@ -1,5 +1,5 @@
 /* ==========================================================================
-   EKA Forest — manage / cancel a booking
+   EKA Forest, manage / cancel a booking
    Opens from the private link  /book/manage/?r=<reference>&k=<token>
 
    Live   : talks to the Cloudflare Worker (GET /booking, POST /booking/…)
@@ -289,7 +289,7 @@
     el.closed.hidden = open || b.status !== 'Confirmed';
     if (!open && b.status !== 'Confirmed') {
       if (b.status === 'Payment review') {
-        el.closed.textContent = 'We are checking your payment screenshot. You will get a WhatsApp confirmation once it clears — usually within a few hours.';
+        el.closed.textContent = 'We are checking your payment screenshot. You will get a WhatsApp confirmation once it clears, usually within a few hours.';
       } else if (b.status === 'Pending payment') {
         el.closed.textContent = 'No payment has reached us yet. Pay the ₹' + Number(b.advance || ADVANCE).toLocaleString('en-IN') +
           ' advance by UPI and upload the screenshot from your booking page, or message us on WhatsApp.';
@@ -561,7 +561,7 @@
     el.moveBtn.setAttribute('aria-expanded', 'false');
     paintCard();
     updateSummary();
-    flash('Done — your stay is now ' + fmtLong(checkIn) + ' → ' + fmtLong(checkOut) +
+    flash('Done, your stay is now ' + fmtLong(checkIn) + ' → ' + fmtLong(checkOut) +
       '. We have updated your booking, and your advance carried over.');
     if (!DEMO) reloadNights();
   }

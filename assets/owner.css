@@ -1,4 +1,4 @@
-/* EKA Forest — owner dashboard */
+/* EKA Forest, owner dashboard */
 
 .page.owner{max-width:1440px;margin:0 auto;padding:40px var(--pad-r) 0 var(--pad-l)}
 
@@ -136,7 +136,7 @@
   font:400 14px/20px var(--f-body);text-decoration:underline;text-underline-offset:4px;
 }
 
-/* the site's .btn is the display face with wide tracking — too heavy here */
+/* the site's .btn is the display face with wide tracking, too heavy here */
 .owner .btn{
   font-family:var(--f-head);font-weight:300;font-size:14px;line-height:40px;
   letter-spacing:.13em;padding:0 18px;white-space:nowrap;

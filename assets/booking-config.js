@@ -1,4 +1,4 @@
-/* EKA Forest — booking settings.
+/* EKA Forest, booking settings.
    Everything the calendar and the booking form need lives here.
    Safe to edit: these values are public (they end up in the page).
    Never put API keys or secrets in this file. */

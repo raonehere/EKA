@@ -33,12 +33,12 @@ confirmation.
 Until the Worker is configured, `assets/booking-config.js` keeps the page in
 preview mode (`demo: true`) with sample availability and a simulated payment.
 
-**Setup: [`docs/booking-setup.md`](docs/booking-setup.md)** — Notion schema, keys,
+**Setup: [`docs/booking-setup.md`](docs/booking-setup.md)**, Notion schema, keys,
 Worker deploy, UPI, dashboard, testing.
 
 Tent count, capacity, advance and the API URL are in
 `assets/booking-config.js`. The Worker's copy of the inventory is in
-`worker/wrangler.toml` (`UNITS`, `TENT_CAPACITY`, `ADVANCE`) — keep the two in
+`worker/wrangler.toml` (`UNITS`, `TENT_CAPACITY`, `ADVANCE`), keep the two in
 step.
 
 ## Content

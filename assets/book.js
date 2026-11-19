@@ -1,5 +1,5 @@
 /* ==========================================================================
-   EKA Forest — availability calendar + booking flow
+   EKA Forest, availability calendar + booking flow
    No dependencies, no build step. Reads settings from booking-config.js.
 
    Live mode  : talks to the Cloudflare Worker in /worker (Notion + UPI advance)
@@ -371,9 +371,9 @@
     setDate(el.sumIn, state.start);
     setDate(el.sumOut, state.end);
 
-    el.sumNights.textContent = hasRange ? plural(n, 'night') : '—';
+    el.sumNights.textContent = hasRange ? plural(n, 'night') : '';
     el.sumGuests.textContent = guestLine();
-    el.sumTents.textContent = (hasRange || state.start) ? plural(tentsNeeded(), 'tent') : '—';
+    el.sumTents.textContent = (hasRange || state.start) ? plural(tentsNeeded(), 'tent') : '';
 
     el.payLabel.textContent = (state.order && !state.paid) ? 'Finish payment' : 'Reserve these dates';
   }
@@ -513,7 +513,7 @@
   function renderQr(link) {
     if (!el.payQr) return;
     if (!link || !window.qrcode) {
-      el.payQr.innerHTML = '<p class="paypanel__qrfallback">Scanning is not available — pay to the UPI ID instead.</p>';
+      el.payQr.innerHTML = '<p class="paypanel__qrfallback">Scanning is not available, pay to the UPI ID instead.</p>';
       return;
     }
     try {
@@ -522,11 +522,11 @@
       qr.make();
       el.payQr.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
     } catch (e) {
-      el.payQr.innerHTML = '<p class="paypanel__qrfallback">Scanning is not available — pay to the UPI ID instead.</p>';
+      el.payQr.innerHTML = '<p class="paypanel__qrfallback">Scanning is not available, pay to the UPI ID instead.</p>';
     }
   }
 
-  var NOT_HELD = 'Your dates are not blocked yet — sending the screenshot is what claims them. ' +
+  var NOT_HELD = 'Your dates are not blocked yet, sending the screenshot is what claims them. ' +
     'Do it within a couple of hours. If someone else gets in first, message us and we will move your ' +
     '₹2,000 to other dates.';
 
@@ -748,12 +748,12 @@
     if (opts.preview) {
       el.confirmTag.textContent = 'Preview';
       el.confirmTag.style.background = '#a55a1c';
-      el.confirmLead.textContent = 'This is what guests see after they upload their payment screenshot. Nothing was charged or saved — preview mode.';
+      el.confirmLead.textContent = 'This is what guests see after they upload their payment screenshot. Nothing was charged or saved, preview mode.';
       document.getElementById('confirm-title').textContent = 'We\'re checking your payment';
     } else {
       el.confirmTag.textContent = 'Payment review';
       el.confirmTag.style.background = '#a55a1c';
-      el.confirmLead.textContent = 'Thank you — your screenshot is in our bookings board. We check UPI credits by hand and confirm on WhatsApp, usually within a few hours.';
+      el.confirmLead.textContent = 'Thank you, your screenshot is in our bookings board. We check UPI credits by hand and confirm on WhatsApp, usually within a few hours.';
       document.getElementById('confirm-title').textContent = 'We\'re checking your payment';
     }
 
@@ -788,7 +788,7 @@
       'UID:' + Date.now() + '@ekaforest.com', 'DTSTAMP:' + stamp,
       'DTSTART;VALUE=DATE:' + state.start.replace(/-/g, ''),
       'DTEND;VALUE=DATE:' + state.end.replace(/-/g, ''),
-      'SUMMARY:EKA Forest — ' + plural(diffDays(state.start, state.end), 'night'),
+      'SUMMARY:EKA Forest, ' + plural(diffDays(state.start, state.end), 'night'),
       'LOCATION:Vattavada, Idukki, Kerala 685615',
       'DESCRIPTION:Booking ' + el.confirmRef.textContent + '. Check-in from 1 PM, check-out by 11 AM.',
       'END:VEVENT', 'END:VCALENDAR'
