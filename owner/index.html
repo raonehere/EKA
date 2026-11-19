@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Owner dashboard · EKA Forest</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#c5b8a5">
+<link rel="icon" href="../assets/img/icon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="../assets/img/icon-180.png">
+<link rel="preload" href="../assets/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/styles.css">
+<link rel="stylesheet" href="../assets/owner.css">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="nav" aria-label="Main">
+    <ul class="nav__group nav__group--left">
+      <li><a href="../book/">Book</a></li>
+      <li><a href="../blog/">Journals</a></li>
+    </ul>
+    <a class="nav__logo" href="../" aria-label="EKA Forest, home">
+      <img src="../assets/img/eka-logo.svg" width="117" height="73" alt="EKA Forest logo">
+    </a>
+    <ul class="nav__group nav__group--right">
+      <li><a href="../events/">Events</a></li>
+      <li><a href="../#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main" class="page owner">
+
+  <!-- ---------- key gate ---------- -->
+  <section class="gate" id="gate" hidden>
+    <p class="eyebrow">Private</p>
+    <h1 class="h1">Owner dashboard</h1>
+    <p class="gate__lead">Paste the owner key you set in the Worker as <code>OWNER_TOKEN</code>. It stays in this browser.</p>
+    <form class="gate__form" id="gate-form" novalidate>
+      <label class="field">
+        <span class="field__label">Owner key</span>
+        <input type="password" id="gate-key" autocomplete="current-password" spellcheck="false" placeholder="long random string">
+      </label>
+      <p class="field__err" id="gate-error" role="alert"></p>
+      <button class="btn" type="submit" id="gate-submit">Open dashboard</button>
+    </form>
+    <p class="gate__note">This page is not linked from the site and carries <code>noindex</code>, but the key is the only thing protecting it.</p>
+  </section>
+
+  <!-- ---------- dashboard ---------- -->
+  <section class="dash" id="dash" hidden>
+    <header class="dash__head">
+      <div>
+        <p class="eyebrow" id="dash-date">Today</p>
+        <h1 class="h1">EKA Forest, right now</h1>
+      </div>
+      <div class="dash__tools">
+        <button class="btn btn--small" type="button" id="refresh">Refresh</button>
+        <button class="linkbtn" type="button" id="signout">Sign out</button>
+      </div>
+    </header>
+
+    <p class="demoflag" id="demoflag" hidden>Preview data — the dashboard is not connected to your Notion yet.</p>
+
+    <!-- KPIs -->
+    <div class="kpis">
+      <div class="kpi">
+        <p class="kpi__label">Tents tonight</p>
+        <p class="kpi__value" id="kpi-tents">—</p>
+        <p class="kpi__note" id="kpi-tents-note"></p>
+      </div>
+      <div class="kpi">
+        <p class="kpi__label">Guests tonight</p>
+        <p class="kpi__value" id="kpi-guests">—</p>
+        <p class="kpi__note" id="kpi-guests-note"></p>
+      </div>
+      <div class="kpi">
+        <p class="kpi__label">Arriving today</p>
+        <p class="kpi__value" id="kpi-in">—</p>
+        <p class="kpi__note" id="kpi-in-note"></p>
+      </div>
+      <div class="kpi">
+        <p class="kpi__label">Leaving today</p>
+        <p class="kpi__value" id="kpi-out">—</p>
+        <p class="kpi__note" id="kpi-out-note"></p>
+      </div>
+      <div class="kpi kpi--money">
+        <p class="kpi__label">Advance received</p>
+        <p class="kpi__value" id="kpi-confirmed">—</p>
+        <p class="kpi__note">confirmed bookings</p>
+      </div>
+      <div class="kpi kpi--money">
+        <p class="kpi__label">Waiting for you</p>
+        <p class="kpi__value" id="kpi-review">—</p>
+        <p class="kpi__note" id="kpi-review-note"></p>
+      </div>
+    </div>
+
+    <!-- occupancy -->
+    <section class="panel">
+      <div class="panel__head">
+        <h2 class="h3">Occupancy</h2>
+        <p class="panel__note">Nights sold as a share of your 11 tents.</p>
+      </div>
+      <div class="bars" id="bars" aria-label="Occupancy by month"></div>
+    </section>
+
+    <!-- today -->
+    <section class="panel" id="today-panel">
+      <div class="panel__head">
+        <h2 class="h3">Today's movement</h2>
+      </div>
+      <div class="twocol">
+        <div>
+          <p class="panel__label">Arriving</p>
+          <ul class="people" id="arrivals"></ul>
+        </div>
+        <div>
+          <p class="panel__label">Leaving</p>
+          <ul class="people" id="departures"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- digest -->
+    <section class="panel panel--digest">
+      <div class="panel__head">
+        <h2 class="h3">Send today's update</h2>
+        <p class="panel__note">One message with arrivals, departures, money and changes.</p>
+      </div>
+      <pre class="digest" id="digest">—</pre>
+      <div class="digest__actions">
+        <button class="btn btn--small" type="button" id="digest-copy">Copy</button>
+        <a class="btn btn--small btn--ghost" id="digest-send" href="#" target="_blank" rel="noopener">Send on WhatsApp</a>
+      </div>
+      <p class="panel__note" id="digest-note" hidden></p>
+    </section>
+
+    <!-- upcoming -->
+    <section class="panel">
+      <div class="panel__head">
+        <h2 class="h3">Next 30 days</h2>
+        <p class="panel__note" id="upcoming-note"></p>
+      </div>
+      <div class="tablewrap">
+        <table class="booktable">
+          <thead>
+            <tr>
+              <th scope="col">Dates</th>
+              <th scope="col">Guest</th>
+              <th scope="col">Tents</th>
+              <th scope="col">Advance</th>
+              <th scope="col">Status</th>
+              <th scope="col">Do</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="dash__foot">Notion is the source of truth. Anything you change here is written straight back to the database.</p>
+  </section>
+
+  <div class="dash-loading" id="loading" hidden>
+    <span class="dash-spinner" aria-hidden="true"></span>
+    <p id="loading-text">Reading Notion…</p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <p>EKA Forest · Vattavada, Kerala</p>
+</footer>
+
+<script src="../assets/booking-config.js?v=3"></script>
+<script src="../assets/owner.js?v=3" defer></script>
+</body>
+</html>
