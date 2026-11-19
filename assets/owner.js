@@ -23,7 +23,10 @@
     kpiConfirmed: $('#kpi-confirmed'), kpiReview: $('#kpi-review'), kpiReviewNote: $('#kpi-review-note'),
     bars: $('#bars'), arrivals: $('#arrivals'), departures: $('#departures'),
     digest: $('#digest'), digestCopy: $('#digest-copy'), digestSend: $('#digest-send'), digestNote: $('#digest-note'),
-    rows: $('#rows'), upcomingNote: $('#upcoming-note')
+    rows: $('#rows'), upcomingNote: $('#upcoming-note'),
+    blockForm: $('#block-form'), blockIn: $('#block-in'), blockOut: $('#block-out'),
+    blockTents: $('#block-tents'), blockNote: $('#block-note'),
+    blockSubmit: $('#block-submit'), blockMsg: $('#block-msg')
   };
 
   var state = { key: '', data: null, digest: null, busy: false };
@@ -259,6 +262,58 @@
       btn.disabled = false;
     }).then(function () { busy(false); });
   });
+
+  /* ---------------- reduce availability ----------------------------------- */
+
+  el.blockForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (state.busy) return;
+    var checkIn = el.blockIn.value;
+    var checkOut = el.blockOut.value;
+    var tents = Number(el.blockTents.value);
+    var note = el.blockNote.value.trim();
+
+    if (!checkIn || !checkOut || checkOut <= checkIn) {
+      return paintBlockMsg('Pick a start date and an end date after it.', true);
+    }
+    if (!(tents >= 1 && tents <= (state.data ? state.data.units : 99))) {
+      return paintBlockMsg('Enter how many tents to take off sale.', true);
+    }
+
+    if (DEMO) {
+      paintBlockMsg('Preview only — nothing was saved.', false);
+      return;
+    }
+
+    el.blockSubmit.disabled = true;
+    busy(true, 'Writing to Notion…');
+    fetch(API + '/owner/block?k=' + encodeURIComponent(state.key), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ checkIn: checkIn, checkOut: checkOut, tents: tents, note: note })
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (body) {
+        if (!res.ok) throw new Error(body.error || 'Could not save that block.');
+        return body;
+      });
+    }).then(function () {
+      el.blockForm.reset();
+      el.blockTents.value = '1';
+      paintBlockMsg('Done. ' + tents + ' tent' + (tents === 1 ? '' : 's') + ' off sale for ' + shortDay(checkIn) + ' → ' + shortDay(checkOut) + '.', false);
+      load();
+    }).catch(function (err) {
+      paintBlockMsg(err.message, true);
+    }).then(function () {
+      el.blockSubmit.disabled = false;
+      busy(false);
+    });
+  });
+
+  function paintBlockMsg(text, isError) {
+    el.blockMsg.hidden = false;
+    el.blockMsg.textContent = text;
+    el.blockMsg.style.color = isError ? '#9b2c2c' : '';
+  }
 
   /* ---------------- digest ------------------------------------------------ */
 

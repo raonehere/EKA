@@ -140,6 +140,22 @@
       <p class="panel__note" id="digest-note" hidden></p>
     </section>
 
+    <!-- reduce availability (owner only) -->
+    <section class="panel" id="block-panel">
+      <div class="panel__head">
+        <h2 class="h3">Reduce availability</h2>
+        <p class="panel__note">Took a booking somewhere else? Take tents off sale for those nights. Cancel the block below to give them back.</p>
+      </div>
+      <form class="blockform" id="block-form">
+        <label class="field"><span class="field__label">From</span><input class="field__input" type="date" id="block-in" required></label>
+        <label class="field"><span class="field__label">To (checkout)</span><input class="field__input" type="date" id="block-out" required></label>
+        <label class="field"><span class="field__label">Tents</span><input class="field__input" type="number" id="block-tents" min="1" value="1" required></label>
+        <label class="field"><span class="field__label">Note</span><input class="field__input" type="text" id="block-note" maxlength="80" placeholder="e.g. booked on Airbnb"></label>
+        <button class="btn btn--small" type="submit" id="block-submit">Take tents off sale</button>
+      </form>
+      <p class="panel__note" id="block-msg" hidden></p>
+    </section>
+
     <!-- upcoming -->
     <section class="panel">
       <div class="panel__head">
@@ -177,6 +193,6 @@
 </footer>
 
 <script src="../assets/booking-config.js?v=3"></script>
-<script src="../assets/owner.js?v=3" defer></script>
+<script src="../assets/owner.js?v=4" defer></script>
 </body>
 </html>
