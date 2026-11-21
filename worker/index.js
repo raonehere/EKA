@@ -1053,7 +1053,7 @@ function digestText(s) {
   if (s.todayArrivals.length) {
     lines.push('Arriving today:');
     s.todayArrivals.forEach(b => {
-      const kids = b.children ? `, ${b.children} under 10` : '';
+      const kids = b.children ? `, ${b.children} children` : '';
       lines.push(`• ${b.name}, ${b.guests} guests${kids}, ${b.tents} tent${b.tents === 1 ? '' : 's'} (${b.reference})`);
     });
     lines.push('');
