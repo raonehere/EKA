@@ -11,6 +11,12 @@
                events: 'Events', blog: 'Journals' };
   var ALLOWED = { BR: 1, STRONG: 1, EM: 1, A: 1 };
 
+  // Site root, so sheet values like "assets/img/x.jpg" work from /blog/ too.
+  var ROOT = (function () {
+    var s = document.querySelector('script[src*="cms.js"]');
+    return s ? s.src.replace(/assets\/cms\.js.*$/, '') : '';
+  })();
+
   function url(tab) {
     return 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
       '/gviz/tq?tqx=out:json&headers=1&sheet=' + encodeURIComponent(tab);
@@ -174,6 +180,10 @@
     }
     document.querySelectorAll('[data-cms-img]').forEach(function (el) {
       var v = get(el.getAttribute('data-cms-img')); if (!v || !/^(https?:|assets\/)/.test(v)) return;
+      // "assets/..." is relative to the site root, not to the current page:
+      // without this, /blog/ asked for /blog/assets/... and every journal
+      // photo 404ed.
+      if (v.indexOf('assets/') === 0) v = ROOT + v;
       el.style.backgroundImage = 'url("' + v.replace(/"/g, '%22') + '")';
       el.style.backgroundSize = 'cover'; el.style.backgroundPosition = 'center';
       el.classList.add('has-photo');

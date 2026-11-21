@@ -2,3 +2,4 @@
 node_modules/
 worker/.dev.vars
 *.log
+photos-in/
