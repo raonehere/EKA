@@ -53,7 +53,7 @@ window.EKA_BOOKING = {
   },
 
   /* Google reviews page. */
-  reviewsUrl: 'https://www.google.com/search?q=eka+forest+vattavada#mpd=~15457584150621157271/customers/reviews',
+  reviewsUrl: 'https://maps.app.goo.gl/ZacFg4FmZhpEeB4y6?g_st=iw',
 
   /* Free date change: how many hours before check-in the guest can still
      move the booking from their manage link. */
