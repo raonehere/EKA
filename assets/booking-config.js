@@ -41,8 +41,19 @@ window.EKA_BOOKING = {
   /* Bookings open this many months ahead. */
   horizonMonths: 12,
 
-  /* Paying guests online: 11 tents × 2. Under-10s are free and not counted. */
-  maxGuestsOnline: 20,
+  /* Largest group booked online: 11 tents × 2. Bigger groups message us. */
+  maxGuestsOnline: 22,
+
+  /* Prices in rupees. Per head per night includes tent, dinner, breakfast,
+     trekking and campfire. Children 5 to 10 pay half. Under 5 is free. */
+  pricing: {
+    perHeadPerNight: 1850,
+    childHalfPerNight: 925,
+    lunchPerHeadPerDay: 250
+  },
+
+  /* Google reviews page. */
+  reviewsUrl: 'https://www.google.com/search?q=eka+forest+vattavada#mpd=~15457584150621157271/customers/reviews',
 
   /* Free date change: how many hours before check-in the guest can still
      move the booking from their manage link. */

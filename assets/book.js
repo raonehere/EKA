@@ -80,8 +80,16 @@
     sumNights: $('#sum-nights'),
     sumGuests: $('#sum-guests'),
     sumTents: $('#sum-tents'),
+    sumStay: $('#sum-stay'),
+    sumLunch: $('#sum-lunch'),
+    sumTotal: $('#sum-total'),
+    sumAdvance: $('#sum-advance'),
+    sumBalance: $('#sum-balance'),
     adults: $('#adults'),
     children: $('#children'),
+    infants: $('#infants'),
+    lunch: $('#lunch'),
+    address: $('#address'),
     capacity: $('#capacity-note'),
     payBtn: $('#pay-btn'),
     payLabel: $('#pay-btn-label'),
@@ -294,17 +302,28 @@
     return Math.max(0, parseInt(el.adults.value, 10) || 0);
   }
   function under10() { return +el.children.value || 0; }
+  function under5() { return +el.infants.value || 0; }
+  /* Price in rupees for the stay as currently chosen. */
+  function priceFor(nights) {
+    var P = cfg.pricing || { perHeadPerNight: 1850, childHalfPerNight: 925, lunchPerHeadPerDay: 250 };
+    var stay = nights * (paying() * P.perHeadPerNight + under10() * P.childHalfPerNight);
+    var lunchHeads = paying() + under10();
+    var lunch = el.lunch.checked ? nights * lunchHeads * P.lunchPerHeadPerDay : 0;
+    return { stay: stay, lunch: lunch, total: stay + lunch, balance: stay + lunch - ADVANCE };
+  }
   function tentsNeeded() {
     if (!PER_TENT) return 1;
     // a solo guest still gets a whole tent
     return Math.max(1, Math.ceil(paying() / PER_TENT));
   }
-  /* "3 guests · 1 under 10" for summaries and confirmations. */
+  /* "3 guests, 1 aged 5 to 10, 1 under 5" for summaries and confirmations. */
   function guestLine() {
-    var p = paying(), u = under10(), out = plural(p, 'guest');
-    if (u) out += ' · ' + u + ' under 10';
+    var p = paying(), out = plural(p, 'adult');
+    if (under10()) out += ', ' + under10() + ' aged 5 to 10';
+    if (under5()) out += ', ' + under5() + ' under 5';
     return out;
   }
+  function rupees(n) { return '₹' + Math.round(n).toLocaleString('en-IN'); }
 
   /* ---------------- range logic ----------------------------------------- */
   function nightsOf(a, b) {
@@ -375,6 +394,21 @@
     el.sumGuests.textContent = guestLine();
     el.sumTents.textContent = (hasRange || state.start) ? plural(tentsNeeded(), 'tent') : '';
 
+    if (hasRange && n >= 1) {
+      var p = priceFor(n);
+      el.sumStay.textContent = rupees(p.stay);
+      el.sumLunch.textContent = el.lunch.checked ? rupees(p.lunch) : 'Not added';
+      el.sumTotal.textContent = rupees(p.total);
+      el.sumAdvance.textContent = rupees(ADVANCE);
+      el.sumBalance.textContent = rupees(p.balance);
+    } else {
+      el.sumStay.textContent = '';
+      el.sumLunch.textContent = '';
+      el.sumTotal.textContent = '';
+      el.sumAdvance.textContent = '';
+      el.sumBalance.textContent = '';
+    }
+
     el.payLabel.textContent = (state.order && !state.paid) ? 'Finish payment' : 'Reserve these dates';
   }
 
@@ -438,7 +472,7 @@
     function fail(name, msg) {
       if (!setError(name, msg)) { ok = false; if (!first) first = name; }
     }
-    setError('name', ''); setError('phone', ''); setError('email', ''); setError('terms', ''); setError('adults', '');
+    setError('name', ''); setError('phone', ''); setError('email', ''); setError('terms', ''); setError('adults', ''); setError('address', '');
 
     if (!state.start || !state.end) {
       ok = false;
@@ -446,7 +480,8 @@
       first = first || 'dates';
     }
     if (!paying()) fail('adults', 'At least one paying guest is needed.');
-    else if (paying() > MAX_GUESTS) fail('adults', 'Groups of more than ' + MAX_GUESTS + ' guests need to reach out to us on WhatsApp first.');
+    else if (paying() > MAX_GUESTS) fail('adults', 'Groups larger than ' + MAX_GUESTS + ' adults need to reach out to us on WhatsApp first.');
+    if (el.address.value.trim().length < 10) fail('address', 'Please share your full address.');
     if (!el.name.value.trim() || el.name.value.trim().length < 2) fail('name', 'Please tell us your name.');
     var ph = el.phone.value.replace(/\D/g, '');
     if (ph.length !== 10) fail('phone', 'Enter a 10-digit Indian mobile number.');
@@ -475,7 +510,11 @@
       checkIn: state.start,
       checkOut: state.end,
       adults: paying(),
-      childrenUnder10: under10(),
+      childrenUnder10: under10() + under5(),
+      childrenUnder5: under5(),
+      childrenFiveToTen: under10(),
+      lunch: el.lunch.checked,
+      address: el.address.value.trim(),
       guests: paying(),
       tents: tentsNeeded(),
       name: el.name.value.trim(),
@@ -867,6 +906,8 @@
     updateSummary();
     if (state.start && state.end) validateStay(false);
   });
+  el.infants.addEventListener('change', updateSummary);
+  el.lunch.addEventListener('change', updateSummary);
 
   el.phone.addEventListener('input', function () {
     this.value = this.value.replace(/\D/g, '').slice(0, 10);
