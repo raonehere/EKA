@@ -186,7 +186,8 @@ const FIELDS = {
   paidAt:     { prop: 'Paid at',                     type: 'date', optional: true },
   type:       { prop: 'Type',                        type: 'select', optional: true },
   source:     { prop: 'Source',                      type: 'select', optional: true },
-  terms:      { prop: 'Terms accepted',              type: 'date', optional: true }
+  terms:      { prop: 'Terms accepted',              type: 'date', optional: true },
+  total:      { prop: 'Total amount',                type: 'number', optional: true }
 };
 
 /** Internal name → Notion property title. */
@@ -452,6 +453,7 @@ async function createBooking(request, env) {
       [C.status]: { select: { name: 'Pending payment' } },
       [C.type]: { select: { name: 'Booking' } },
       [C.advance]: { number: advance(env) },
+      [C.total]: { number: price.total },
       [C.notes]: { rich_text: notesText ? [{ text: { content: notesText } }] : [] },
       [C.source]: { select: { name: 'Website' } },
       [C.terms]: { date: { start: now.toISOString() } },
