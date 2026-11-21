@@ -400,7 +400,7 @@
       var p = priceFor(n);
       el.sumStay.textContent = rupees(p.stay);
       var count = Math.min(parseInt(el.lunches.value, 10) || 0, n);
-      el.sumLunch.textContent = count ? plural(count, 'lunch') + ' each · ' + rupees(p.lunch) : 'None';
+      el.sumLunch.textContent = count ? count + (count === 1 ? ' lunch' : ' lunches') + ' each · ' + rupees(p.lunch) : 'None';
       el.estimate.textContent = 'Estimated total ' + rupees(p.total) + ' for ' + plural(n, 'night') + ' · ' + rupees(ADVANCE) + ' advance now';
       el.sumTotal.textContent = rupees(p.total);
       el.sumAdvance.textContent = rupees(ADVANCE);
