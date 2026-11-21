@@ -1,4 +1,4 @@
-// EKA Forest v1 — tiny enhancements (site works without JS)
+// EKA Forest v1, tiny enhancements (site works without JS)
 document.getElementById('y').textContent = new Date().getFullYear();
 // FAQ: opening a question closes the others in the same column
 document.querySelectorAll('.faq__col').forEach(col => {

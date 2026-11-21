@@ -1,4 +1,4 @@
-/* EKA Forest — owner dashboard.
+/* EKA Forest, owner dashboard.
    Reads the Worker (/owner/summary, /owner/digest) with the owner key.
    Preview mode shows generated numbers so the layout can be reviewed offline. */
 
@@ -183,7 +183,7 @@
       li.className = 'person';
       var link = waLink(b.phone, 'Hi ' + (b.name || '') + ', this is EKA Forest.');
       li.innerHTML =
-        '<span class="person__name">' + escapeHTML(b.name || '—') + '</span>' +
+        '<span class="person__name">' + escapeHTML(b.name || '') + '</span>' +
         '<span class="person__meta">' + b.guests + (b.guests === 1 ? ' guest' : ' guests') +
         (b.children ? ' + ' + b.children + ' under 10' : '') +
         ' · ' + b.tents + ' tent' + (b.tents === 1 ? '' : 's') + ' · ' + escapeHTML(b.reference) + '</span>' +
@@ -213,7 +213,7 @@
       tr.innerHTML =
         '<td data-label="Dates"><span class="cell__strong">' + shortDay(b.checkIn) + ' → ' + shortDay(b.checkOut) + '</span>' +
           '<span class="cell__sub">' + nights(b.checkIn, b.checkOut) + ' nights</span></td>' +
-        '<td data-label="Guest"><span class="cell__strong">' + escapeHTML(b.name || '—') + '</span>' +
+        '<td data-label="Guest"><span class="cell__strong">' + escapeHTML(b.name || '') + '</span>' +
           '<span class="cell__sub">' + b.guests + (b.guests === 1 ? ' guest' : ' guests') +
           (b.children ? ' + ' + b.children + ' under 10' : '') +
           (link ? ' · <a href="' + link + '" target="_blank" rel="noopener">message</a>' : '') + '</span></td>' +
@@ -281,7 +281,7 @@
     }
 
     if (DEMO) {
-      paintBlockMsg('Preview only — nothing was saved.', false);
+      paintBlockMsg('Preview only, nothing was saved.', false);
       return;
     }
 
@@ -361,7 +361,7 @@
   /* ---------------- demo data --------------------------------------------- */
 
   function localDigest(s) {
-    var out = ['EKA Forest — ' + day(s.today), ''];
+    var out = ['EKA Forest, ' + day(s.today), ''];
     out.push('Tonight: ' + s.tonight.tents + ' of ' + s.units + ' tents, ' + s.tonight.guests + ' guests, ' + s.tonight.free + ' free');
     out.push('Today: ' + s.todayArrivals.length + ' arriving, ' + s.todayDepartures.length + ' leaving');
     out.push('Next 7 days: ' + s.next7.arrivals + ' arriving, ' + s.next7.departures + ' leaving');
@@ -369,7 +369,7 @@
       out.push('');
       out.push('Arriving today:');
       s.todayArrivals.forEach(function (b) {
-        out.push('• ' + b.name + ' — ' + b.guests + ' guests, ' + b.tents + ' tent' + (b.tents === 1 ? '' : 's') + ' (' + b.reference + ')');
+        out.push('• ' + b.name + ', ' + b.guests + ' guests, ' + b.tents + ' tent' + (b.tents === 1 ? '' : 's') + ' (' + b.reference + ')');
       });
     }
     out.push('');

@@ -1,5 +1,5 @@
 /**
- * EKA Forest — booking API (Cloudflare Worker)
+ * EKA Forest, booking API (Cloudflare Worker)
  *
  *   GET  /health              → checks Notion access + database schema
  *   GET  /availability        → free tents per night
@@ -33,6 +33,15 @@ const NOTION_VERSION = '2022-06-28';
 const NOTION_FILES_VERSION = '2026-03-11';
 const NOTION = 'https://api.notion.com/v1';
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
+/** Price in rupees. Children 5 to 10 pay half, under 5 is free, lunch is per head per day. */
+function bookingPrice(env, nights, adults, fiveToTen, lunch) {
+  const perNight = Number(env.PRICE_PER_NIGHT) || 1850;
+  const lunchRate = Number(env.LUNCH_PRICE) || 250;
+  const stay = nights * (adults * perNight + fiveToTen * Math.round(perNight / 2));
+  const lunchTotal = lunch ? nights * (adults + fiveToTen) * lunchRate : 0;
+  const total = stay + lunchTotal;
+  return { stay, lunch: lunchTotal, total, balance: total - advance(env) };
+}
 
 export default {
   async fetch(request, env, ctx) {
@@ -147,7 +156,7 @@ async function notion(env, path, init = {}, version) {
 /* ---------------------------------------------------------------- the schema */
 
 /* The columns this Worker needs, and the names they have in the Notion
-   database. If you rename a column in Notion, change the title on the right —
+   database. If you rename a column in Notion, change the title on the right , 
    nothing else in this file mentions a Notion property by name.
 
    optional: true means the Worker works without it. /health will not complain,
@@ -187,7 +196,7 @@ const OPTIONAL = new Set(
 
 /** Notion lets a column be called "reference " or "Reference". Compare names
  *  with the spaces and capitals taken out, so a stray space cannot break a
- *  booking — which is exactly what happened once. */
+ *  booking, which is exactly what happened once. */
 const norm = s => String(s || '').trim().toLowerCase();
 
 function resolveColumns(propertyKeys) {
@@ -375,6 +384,10 @@ async function createBooking(request, env) {
   const guests = parseInt(body.guests, 10);
   const adults = parseInt(body.adults, 10) || guests;
   const childrenUnder10 = Math.max(0, parseInt(body.childrenUnder10, 10) || 0);
+  const childrenUnder5 = Math.max(0, parseInt(body.childrenUnder5, 10) || 0);
+  const childrenFiveToTen = Math.max(0, parseInt(body.childrenFiveToTen, 10) || 0);
+  const lunch = body.lunch === true;
+  const address = clean(body.address, 300);
 
   if (!isDate(checkIn) || !isDate(checkOut)) return json({ error: 'Please pick valid dates.' }, 400);
   if (checkIn < todayIST()) return json({ error: 'Those dates are in the past.' }, 400);
@@ -389,7 +402,12 @@ async function createBooking(request, env) {
   const cap = capacity(env);
   const total = units(env);
   if (!guests || guests < 1) return json({ error: 'Tell us how many guests are coming.' }, 400);
-  if (guests > total * cap) return json({ error: 'That is more guests than we can host. Message us on WhatsApp.' }, 400);
+  if (adults > total * cap) {
+    return json({ error: `Groups larger than ${total * cap} adults need to reach out to us on WhatsApp first.` }, 400);
+  }
+  if (address.length < 10) return json({ error: 'Please share your full address.' }, 400);
+
+  const price = bookingPrice(env, nights, adults, childrenFiveToTen, lunch);
   const tents = Math.max(1, Math.ceil(guests / cap));
 
   if (name.length < 2) return json({ error: 'Please share your name.' }, 400);
@@ -410,7 +428,11 @@ async function createBooking(request, env) {
   const token = await manageToken(env, reference);
   const C = await columns(env);
   const notesText = [notes, arrival && `Arrival: ${arrival}`, pets && pets !== 'No' && `Pets: ${pets}`,
-    childrenUnder10 > 0 && `Children under 10: ${childrenUnder10}`]
+    `Address: ${address}`,
+    childrenFiveToTen > 0 && `Children 5 to 10: ${childrenFiveToTen}`,
+    childrenUnder5 > 0 && `Children under 5: ${childrenUnder5}`,
+    `Lunch: ${lunch ? 'yes' : 'no'}`,
+    `Total: ₹${price.total}, balance at check-in: ₹${price.balance}`]
     .filter(Boolean).join(' · ').slice(0, 900);
   const now = new Date();
 
@@ -445,6 +467,8 @@ async function createBooking(request, env) {
     token,
     manageUrl: token ? manageUrl(env, reference, token) : '',
     amount: advance(env),
+    total: price.total,
+    balance: price.balance,
     currency: 'INR',
     upi: {
       ...upi(env),
@@ -662,7 +686,7 @@ async function uploadScreenshot(request, env) {
   }
 
   const note = [booking.notes,
-    `Payment screenshot uploaded ${todayIST()} — please check the ₹${booking.advance || advance(env)} UPI credit.`]
+    `Payment screenshot uploaded ${todayIST()}, please check the ₹${booking.advance || advance(env)} UPI credit.`]
     .filter(Boolean).join(' · ').slice(0, 1800);
 
   const C = await columns(env);
@@ -1019,7 +1043,7 @@ async function ownerSummary(request, env) {
 /** One message the property manager can read on a phone, no jargon. */
 function digestText(s) {
   const lines = [];
-  lines.push(`EKA Forest — ${prettyDate(s.today)}`);
+  lines.push(`EKA Forest, ${prettyDate(s.today)}`);
   lines.push('');
   lines.push(`Tonight: ${s.tonight.tents} of ${s.units} tents, ${s.tonight.guests} guests, ${s.tonight.free} free`);
   lines.push(`Today: ${s.todayArrivals.length} arriving, ${s.todayDepartures.length} leaving`);
@@ -1030,14 +1054,14 @@ function digestText(s) {
     lines.push('Arriving today:');
     s.todayArrivals.forEach(b => {
       const kids = b.children ? `, ${b.children} under 10` : '';
-      lines.push(`• ${b.name} — ${b.guests} guests${kids}, ${b.tents} tent${b.tents === 1 ? '' : 's'} (${b.reference})`);
+      lines.push(`• ${b.name}, ${b.guests} guests${kids}, ${b.tents} tent${b.tents === 1 ? '' : 's'} (${b.reference})`);
     });
     lines.push('');
   }
   if (s.todayDepartures.length) {
     lines.push('Leaving today:');
     s.todayDepartures.forEach(b => {
-      lines.push(`• ${b.name} — ${b.tents} tent${b.tents === 1 ? '' : 's'} (${b.reference})`);
+      lines.push(`• ${b.name}, ${b.tents} tent${b.tents === 1 ? '' : 's'} (${b.reference})`);
     });
     lines.push('');
   }

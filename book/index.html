@@ -46,7 +46,7 @@
   <header class="book__head">
     <p class="eyebrow">Book your stay</p>
     <h1 class="h1">Check availability</h1>
-    <p class="page__intro">EKA Forest is a small stay of tents in the eucalyptus woods of Vattavada. Pick the nights you want, tell us who's coming, and confirm with a <strong>₹2,000 advance</strong> — the same flat amount whether you're two people or a full group. It comes off your final bill.</p>
+    <p class="page__intro">EKA Forest is a small stay of tents in the eucalyptus woods of Vattavada. Pick the nights you want, tell us who's coming, and confirm with a <strong>₹2,000 advance</strong>, the same flat amount whether you're two people or a full group. It comes off your final bill.</p>
   </header>
 
   <div class="book__meta" aria-hidden="true">
@@ -57,7 +57,7 @@
 
   <form class="book__layout" id="booking-form" novalidate>
 
-    <!-- ============ 01 — DATES ============ -->
+    <!-- ============ 01, DATES ============ -->
     <section class="book__main step" id="step-dates" aria-labelledby="step-dates-title">
       <div class="step__head">
         <span class="step__num" aria-hidden="true">01</span>
@@ -103,7 +103,7 @@
       </noscript>
     </section>
 
-    <!-- ============ 02 — GUESTS & DETAILS ============ -->
+    <!-- ============ 02, GUESTS & DETAILS ============ -->
     <section class="book__main step" id="step-details" aria-labelledby="step-details-title">
       <div class="step__head">
         <span class="step__num" aria-hidden="true">02</span>
@@ -114,12 +114,12 @@
         <legend class="fieldset-legend">Guests</legend>
         <div class="field">
           <label for="adults">Adults &amp; children 10+</label>
-          <input id="adults" name="adults" type="number" inputmode="numeric" min="1" max="22" step="1" value="2" required autocomplete="off">
+          <input id="adults" name="adults" type="number" inputmode="numeric" min="1" step="1" value="2" required autocomplete="off">
           <p class="field__hint">A tent sleeps two, and a solo guest still gets a whole tent.</p>
           <p class="field__err" data-err-for="adults"></p>
         </div>
         <div class="field">
-          <label for="children">Children under 10</label>
+          <label for="children">Children aged 5 to 10</label>
           <select id="children" name="children">
             <option value="0" selected>0</option>
             <option value="1">1</option>
@@ -129,7 +129,19 @@
             <option value="5">5</option>
             <option value="6">6</option>
           </select>
-          <p class="field__hint">Free, and they share your tent. We still need to know.</p>
+          <p class="field__hint">Half price, ₹925 per night.</p>
+        </div>
+        <div class="field">
+          <label for="infants">Children under 5</label>
+          <select id="infants" name="infants">
+            <option value="0" selected>0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+          <p class="field__hint">Free, and they share your tent.</p>
         </div>
       </fieldset>
 
@@ -182,12 +194,24 @@
       </div>
 
       <div class="field">
+        <label for="address">Your address</label>
+        <textarea id="address" name="address" rows="2" required autocomplete="street-address" placeholder="House no., street, city, state, PIN"></textarea>
+        <p class="field__hint">Required for our records and your invoice.</p>
+        <p class="field__err" data-err-for="address"></p>
+      </div>
+
+      <label class="terms" for="lunch">
+        <input type="checkbox" id="lunch" name="lunch">
+        <span>Add lunch, <strong>₹250 per head per day</strong>. Dinner, breakfast, trekking and campfire are already included in the ₹1,850 per head per night.</span>
+      </label>
+
+      <div class="field">
         <label for="notes">Anything we should know? <span class="field__opt">(optional)</span></label>
         <textarea id="notes" name="notes" rows="3" placeholder="Dietary needs, a birthday, travelling with kids, questions about reaching us…"></textarea>
       </div>
     </section>
 
-    <!-- ============ SIDE — SUMMARY & PAYMENT ============ -->
+    <!-- ============ SIDE, SUMMARY & PAYMENT ============ -->
     <aside class="book__side" aria-labelledby="summary-title">
       <div class="summary">
         <h2 class="h4" id="summary-title">Your stay</h2>
@@ -204,9 +228,17 @@
         </div>
 
         <dl class="summary__list">
-          <div><dt>Nights</dt><dd id="sum-nights">—</dd></div>
+          <div><dt>Nights</dt><dd id="sum-nights"></dd></div>
           <div><dt>Guests</dt><dd id="sum-guests">2 adults</dd></div>
-          <div><dt>Tents</dt><dd id="sum-tents">—</dd></div>
+          <div><dt>Tents</dt><dd id="sum-tents"></dd></div>
+        </dl>
+
+        <dl class="summary__list">
+          <div><dt>Stay</dt><dd id="sum-stay"></dd></div>
+          <div><dt>Lunch</dt><dd id="sum-lunch"></dd></div>
+          <div><dt>Total</dt><dd id="sum-total"></dd></div>
+          <div><dt>Advance now</dt><dd id="sum-advance"></dd></div>
+          <div><dt>Balance at EKA Forest</dt><dd id="sum-balance"></dd></div>
         </dl>
 
         <div class="summary__pay">
@@ -218,7 +250,7 @@
         </div>
 
         <p class="summary__demo" id="demo-note" hidden>
-          Preview mode — sample availability, simulated payment. Nothing is charged or saved.
+          Preview mode, sample availability, simulated payment. Nothing is charged or saved.
         </p>
 
         <label class="terms" for="terms">
@@ -240,7 +272,7 @@
       </div>
 
       <p class="summary__policy">
-        <strong>How it works.</strong> Fill the form, pay the ₹2,000 by UPI and upload the screenshot — that is what blocks your dates. We check the credit by hand and confirm on WhatsApp, usually within a few hours. The advance comes off your final bill, moves with your dates up to 48 hours before check-in, and is not refunded if you cancel.
+        <strong>How it works.</strong> Fill the form, pay the ₹2,000 by UPI and upload the screenshot, that is what blocks your dates. We check the credit by hand and confirm on WhatsApp, usually within a few hours. The advance comes off your final bill, moves with your dates up to 48 hours before check-in, and is not refunded if you cancel.
       </p>
     </aside>
 
@@ -253,25 +285,25 @@
       <div class="faq__col">
         <details>
           <summary>How does the ₹2,000 advance work?</summary>
-          <p>It's a flat amount — a solo tent or a group of ten, it stays ₹2,000. You reserve your nights, pay by UPI (scan the QR or use the ID), and upload the screenshot; we check it and confirm on WhatsApp. It's non-refundable and comes off your final bill, which you settle at EKA Forest.</p>
+          <p>It's a flat amount, a solo tent or a group of ten, it stays ₹2,000. You reserve your nights, pay by UPI (scan the QR or use the ID), and upload the screenshot; we check it and confirm on WhatsApp. It's non-refundable and comes off your final bill, which you settle at EKA Forest.</p>
         </details>
         <details>
           <summary>What if I need to change my dates?</summary>
-          <p>Your confirmation includes a private link to move the booking yourself. Pick any free nights and the ₹2,000 advance carries over — no charge, and you can do it more than once. Changes close 48 hours before check-in; after that, message us on WhatsApp.</p>
+          <p>Your confirmation includes a private link to move the booking yourself. Pick any free nights and the ₹2,000 advance carries over, no charge, and you can do it more than once. Changes close 48 hours before check-in; after that, message us on WhatsApp.</p>
         </details>
         <details>
           <summary>How many people can come?</summary>
-          <p>We have eleven tents and each sleeps two. A couple shares a tent, but a solo guest still gets a whole tent — so three people need two tents. Children under 10 stay free and share your tent, but do tell us they're coming. Anyone 10 or older is a paying guest. For groups larger than 22, message us first.</p>
+          <p>We have eleven tents and each sleeps two. A couple shares a tent, but a solo guest still gets a whole tent, so three people need two tents. Children under 5 are free and share your tent. Children aged 5 to 10 pay half, and everyone 11 or older pays the full ₹1,850 per night. Dinner, breakfast, trekking and campfire are included. For groups larger than 22 adults, message us first.</p>
         </details>
       </div>
       <div class="faq__col">
         <details>
           <summary>What's included in the stay?</summary>
-          <p>A tent with bedding, access to the shared washrooms with hot water, the garden and terrace, and the campfire in the evening. Meals are home-style and served on request — tell us in the notes if you'd like them.</p>
+          <p>A tent with bedding, access to the shared washrooms with hot water, the garden and terrace, and the campfire in the evening. Meals are home-style and served on request, tell us in the notes if you'd like them.</p>
         </details>
         <details>
           <summary>When will my booking be confirmed?</summary>
-          <p>Your dates are blocked the moment your payment screenshot reaches us, not when you fill the form. We check the credit by hand and confirm on WhatsApp — usually within a few hours, and always with your tent, directions and the map pin.</p>
+          <p>Your dates are blocked the moment your payment screenshot reaches us, not when you fill the form. We check the credit by hand and confirm on WhatsApp, usually within a few hours, and always with your tent, directions and the map pin.</p>
         </details>
         <details>
           <summary>Can I pay the full amount now?</summary>
@@ -319,19 +351,19 @@
 
     <div class="confirm__ref">
       <span>Booking reference</span>
-      <strong id="confirm-ref">—</strong>
+      <strong id="confirm-ref"></strong>
     </div>
 
     <dl class="confirm__list">
-      <div><dt>Dates</dt><dd id="confirm-dates">—</dd></div>
-      <div><dt>Guests</dt><dd id="confirm-guests">—</dd></div>
+      <div><dt>Dates</dt><dd id="confirm-dates"></dd></div>
+      <div><dt>Guests</dt><dd id="confirm-guests"></dd></div>
       <div><dt>Advance</dt><dd id="confirm-paid">₹2,000</dd></div>
     </dl>
 
     <p class="confirm__next">We'll message you on WhatsApp within a few hours with your tent, directions and the map pin. The balance is paid when you arrive.</p>
 
     <p class="confirm__manage" id="confirm-manage-wrap">
-      Need to move your dates or cancel? Keep this private link —
+      Need to move your dates or cancel? Keep this private link , 
       <a id="confirm-manage" href="#">open your booking</a>.
     </p>
 
@@ -340,7 +372,7 @@
       <button class="linkbtn" type="button" id="confirm-ics">Add to calendar</button>
     </div>
 
-    <p class="confirm__preview" id="confirm-preview" hidden>Preview only — no payment was taken and nothing was saved to Notion.</p>
+    <p class="confirm__preview" id="confirm-preview" hidden>Preview only, no payment was taken and nothing was saved to Notion.</p>
   </div>
 </div>
 
@@ -353,7 +385,7 @@
 
     <p class="confirm__tag" id="pay-tag">Dates held</p>
     <h2 class="h2" id="pay-title">Pay ₹2,000 by UPI</h2>
-    <p class="paypanel__lead">Scan the code with any UPI app, or pay to the ID below. The screenshot is what blocks your dates — we check it by hand and confirm on WhatsApp.</p>
+    <p class="paypanel__lead">Scan the code with any UPI app, or pay to the ID below. The screenshot is what blocks your dates, we check it by hand and confirm on WhatsApp.</p>
 
     <div class="paypanel__grid">
       <div class="paypanel__qrbox">
@@ -367,12 +399,12 @@
 
         <p class="paypanel__label">UPI ID</p>
         <p class="paypanel__upi">
-          <code id="pay-upi-id">—</code>
+          <code id="pay-upi-id"></code>
           <button class="linkbtn" type="button" id="pay-copy">Copy</button>
         </p>
 
         <p class="paypanel__label">Your reference</p>
-        <p class="paypanel__ref" id="pay-ref">—</p>
+        <p class="paypanel__ref" id="pay-ref"></p>
 
         <a class="btn btn--small paypanel__app" id="pay-open-app" href="#">Open UPI app</a>
       </div>

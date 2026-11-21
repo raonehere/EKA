@@ -1,4 +1,4 @@
-/* EKA Forest — booking settings.
+/* EKA Forest, booking settings.
    Everything the calendar and the booking form need lives here.
    Safe to edit: these values are public (they end up in the page).
    Never put API keys or secrets in this file. */
@@ -41,8 +41,19 @@ window.EKA_BOOKING = {
   /* Bookings open this many months ahead. */
   horizonMonths: 12,
 
-  /* Paying guests online: 11 tents × 2. Under-10s are free and not counted. */
+  /* Largest group booked online: 11 tents × 2. Bigger groups message us. */
   maxGuestsOnline: 22,
+
+  /* Prices in rupees. Per head per night includes tent, dinner, breakfast,
+     trekking and campfire. Children 5 to 10 pay half. Under 5 is free. */
+  pricing: {
+    perHeadPerNight: 1850,
+    childHalfPerNight: 925,
+    lunchPerHeadPerDay: 250
+  },
+
+  /* Google reviews page. */
+  reviewsUrl: 'https://maps.app.goo.gl/ZacFg4FmZhpEeB4y6?g_st=iw',
 
   /* Free date change: how many hours before check-in the guest can still
      move the booking from their manage link. */

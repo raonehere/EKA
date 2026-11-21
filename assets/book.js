@@ -1,5 +1,5 @@
 /* ==========================================================================
-   EKA Forest — availability calendar + booking flow
+   EKA Forest, availability calendar + booking flow
    No dependencies, no build step. Reads settings from booking-config.js.
 
    Live mode  : talks to the Cloudflare Worker in /worker (Notion + UPI advance)
@@ -18,7 +18,7 @@
   var HORIZON = cfg.horizonMonths || 12;
   var MAX_NIGHTS = cfg.maxNights || 10;
   var MIN_NIGHTS = cfg.minNights || 1;
-  var MAX_GUESTS = cfg.maxGuestsOnline || 18;
+  var MAX_GUESTS = cfg.maxGuestsOnline || 20;
   var WA = String(cfg.whatsapp || '').replace(/\D/g, '');
 
   /* ---------------- tiny date helpers (all local, no UTC drift) ---------- */
@@ -80,8 +80,16 @@
     sumNights: $('#sum-nights'),
     sumGuests: $('#sum-guests'),
     sumTents: $('#sum-tents'),
+    sumStay: $('#sum-stay'),
+    sumLunch: $('#sum-lunch'),
+    sumTotal: $('#sum-total'),
+    sumAdvance: $('#sum-advance'),
+    sumBalance: $('#sum-balance'),
     adults: $('#adults'),
     children: $('#children'),
+    infants: $('#infants'),
+    lunch: $('#lunch'),
+    address: $('#address'),
     capacity: $('#capacity-note'),
     payBtn: $('#pay-btn'),
     payLabel: $('#pay-btn-label'),
@@ -294,17 +302,28 @@
     return Math.max(0, parseInt(el.adults.value, 10) || 0);
   }
   function under10() { return +el.children.value || 0; }
+  function under5() { return +el.infants.value || 0; }
+  /* Price in rupees for the stay as currently chosen. */
+  function priceFor(nights) {
+    var P = cfg.pricing || { perHeadPerNight: 1850, childHalfPerNight: 925, lunchPerHeadPerDay: 250 };
+    var stay = nights * (paying() * P.perHeadPerNight + under10() * P.childHalfPerNight);
+    var lunchHeads = paying() + under10();
+    var lunch = el.lunch.checked ? nights * lunchHeads * P.lunchPerHeadPerDay : 0;
+    return { stay: stay, lunch: lunch, total: stay + lunch, balance: stay + lunch - ADVANCE };
+  }
   function tentsNeeded() {
     if (!PER_TENT) return 1;
     // a solo guest still gets a whole tent
     return Math.max(1, Math.ceil(paying() / PER_TENT));
   }
-  /* "3 guests · 1 under 10" for summaries and confirmations. */
+  /* "3 guests, 1 aged 5 to 10, 1 under 5" for summaries and confirmations. */
   function guestLine() {
-    var p = paying(), u = under10(), out = plural(p, 'guest');
-    if (u) out += ' · ' + u + ' under 10';
+    var p = paying(), out = plural(p, 'adult');
+    if (under10()) out += ', ' + under10() + ' aged 5 to 10';
+    if (under5()) out += ', ' + under5() + ' under 5';
     return out;
   }
+  function rupees(n) { return '₹' + Math.round(n).toLocaleString('en-IN'); }
 
   /* ---------------- range logic ----------------------------------------- */
   function nightsOf(a, b) {
@@ -371,9 +390,24 @@
     setDate(el.sumIn, state.start);
     setDate(el.sumOut, state.end);
 
-    el.sumNights.textContent = hasRange ? plural(n, 'night') : '—';
+    el.sumNights.textContent = hasRange ? plural(n, 'night') : '';
     el.sumGuests.textContent = guestLine();
-    el.sumTents.textContent = (hasRange || state.start) ? plural(tentsNeeded(), 'tent') : '—';
+    el.sumTents.textContent = (hasRange || state.start) ? plural(tentsNeeded(), 'tent') : '';
+
+    if (hasRange && n >= 1) {
+      var p = priceFor(n);
+      el.sumStay.textContent = rupees(p.stay);
+      el.sumLunch.textContent = el.lunch.checked ? rupees(p.lunch) : 'Not added';
+      el.sumTotal.textContent = rupees(p.total);
+      el.sumAdvance.textContent = rupees(ADVANCE);
+      el.sumBalance.textContent = rupees(p.balance);
+    } else {
+      el.sumStay.textContent = '';
+      el.sumLunch.textContent = '';
+      el.sumTotal.textContent = '';
+      el.sumAdvance.textContent = '';
+      el.sumBalance.textContent = '';
+    }
 
     el.payLabel.textContent = (state.order && !state.paid) ? 'Finish payment' : 'Reserve these dates';
   }
@@ -400,7 +434,7 @@
 
   function validateStay(showHint) {
     if (paying() > MAX_GUESTS) {
-      el.capacity.textContent = 'For more than ' + MAX_GUESTS + ' paying guests, message us on WhatsApp and we\'ll plan it with you.';
+      el.capacity.textContent = 'Groups of more than ' + MAX_GUESTS + ' guests need to reach out to us on WhatsApp first.';
       el.capacity.className = 'book__capacity is-bad';
       return false;
     }
@@ -438,7 +472,7 @@
     function fail(name, msg) {
       if (!setError(name, msg)) { ok = false; if (!first) first = name; }
     }
-    setError('name', ''); setError('phone', ''); setError('email', ''); setError('terms', ''); setError('adults', '');
+    setError('name', ''); setError('phone', ''); setError('email', ''); setError('terms', ''); setError('adults', ''); setError('address', '');
 
     if (!state.start || !state.end) {
       ok = false;
@@ -446,7 +480,8 @@
       first = first || 'dates';
     }
     if (!paying()) fail('adults', 'At least one paying guest is needed.');
-    else if (paying() > MAX_GUESTS) fail('adults', 'For more than ' + MAX_GUESTS + ' paying guests, message us on WhatsApp.');
+    else if (paying() > MAX_GUESTS) fail('adults', 'Groups larger than ' + MAX_GUESTS + ' adults need to reach out to us on WhatsApp first.');
+    if (el.address.value.trim().length < 10) fail('address', 'Please share your full address.');
     if (!el.name.value.trim() || el.name.value.trim().length < 2) fail('name', 'Please tell us your name.');
     var ph = el.phone.value.replace(/\D/g, '');
     if (ph.length !== 10) fail('phone', 'Enter a 10-digit Indian mobile number.');
@@ -475,7 +510,11 @@
       checkIn: state.start,
       checkOut: state.end,
       adults: paying(),
-      childrenUnder10: under10(),
+      childrenUnder10: under10() + under5(),
+      childrenUnder5: under5(),
+      childrenFiveToTen: under10(),
+      lunch: el.lunch.checked,
+      address: el.address.value.trim(),
       guests: paying(),
       tents: tentsNeeded(),
       name: el.name.value.trim(),
@@ -513,7 +552,7 @@
   function renderQr(link) {
     if (!el.payQr) return;
     if (!link || !window.qrcode) {
-      el.payQr.innerHTML = '<p class="paypanel__qrfallback">Scanning is not available — pay to the UPI ID instead.</p>';
+      el.payQr.innerHTML = '<p class="paypanel__qrfallback">Scanning is not available, pay to the UPI ID instead.</p>';
       return;
     }
     try {
@@ -522,11 +561,11 @@
       qr.make();
       el.payQr.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
     } catch (e) {
-      el.payQr.innerHTML = '<p class="paypanel__qrfallback">Scanning is not available — pay to the UPI ID instead.</p>';
+      el.payQr.innerHTML = '<p class="paypanel__qrfallback">Scanning is not available, pay to the UPI ID instead.</p>';
     }
   }
 
-  var NOT_HELD = 'Your dates are not blocked yet — sending the screenshot is what claims them. ' +
+  var NOT_HELD = 'Your dates are not blocked yet, sending the screenshot is what claims them. ' +
     'Do it within a couple of hours. If someone else gets in first, message us and we will move your ' +
     '₹2,000 to other dates.';
 
@@ -748,12 +787,12 @@
     if (opts.preview) {
       el.confirmTag.textContent = 'Preview';
       el.confirmTag.style.background = '#a55a1c';
-      el.confirmLead.textContent = 'This is what guests see after they upload their payment screenshot. Nothing was charged or saved — preview mode.';
+      el.confirmLead.textContent = 'This is what guests see after they upload their payment screenshot. Nothing was charged or saved, preview mode.';
       document.getElementById('confirm-title').textContent = 'We\'re checking your payment';
     } else {
       el.confirmTag.textContent = 'Payment review';
       el.confirmTag.style.background = '#a55a1c';
-      el.confirmLead.textContent = 'Thank you — your screenshot is in our bookings board. We check UPI credits by hand and confirm on WhatsApp, usually within a few hours.';
+      el.confirmLead.textContent = 'Thank you, your screenshot is in our bookings board. We check UPI credits by hand and confirm on WhatsApp, usually within a few hours.';
       document.getElementById('confirm-title').textContent = 'We\'re checking your payment';
     }
 
@@ -788,7 +827,7 @@
       'UID:' + Date.now() + '@ekaforest.com', 'DTSTAMP:' + stamp,
       'DTSTART;VALUE=DATE:' + state.start.replace(/-/g, ''),
       'DTEND;VALUE=DATE:' + state.end.replace(/-/g, ''),
-      'SUMMARY:EKA Forest — ' + plural(diffDays(state.start, state.end), 'night'),
+      'SUMMARY:EKA Forest, ' + plural(diffDays(state.start, state.end), 'night'),
       'LOCATION:Vattavada, Idukki, Kerala 685615',
       'DESCRIPTION:Booking ' + el.confirmRef.textContent + '. Check-in from 1 PM, check-out by 11 AM.',
       'END:VEVENT', 'END:VCALENDAR'
@@ -860,7 +899,6 @@
   el.adults.addEventListener('blur', function () {
     var v = parseInt(this.value, 10);
     if (!v || v < 1) this.value = '1';
-    else if (v > MAX_GUESTS) this.value = String(MAX_GUESTS);
     updateSummary();
     if (state.start && state.end) validateStay(false);
   });
@@ -868,6 +906,8 @@
     updateSummary();
     if (state.start && state.end) validateStay(false);
   });
+  el.infants.addEventListener('change', updateSummary);
+  el.lunch.addEventListener('change', updateSummary);
 
   el.phone.addEventListener('input', function () {
     this.value = this.value.replace(/\D/g, '').slice(0, 10);
