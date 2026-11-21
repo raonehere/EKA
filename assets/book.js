@@ -88,7 +88,8 @@
     adults: $('#adults'),
     children: $('#children'),
     infants: $('#infants'),
-    lunch: $('#lunch'),
+    lunches: $('#lunches'),
+    estimate: $('#estimate'),
     idProof: $('#id-proof'),
     capacity: $('#capacity-note'),
     payBtn: $('#pay-btn'),
@@ -308,7 +309,8 @@
     var P = cfg.pricing || { perHeadPerNight: 1850, childHalfPerNight: 925, lunchPerHeadPerDay: 250 };
     var stay = nights * (paying() * P.perHeadPerNight + under10() * P.childHalfPerNight);
     var lunchHeads = paying() + under10();
-    var lunch = el.lunch.checked ? nights * lunchHeads * P.lunchPerHeadPerDay : 0;
+    var count = Math.min(parseInt(el.lunches.value, 10) || 0, nights);
+    var lunch = count * lunchHeads * P.lunchPerHeadPerDay;
     return { stay: stay, lunch: lunch, total: stay + lunch, balance: stay + lunch - ADVANCE };
   }
   function tentsNeeded() {
@@ -397,11 +399,14 @@
     if (hasRange && n >= 1) {
       var p = priceFor(n);
       el.sumStay.textContent = rupees(p.stay);
-      el.sumLunch.textContent = el.lunch.checked ? rupees(p.lunch) : 'Not added';
+      var count = Math.min(parseInt(el.lunches.value, 10) || 0, n);
+      el.sumLunch.textContent = count ? plural(count, 'lunch') + ' each · ' + rupees(p.lunch) : 'None';
+      el.estimate.textContent = 'Estimated total ' + rupees(p.total) + ' for ' + plural(n, 'night') + ' · ' + rupees(ADVANCE) + ' advance now';
       el.sumTotal.textContent = rupees(p.total);
       el.sumAdvance.textContent = rupees(ADVANCE);
       el.sumBalance.textContent = rupees(p.balance);
     } else {
+      el.estimate.textContent = 'Pick your dates to see the total.';
       el.sumStay.textContent = '';
       el.sumLunch.textContent = '';
       el.sumTotal.textContent = '';
@@ -515,7 +520,7 @@
       childrenUnder10: under10() + under5(),
       childrenUnder5: under5(),
       childrenFiveToTen: under10(),
-      lunch: el.lunch.checked,
+      lunches: Math.min(parseInt(el.lunches.value, 10) || 0, diffDays(state.start, state.end) || 0),
       guests: paying(),
       tents: tentsNeeded(),
       name: el.name.value.trim(),
@@ -923,7 +928,7 @@
     if (state.start && state.end) validateStay(false);
   });
   el.infants.addEventListener('change', updateSummary);
-  el.lunch.addEventListener('change', updateSummary);
+  el.lunches.addEventListener('change', updateSummary);
 
   el.phone.addEventListener('input', function () {
     this.value = this.value.replace(/\D/g, '').slice(0, 10);

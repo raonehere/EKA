@@ -104,6 +104,18 @@
     </section>
 
     <!-- ============ 02, GUESTS & DETAILS ============ -->
+    <section class="book__main book__strip" aria-labelledby="strip-title">
+      <h2 class="h3" id="strip-title">What your stay looks like</h2>
+      <ul class="gallery__strip" tabindex="0" aria-label="Photos of the stay, scroll horizontally">
+        <li class="ph ph--tile"><img src="../assets/photos-named/tent.jpg" alt="A tent for two" loading="lazy" width="600" height="400"><span class="ph__cap">A tent for two</span></li>
+        <li class="ph ph--tile"><img src="../assets/photos-named/tent-stay.jpg" alt="Inside the tent stay" loading="lazy" width="600" height="400"><span class="ph__cap">Inside the tent stay</span></li>
+        <li class="ph ph--tile"><img src="../assets/photos-named/eka-entrace.jpg" alt="The entrance" loading="lazy" width="600" height="400"><span class="ph__cap">The entrance</span></li>
+        <li class="ph ph--tile"><img src="../assets/photos-named/chill-out-spcae.jpg" alt="The chill-out space" loading="lazy" width="600" height="400"><span class="ph__cap">The chill-out space</span></li>
+        <li class="ph ph--tile"><img src="../assets/photos-named/village-walking.jpg" alt="A village walk" loading="lazy" width="600" height="400"><span class="ph__cap">A village walk</span></li>
+        <li class="ph ph--tile"><img src="../assets/photos-named/tekking.jpg" alt="Trekking" loading="lazy" width="600" height="400"><span class="ph__cap">Trekking</span></li>
+      </ul>
+    </section>
+
     <section class="book__main step" id="step-details" aria-labelledby="step-details-title">
       <div class="step__head">
         <span class="step__num" aria-hidden="true">02</span>
@@ -145,6 +157,7 @@
         </div>
       </fieldset>
 
+      <p class="book__estimate" id="estimate" aria-live="polite">Pick your dates to see the total.</p>
       <p class="book__capacity" id="capacity-note" aria-live="polite"></p>
 
       <div class="field">
@@ -200,10 +213,23 @@
         <p class="field__err" data-err-for="idproof"></p>
       </div>
 
-      <label class="terms" for="lunch">
-        <input type="checkbox" id="lunch" name="lunch">
-        <span>Add lunch, <strong>₹250 per head per day</strong>. Dinner, breakfast, trekking and campfire are already included in the ₹1,850 per head per night.</span>
-      </label>
+      <div class="field">
+        <label for="lunches">Lunches for each person</label>
+        <select id="lunches" name="lunches">
+          <option value="0" selected>None</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+        </select>
+        <p class="field__hint">₹250 per person for each lunch, up to one a night. Dinner, breakfast, trekking and campfire are already included in the ₹1,850 per head per night.</p>
+      </div>
 
       <div class="field">
         <label for="notes">Anything we should know? <span class="field__opt">(optional)</span></label>

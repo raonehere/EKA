@@ -34,12 +34,12 @@ const NOTION_VERSION = '2022-06-28';
 const NOTION_FILES_VERSION = '2026-03-11';
 const NOTION = 'https://api.notion.com/v1';
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
-/** Price in rupees. Children 5 to 10 pay half, under 5 is free, lunch is per head per day. */
-function bookingPrice(env, nights, adults, fiveToTen, lunch) {
+/** Price in rupees. Children 5 to 10 pay half, under 5 is free. Lunches are counted per person, at most one a night. */
+function bookingPrice(env, nights, adults, fiveToTen, lunches) {
   const perNight = Number(env.PRICE_PER_NIGHT) || 1850;
   const lunchRate = Number(env.LUNCH_PRICE) || 250;
   const stay = nights * (adults * perNight + fiveToTen * Math.round(perNight / 2));
-  const lunchTotal = lunch ? nights * (adults + fiveToTen) * lunchRate : 0;
+  const lunchTotal = lunches * (adults + fiveToTen) * lunchRate;
   const total = stay + lunchTotal;
   return { stay, lunch: lunchTotal, total, balance: total - advance(env) };
 }
@@ -174,7 +174,7 @@ const FIELDS = {
   notes:      { prop: 'Notes (special request)',     type: 'rich_text' },
   status:     { prop: 'Booking status',              type: 'select' },
   screenshot: { prop: 'Payment',                     type: 'files' },
-  idProof:    { prop: 'Other card copy',             type: 'files', optional: true },
+  idProof:    { prop: 'ID proof',                   type: 'files', optional: true },
 
   /* Optional. */
   tents:      { prop: 'Tents',                       type: 'number', optional: true },
@@ -390,7 +390,7 @@ async function createBooking(request, env) {
   const childrenUnder10 = Math.max(0, parseInt(body.childrenUnder10, 10) || 0);
   const childrenUnder5 = Math.max(0, parseInt(body.childrenUnder5, 10) || 0);
   const childrenFiveToTen = Math.max(0, parseInt(body.childrenFiveToTen, 10) || 0);
-  const lunch = body.lunch === true;
+  const lunches = Math.min(nights, Math.min(10, Math.max(0, parseInt(body.lunches, 10) || 0)));
 
   if (!isDate(checkIn) || !isDate(checkOut)) return json({ error: 'Please pick valid dates.' }, 400);
   if (checkIn < todayIST()) return json({ error: 'Those dates are in the past.' }, 400);
@@ -409,7 +409,7 @@ async function createBooking(request, env) {
     return json({ error: `Groups larger than ${total * cap} adults need to reach out to us on WhatsApp first.` }, 400);
   }
 
-  const price = bookingPrice(env, nights, adults, childrenFiveToTen, lunch);
+  const price = bookingPrice(env, nights, adults, childrenFiveToTen, lunches);
   const tents = Math.max(1, Math.ceil(guests / cap));
 
   if (name.length < 2) return json({ error: 'Please share your name.' }, 400);
@@ -432,7 +432,7 @@ async function createBooking(request, env) {
   const notesText = [notes, arrival && `Arrival: ${arrival}`, pets && pets !== 'No' && `Pets: ${pets}`,
     childrenFiveToTen > 0 && `Children 5 to 10: ${childrenFiveToTen}`,
     childrenUnder5 > 0 && `Children under 5: ${childrenUnder5}`,
-    `Lunch: ${lunch ? 'yes' : 'no'}`,
+    `Lunches: ${lunches} each`,
     `Total: ₹${price.total}, balance at check-in: ₹${price.balance}`]
     .filter(Boolean).join(' · ').slice(0, 900);
   const now = new Date();

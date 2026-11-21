@@ -161,6 +161,14 @@
         <h2 class="h3">Next 30 days</h2>
         <p class="panel__note" id="upcoming-note"></p>
       </div>
+      <label class="field filter"><span class="field__label">Show</span>
+        <select id="filter-status">
+          <option value="">All bookings</option>
+          <option value="Pending payment">Not paid yet</option>
+          <option value="Payment review">Check payment</option>
+          <option value="Confirmed">Confirmed</option>
+        </select>
+      </label>
       <div class="tablewrap">
         <table class="booktable">
           <thead>
