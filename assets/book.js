@@ -89,7 +89,7 @@
     children: $('#children'),
     infants: $('#infants'),
     lunch: $('#lunch'),
-    address: $('#address'),
+    idProof: $('#id-proof'),
     capacity: $('#capacity-note'),
     payBtn: $('#pay-btn'),
     payLabel: $('#pay-btn-label'),
@@ -472,7 +472,7 @@
     function fail(name, msg) {
       if (!setError(name, msg)) { ok = false; if (!first) first = name; }
     }
-    setError('name', ''); setError('phone', ''); setError('email', ''); setError('terms', ''); setError('adults', ''); setError('address', '');
+    setError('name', ''); setError('phone', ''); setError('email', ''); setError('terms', ''); setError('adults', ''); setError('idproof', '');
 
     if (!state.start || !state.end) {
       ok = false;
@@ -481,7 +481,9 @@
     }
     if (!paying()) fail('adults', 'At least one paying guest is needed.');
     else if (paying() > MAX_GUESTS) fail('adults', 'Groups larger than ' + MAX_GUESTS + ' adults need to reach out to us on WhatsApp first.');
-    if (el.address.value.trim().length < 10) fail('address', 'Please share your full address.');
+    var idFile = el.idProof.files && el.idProof.files[0];
+    if (!idFile) fail('idproof', 'Upload a photo or PDF of your ID to continue.');
+    else if (idFile.size > 8 * 1024 * 1024) fail('idproof', 'That ID file is too large. Please pick one under 8 MB.');
     if (!el.name.value.trim() || el.name.value.trim().length < 2) fail('name', 'Please tell us your name.');
     var ph = el.phone.value.replace(/\D/g, '');
     if (ph.length !== 10) fail('phone', 'Enter a 10-digit Indian mobile number.');
@@ -514,7 +516,6 @@
       childrenUnder5: under5(),
       childrenFiveToTen: under10(),
       lunch: el.lunch.checked,
-      address: el.address.value.trim(),
       guests: paying(),
       tents: tentsNeeded(),
       name: el.name.value.trim(),
@@ -726,6 +727,17 @@
     }
   }
 
+  async function uploadIdProof(file) {
+    if (DEMO) return;
+    var fd = new FormData();
+    fd.append('reference', state.order.reference);
+    fd.append('token', state.order.token || '');
+    fd.append('file', file, file.name || 'id-proof');
+    var res = await fetch(API + '/bookings/id', { method: 'POST', body: fd });
+    var body = await res.json().catch(function () { return {}; });
+    if (!res.ok) throw new Error(body.error || 'We could not store your ID proof. Please try again.');
+  }
+
   async function submit() {
     if (state.busy) return;
     if (!validateForm()) return;
@@ -745,15 +757,19 @@
 
     busy(true, 'Saving your details…');
     try {
-      var res = await fetch(API + '/bookings', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', accept: 'application/json' },
-        body: JSON.stringify(data)
-      });
-      var body = await res.json().catch(function () { return {}; });
-      if (!res.ok) throw new Error(body.error || 'We could not hold those dates. Please try again.');
-      state.order = body;
-      state.paid = false;
+      if (!state.order) {
+        var res = await fetch(API + '/bookings', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', accept: 'application/json' },
+          body: JSON.stringify(data)
+        });
+        var body = await res.json().catch(function () { return {}; });
+        if (!res.ok) throw new Error(body.error || 'We could not hold those dates. Please try again.');
+        state.order = body;
+        state.paid = false;
+      }
+      busy(true, 'Sending your ID proof…');
+      await uploadIdProof(el.idProof.files[0]);
     } catch (e) {
       fail(e.message || 'Something went wrong. Please try again or message us on WhatsApp.');
       return;

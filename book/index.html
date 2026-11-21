@@ -194,10 +194,10 @@
       </div>
 
       <div class="field">
-        <label for="address">Your address</label>
-        <textarea id="address" name="address" rows="2" required autocomplete="street-address" placeholder="House no., street, city, state, PIN"></textarea>
-        <p class="field__hint">Required for our records and your invoice.</p>
-        <p class="field__err" data-err-for="address"></p>
+        <label for="id-proof">ID proof <span class="field__req">(required)</span></label>
+        <input id="id-proof" name="idProof" type="file" accept="image/*,application/pdf" required>
+        <p class="field__hint">Aadhaar, passport or driving licence. A photo or PDF, under 8 MB. Every guest over 18 must have one.</p>
+        <p class="field__err" data-err-for="idproof"></p>
       </div>
 
       <label class="terms" for="lunch">
@@ -409,7 +409,7 @@
 
     <form class="paypanel__upload" id="pay-form" novalidate>
       <label class="paypanel__drop" for="pay-file">
-        <span class="paypanel__drop-title">Upload payment screenshot</span>
+        <span class="paypanel__drop-title">Upload payment screenshot <span class="field__req">(required)</span></span>
         <span class="paypanel__drop-note" id="pay-file-name">PNG, JPG or PDF · under 8 MB</span>
         <input id="pay-file" name="file" type="file" accept="image/*,application/pdf">
       </label>

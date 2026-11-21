@@ -4,6 +4,7 @@
  *   GET  /health              → checks Notion access + database schema
  *   GET  /availability        → free tents per night
  *   POST /bookings            → validates dates and holds them in Notion (no payment gateway)
+ *   POST /bookings/id         → stores the guest's ID proof (photo or PDF) in Notion
  *   POST /bookings/screenshot → stores the guest's UPI payment screenshot in Notion
  *   GET  /booking             → one booking, for the private manage link
  *   POST /booking/reschedule  → guest moves their own dates (advance carries over)
@@ -59,6 +60,7 @@ export default {
       else if (path === '/availability') res = await availability(url, env, ctx);
       else if (path === '/bookings') res = await createBooking(request, env);
       else if (path === '/bookings/screenshot') res = await uploadScreenshot(request, env);
+      else if (path === '/bookings/id') res = await uploadIdProof(request, env);
       else if (path === '/booking' && request.method === 'GET') res = await getBooking(url, env);
       else if (path === '/booking/reschedule') res = await rescheduleBooking(request, env);
       else if (path === '/booking/cancel') res = await cancelBooking(request, env);
@@ -172,6 +174,7 @@ const FIELDS = {
   notes:      { prop: 'Notes (special request)',     type: 'rich_text' },
   status:     { prop: 'Booking status',              type: 'select' },
   screenshot: { prop: 'Payment',                     type: 'files' },
+  idProof:    { prop: 'ID proof',                   type: 'files', optional: true },
 
   /* Optional. */
   tents:      { prop: 'Tents',                       type: 'number', optional: true },
@@ -387,7 +390,6 @@ async function createBooking(request, env) {
   const childrenUnder5 = Math.max(0, parseInt(body.childrenUnder5, 10) || 0);
   const childrenFiveToTen = Math.max(0, parseInt(body.childrenFiveToTen, 10) || 0);
   const lunch = body.lunch === true;
-  const address = clean(body.address, 300);
 
   if (!isDate(checkIn) || !isDate(checkOut)) return json({ error: 'Please pick valid dates.' }, 400);
   if (checkIn < todayIST()) return json({ error: 'Those dates are in the past.' }, 400);
@@ -405,7 +407,6 @@ async function createBooking(request, env) {
   if (adults > total * cap) {
     return json({ error: `Groups larger than ${total * cap} adults need to reach out to us on WhatsApp first.` }, 400);
   }
-  if (address.length < 10) return json({ error: 'Please share your full address.' }, 400);
 
   const price = bookingPrice(env, nights, adults, childrenFiveToTen, lunch);
   const tents = Math.max(1, Math.ceil(guests / cap));
@@ -428,7 +429,6 @@ async function createBooking(request, env) {
   const token = await manageToken(env, reference);
   const C = await columns(env);
   const notesText = [notes, arrival && `Arrival: ${arrival}`, pets && pets !== 'No' && `Pets: ${pets}`,
-    `Address: ${address}`,
     childrenFiveToTen > 0 && `Children 5 to 10: ${childrenFiveToTen}`,
     childrenUnder5 > 0 && `Children under 5: ${childrenUnder5}`,
     `Lunch: ${lunch ? 'yes' : 'no'}`,
@@ -652,6 +652,10 @@ async function uploadScreenshot(request, env) {
   if (booking.status === 'Cancelled') {
     return json({ error: 'This booking was cancelled, so there is nothing to pay.' }, 409, cors);
   }
+  const C0 = await columns(env);
+  if (!((page.properties || {})[C0.idProof]?.files || []).length) {
+    return json({ error: 'Please upload your ID proof first.' }, 409, cors);
+  }
 
   const ext = isPdf ? 'pdf' : (type.split('/')[1] || 'jpg').replace('jpeg', 'jpg').replace(/[^a-z0-9]/g, '');
   const filename = `eka-${reference}.${ext || 'jpg'}`;
@@ -712,6 +716,90 @@ async function uploadScreenshot(request, env) {
     status: 'Payment review',
     manageUrl: manageUrl(env, reference, booking.token || token)
   }, 200, cors);
+}
+
+/** Store the guest's ID proof (photo or PDF) in Notion. The row status does not change. */
+async function uploadIdProof(request, env) {
+  const cors = corsHeaders(request, env);
+
+  let form;
+  try { form = await request.formData(); }
+  catch { return json({ error: 'We could not read that upload. Please try a photo or a screenshot.' }, 400, cors); }
+
+  const reference = clean(form.get('reference'), 40).toUpperCase();
+  const token = clean(form.get('token'), 64);
+  const file = form.get('file');
+
+  if (!reference || !token) return json({ error: 'This upload is missing its booking reference.' }, 400, cors);
+  if (!file || typeof file === 'string' || !file.size) {
+    return json({ error: 'Please attach a photo or PDF of your ID.' }, 400, cors);
+  }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return json({ error: 'That file is too large. Please send a screenshot under 8 MB.' }, 413, cors);
+  }
+
+  const type = clean(file.type, 100).toLowerCase();
+  const isImage = type.startsWith('image/');
+  const isPdf = type === 'application/pdf';
+  if (!isImage && !isPdf) {
+    return json({ error: 'Please upload a photo or a PDF of your ID.' }, 415, cors);
+  }
+
+  const page = await findPageByReference(env, reference);
+  if (!page) return json({ error: 'We could not find that booking.' }, 404, cors);
+
+  const booking = readBooking(page);
+  if (!(await tokenMatches(env, booking.reference, token, booking.token))) {
+    return json({ error: 'That link is not valid for this booking.' }, 403, cors);
+  }
+  if (booking.status === 'Cancelled') {
+    return json({ error: 'This booking was cancelled, so there is nothing to pay.' }, 409, cors);
+  }
+
+  const ext = isPdf ? 'pdf' : (type.split('/')[1] || 'jpg').replace('jpeg', 'jpg').replace(/[^a-z0-9]/g, '');
+  const filename = `eka-id-${reference}.${ext || 'jpg'}`;
+
+  let upload;
+  try {
+    upload = await notion(env, '/file_uploads', {
+      method: 'POST',
+      body: JSON.stringify({ mode: 'single_part', filename, content_type: type })
+    }, NOTION_FILES_VERSION);
+
+    const fd = new FormData();
+    fd.append('file', file, filename);
+    const sent = await fetch(upload.upload_url, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${env.NOTION_TOKEN}`,
+        'notion-version': NOTION_FILES_VERSION
+      },
+      body: fd
+    });
+    if (!sent.ok) {
+      const detail = await sent.text();
+      throw new Error(`file upload ${sent.status}: ${detail.slice(0, 200)}`);
+    }
+  } catch (err) {
+    console.error('Notion file upload failed', err);
+    return json({
+      error: 'We could not store your ID proof. Please try again, or send it to us on WhatsApp.',
+      detail: String(err && err.message || err).slice(0, 200)
+    }, 502, cors);
+  }
+
+  const C = await columns(env);
+  try {
+    await patchPage(env, page.id, {
+      [C.idProof]: {
+        files: [{ type: 'file_upload', file_upload: { id: upload.id }, name: filename }]
+      }
+    }, NOTION_FILES_VERSION);
+  } catch (err) {
+    console.error('ID proof save failed', err);
+    return json({ error: 'We could not save your ID proof. Please try again.' }, 502, cors);
+  }
+  return json({ ok: true, reference });
 }
 
 /* ------------------------------------------------------------------ manage */
