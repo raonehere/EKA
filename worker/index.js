@@ -174,7 +174,7 @@ const FIELDS = {
   notes:      { prop: 'Notes (special request)',     type: 'rich_text' },
   status:     { prop: 'Booking status',              type: 'select' },
   screenshot: { prop: 'Payment',                     type: 'files' },
-  idProof:    { prop: 'ID proof',                   type: 'files', optional: true },
+  idProof:    { prop: 'Other card copy',             type: 'files', optional: true },
 
   /* Optional. */
   tents:      { prop: 'Tents',                       type: 'number', optional: true },
