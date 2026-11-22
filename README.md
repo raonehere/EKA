@@ -10,7 +10,8 @@ The site is served at **https://ekaforest.com/** from this repository, via GitHu
 python3 -m http.server 8080
 ```
 
-Then open http://localhost:8080
+Then open http://localhost:8093/demo/
+
 
 ## Booking
 
