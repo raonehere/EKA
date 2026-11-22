@@ -88,8 +88,9 @@
     adults: $('#adults'),
     children: $('#children'),
     infants: $('#infants'),
-    lunch: $('#lunch'),
-    address: $('#address'),
+    lunches: $('#lunches'),
+    estimate: $('#estimate'),
+    idProof: $('#id-proof'),
     capacity: $('#capacity-note'),
     payBtn: $('#pay-btn'),
     payLabel: $('#pay-btn-label'),
@@ -308,7 +309,8 @@
     var P = cfg.pricing || { perHeadPerNight: 1850, childHalfPerNight: 925, lunchPerHeadPerDay: 250 };
     var stay = nights * (paying() * P.perHeadPerNight + under10() * P.childHalfPerNight);
     var lunchHeads = paying() + under10();
-    var lunch = el.lunch.checked ? nights * lunchHeads * P.lunchPerHeadPerDay : 0;
+    var count = Math.min(parseInt(el.lunches.value, 10) || 0, nights);
+    var lunch = count * lunchHeads * P.lunchPerHeadPerDay;
     return { stay: stay, lunch: lunch, total: stay + lunch, balance: stay + lunch - ADVANCE };
   }
   function tentsNeeded() {
@@ -394,14 +396,24 @@
     el.sumGuests.textContent = guestLine();
     el.sumTents.textContent = (hasRange || state.start) ? plural(tentsNeeded(), 'tent') : '';
 
-    if (hasRange && n >= 1) {
+    if (hasRange && n >= 1 && isLarge()) {
+      el.sumStay.textContent = 'On WhatsApp';
+      el.sumLunch.textContent = '';
+      el.sumTotal.textContent = 'On WhatsApp';
+      el.sumAdvance.textContent = '';
+      el.sumBalance.textContent = '';
+      el.estimate.textContent = 'Large group: we check availability and send the price on WhatsApp.';
+    } else if (hasRange && n >= 1) {
       var p = priceFor(n);
       el.sumStay.textContent = rupees(p.stay);
-      el.sumLunch.textContent = el.lunch.checked ? rupees(p.lunch) : 'Not added';
+      var count = Math.min(parseInt(el.lunches.value, 10) || 0, n);
+      el.sumLunch.textContent = count ? count + (count === 1 ? ' lunch' : ' lunches') + ' each · ' + rupees(p.lunch) : 'None';
+      el.estimate.textContent = 'Estimated total ' + rupees(p.total) + ' for ' + plural(n, 'night') + ' · ' + rupees(ADVANCE) + ' advance now';
       el.sumTotal.textContent = rupees(p.total);
       el.sumAdvance.textContent = rupees(ADVANCE);
       el.sumBalance.textContent = rupees(p.balance);
     } else {
+      el.estimate.textContent = 'Pick your dates to see the total.';
       el.sumStay.textContent = '';
       el.sumLunch.textContent = '';
       el.sumTotal.textContent = '';
@@ -432,12 +444,9 @@
     return !msg;
   }
 
+  function isLarge() { return paying() > MAX_GUESTS; }
+
   function validateStay(showHint) {
-    if (paying() > MAX_GUESTS) {
-      el.capacity.textContent = 'Groups of more than ' + MAX_GUESTS + ' guests need to reach out to us on WhatsApp first.';
-      el.capacity.className = 'book__capacity is-bad';
-      return false;
-    }
     if (!state.start) {
       el.capacity.textContent = 'Pick your nights above and we\'ll work out how many tents you need.';
       el.capacity.className = 'book__capacity';
@@ -447,6 +456,11 @@
       el.capacity.textContent = 'Now pick a check-out date.';
       el.capacity.className = 'book__capacity';
       return false;
+    }
+    if (isLarge()) {
+      el.capacity.textContent = 'Large group: send your request and we will check availability for your dates and send the price on WhatsApp.';
+      el.capacity.className = 'book__capacity';
+      return true;
     }
     var need = tentsNeeded();
     var st = rangeStatus(state.start, state.end);
@@ -472,7 +486,7 @@
     function fail(name, msg) {
       if (!setError(name, msg)) { ok = false; if (!first) first = name; }
     }
-    setError('name', ''); setError('phone', ''); setError('email', ''); setError('terms', ''); setError('adults', ''); setError('address', '');
+    setError('name', ''); setError('phone', ''); setError('email', ''); setError('terms', ''); setError('adults', ''); setError('idproof', '');
 
     if (!state.start || !state.end) {
       ok = false;
@@ -480,8 +494,9 @@
       first = first || 'dates';
     }
     if (!paying()) fail('adults', 'At least one paying guest is needed.');
-    else if (paying() > MAX_GUESTS) fail('adults', 'Groups larger than ' + MAX_GUESTS + ' adults need to reach out to us on WhatsApp first.');
-    if (el.address.value.trim().length < 10) fail('address', 'Please share your full address.');
+    var idFile = el.idProof.files && el.idProof.files[0];
+    if (!idFile) fail('idproof', 'Upload a photo or PDF of your ID to continue.');
+    else if (idFile.size > 8 * 1024 * 1024) fail('idproof', 'That ID file is too large. Please pick one under 8 MB.');
     if (!el.name.value.trim() || el.name.value.trim().length < 2) fail('name', 'Please tell us your name.');
     var ph = el.phone.value.replace(/\D/g, '');
     if (ph.length !== 10) fail('phone', 'Enter a 10-digit Indian mobile number.');
@@ -513,8 +528,7 @@
       childrenUnder10: under10() + under5(),
       childrenUnder5: under5(),
       childrenFiveToTen: under10(),
-      lunch: el.lunch.checked,
-      address: el.address.value.trim(),
+      lunches: Math.min(parseInt(el.lunches.value, 10) || 0, diffDays(state.start, state.end) || 0),
       guests: paying(),
       tents: tentsNeeded(),
       name: el.name.value.trim(),
@@ -726,6 +740,17 @@
     }
   }
 
+  async function uploadIdProof(file) {
+    if (DEMO) return;
+    var fd = new FormData();
+    fd.append('reference', state.order.reference);
+    fd.append('token', state.order.token || '');
+    fd.append('file', file, file.name || 'id-proof');
+    var res = await fetch(API + '/bookings/id', { method: 'POST', body: fd });
+    var body = await res.json().catch(function () { return {}; });
+    if (!res.ok) throw new Error(body.error || 'We could not store your ID proof. Please try again.');
+  }
+
   async function submit() {
     if (state.busy) return;
     if (!validateForm()) return;
@@ -745,21 +770,29 @@
 
     busy(true, 'Saving your details…');
     try {
-      var res = await fetch(API + '/bookings', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', accept: 'application/json' },
-        body: JSON.stringify(data)
-      });
-      var body = await res.json().catch(function () { return {}; });
-      if (!res.ok) throw new Error(body.error || 'We could not hold those dates. Please try again.');
-      state.order = body;
-      state.paid = false;
+      if (!state.order) {
+        var res = await fetch(API + '/bookings', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', accept: 'application/json' },
+          body: JSON.stringify(data)
+        });
+        var body = await res.json().catch(function () { return {}; });
+        if (!res.ok) throw new Error(body.error || 'We could not hold those dates. Please try again.');
+        state.order = body;
+        state.paid = false;
+      }
+      busy(true, 'Sending your ID proof…');
+      await uploadIdProof(el.idProof.files[0]);
     } catch (e) {
       fail(e.message || 'Something went wrong. Please try again or message us on WhatsApp.');
       return;
     }
 
     busy(false);
+    if (state.order.large) {
+      confirmScreen({ reference: state.order.reference, preview: false, large: true, manageUrl: state.order.manageUrl || '' });
+      return;
+    }
     showPayPanel();
   }
 
@@ -794,6 +827,14 @@
       el.confirmTag.style.background = '#a55a1c';
       el.confirmLead.textContent = 'Thank you, your screenshot is in our bookings board. We check UPI credits by hand and confirm on WhatsApp, usually within a few hours.';
       document.getElementById('confirm-title').textContent = 'We\'re checking your payment';
+    }
+
+    if (opts.large) {
+      el.confirmTag.textContent = 'Request received';
+      el.confirmTag.style.background = '#6b5a45';
+      el.confirmLead.textContent = 'Thanks. Groups this size need a quick check first. We will look at availability for your dates and send you the price on WhatsApp. Nothing is charged yet.';
+      el.confirmPaid.textContent = 'On WhatsApp';
+      document.getElementById('confirm-title').textContent = 'We have your request';
     }
 
     el.confirm.hidden = false;
@@ -907,7 +948,7 @@
     if (state.start && state.end) validateStay(false);
   });
   el.infants.addEventListener('change', updateSummary);
-  el.lunch.addEventListener('change', updateSummary);
+  el.lunches.addEventListener('change', updateSummary);
 
   el.phone.addEventListener('input', function () {
     this.value = this.value.replace(/\D/g, '').slice(0, 10);

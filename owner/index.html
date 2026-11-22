@@ -27,7 +27,6 @@
       <img src="../assets/img/eka-logo.svg" width="117" height="73" alt="EKA Forest logo">
     </a>
     <ul class="nav__group nav__group--right">
-      <li><a href="../retreats/">Retreats</a></li>
       <li><a href="../#contact">Contact</a></li>
     </ul>
   </nav>
@@ -162,6 +161,14 @@
         <h2 class="h3">Next 30 days</h2>
         <p class="panel__note" id="upcoming-note"></p>
       </div>
+      <label class="field filter"><span class="field__label">Show</span>
+        <select id="filter-status">
+          <option value="">All bookings</option>
+          <option value="Pending payment">Not paid yet</option>
+          <option value="Payment review">Check payment</option>
+          <option value="Confirmed">Confirmed</option>
+        </select>
+      </label>
       <div class="tablewrap">
         <table class="booktable">
           <thead>

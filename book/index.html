@@ -36,7 +36,6 @@
       <img src="../assets/img/eka-logo.svg" width="117" height="73" alt="EKA Forest logo">
     </a>
     <ul class="nav__group nav__group--right">
-      <li><a href="../retreats/">Retreats</a></li>
       <li><a href="../#contact">Contact</a></li>
     </ul>
   </nav>
@@ -55,6 +54,18 @@
     <p><span class="book__meta-k">Check-out</span> by 11 AM</p>
     <p><span class="book__meta-k">Advance</span> ₹2,000, non-refundable</p>
   </div>
+
+  <section class="inclusions" aria-labelledby="inclusions-title">
+    <p class="inclusions__price"><span class="inclusions__amount">₹1,850</span> <span class="inclusions__per">per person, per night</span></p>
+    <h2 class="inclusions__title" id="inclusions-title">Everything below is included</h2>
+    <ul class="inclusions__list">
+      <li>Tent for the night</li>
+      <li>Dinner and breakfast</li>
+      <li>Guided trekking</li>
+      <li>Campfire every evening</li>
+    </ul>
+    <p class="inclusions__note">Optional lunch: ₹250 per person, added below if you want it. Children aged 5 to 10 pay half (₹925). Under 5 is free. Your ₹2,000 advance comes off the total, and you pay the rest at the camp.</p>
+  </section>
 
   <form class="book__layout" id="booking-form" novalidate>
 
@@ -105,6 +116,18 @@
     </section>
 
     <!-- ============ 02, GUESTS & DETAILS ============ -->
+    <section class="book__main book__strip" aria-labelledby="strip-title">
+      <h2 class="h3" id="strip-title">What your stay looks like</h2>
+      <ul class="gallery__strip" tabindex="0" aria-label="Photos of the stay, scroll horizontally">
+        <li class="ph ph--tile"><img src="../assets/photos-named/tent.jpg" alt="A tent for two" loading="lazy" width="600" height="400"><span class="ph__cap">A tent for two</span></li>
+        <li class="ph ph--tile"><img src="../assets/photos-named/tent-stay.jpg" alt="Our tent stay" loading="lazy" width="600" height="400"><span class="ph__cap">Our tent stay</span></li>
+        <li class="ph ph--tile"><img src="../assets/photos-named/eka-entrace.jpg" alt="The entrance" loading="lazy" width="600" height="400"><span class="ph__cap">The entrance</span></li>
+        <li class="ph ph--tile"><img src="../assets/photos-named/chill-out-spcae.jpg" alt="Campfire" loading="lazy" width="600" height="400"><span class="ph__cap">Campfire</span></li>
+        <li class="ph ph--tile"><img src="../assets/photos-named/village-walking.jpg" alt="A village walk" loading="lazy" width="600" height="400"><span class="ph__cap">A village walk</span></li>
+        <li class="ph ph--tile"><img src="../assets/photos-named/tekking.jpg" alt="Trekking" loading="lazy" width="600" height="400"><span class="ph__cap">Trekking</span></li>
+      </ul>
+    </section>
+
     <section class="book__main step" id="step-details" aria-labelledby="step-details-title">
       <div class="step__head">
         <span class="step__num" aria-hidden="true">02</span>
@@ -114,7 +137,7 @@
       <fieldset class="field-row">
         <legend class="fieldset-legend">Guests</legend>
         <div class="field">
-          <label for="adults">Adults &amp; children 10+</label>
+          <label for="adults">Adults (11 and over)</label>
           <input id="adults" name="adults" type="number" inputmode="numeric" min="1" step="1" value="2" required autocomplete="off">
           <p class="field__hint">A tent sleeps two, and a solo guest still gets a whole tent.</p>
           <p class="field__err" data-err-for="adults"></p>
@@ -146,6 +169,7 @@
         </div>
       </fieldset>
 
+      <p class="book__estimate" id="estimate" aria-live="polite">Pick your dates to see the total.</p>
       <p class="book__capacity" id="capacity-note" aria-live="polite"></p>
 
       <div class="field">
@@ -195,16 +219,29 @@
       </div>
 
       <div class="field">
-        <label for="address">Your address</label>
-        <textarea id="address" name="address" rows="2" required autocomplete="street-address" placeholder="House no., street, city, state, PIN"></textarea>
-        <p class="field__hint">Required for our records and your invoice.</p>
-        <p class="field__err" data-err-for="address"></p>
+        <label for="id-proof">ID proof <span class="field__req">(required)</span></label>
+        <input id="id-proof" name="idProof" type="file" accept="image/*,application/pdf" required>
+        <p class="field__hint">Aadhaar, passport or driving licence. A photo or PDF, under 8 MB. Every guest over 18 must have one.</p>
+        <p class="field__err" data-err-for="idproof"></p>
       </div>
 
-      <label class="terms" for="lunch">
-        <input type="checkbox" id="lunch" name="lunch">
-        <span>Add lunch, <strong>₹250 per head per day</strong>. Dinner, breakfast, trekking and campfire are already included in the ₹1,850 per head per night.</span>
-      </label>
+      <div class="field">
+        <label for="lunches">Lunches for each person</label>
+        <select id="lunches" name="lunches">
+          <option value="0" selected>None</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+        </select>
+        <p class="field__hint">₹250 per person for each lunch, up to one a night. Dinner, breakfast, trekking and campfire are already included in the ₹1,850 per head per night.</p>
+      </div>
 
       <div class="field">
         <label for="notes">Anything we should know? <span class="field__opt">(optional)</span></label>
@@ -250,10 +287,6 @@
           <p class="summary__fine">Flat advance, whatever the group size. It comes off your final bill, and moves with your dates if plans change.</p>
         </div>
 
-        <p class="summary__demo" id="demo-note" hidden>
-          Preview mode, sample availability, simulated payment. Nothing is charged or saved.
-        </p>
-
         <label class="terms" for="terms">
           <input type="checkbox" id="terms" name="terms" required>
           <span>I understand the ₹2,000 advance is <strong>non-refundable</strong>, that I'll pay it by UPI and upload the screenshot, and that the balance is paid at EKA Forest.</span>
@@ -294,7 +327,7 @@
         </details>
         <details>
           <summary>How many people can come?</summary>
-          <p>We have eleven tents and each sleeps two. A couple shares a tent, but a solo guest still gets a whole tent, so three people need two tents. Children under 5 are free and share your tent. Children aged 5 to 10 pay half, and everyone 11 or older pays the full ₹1,850 per night. Dinner, breakfast, trekking and campfire are included. For groups larger than 22 adults, message us first.</p>
+          <p>We have eleven tents and each sleeps two. A couple shares a tent, but a solo guest still gets a whole tent, so three people need two tents. Children under 5 are free and share your tent. Children aged 5 to 10 pay half, and everyone 11 or older pays the full ₹1,850 per night. Dinner, breakfast, trekking and campfire are included. Groups larger than 22 adults can still send a request. We check availability and send the price on WhatsApp before anything is confirmed.</p>
         </details>
       </div>
       <div class="faq__col">
@@ -331,7 +364,6 @@
       <ul>
         <li><a href="../">Home</a></li>
         <li><a href="../#stays">Stays &amp; experiences</a></li>
-        <li><a href="../retreats/">Groups &amp; retreats</a></li>
         <li><a href="../blog/">Journal</a></li>
         <li><a href="../#reach">How to reach</a></li>
       </ul>
@@ -415,7 +447,7 @@
 
     <form class="paypanel__upload" id="pay-form" novalidate>
       <label class="paypanel__drop" for="pay-file">
-        <span class="paypanel__drop-title">Upload payment screenshot</span>
+        <span class="paypanel__drop-title">Upload payment screenshot <span class="field__req">(required)</span></span>
         <span class="paypanel__drop-note" id="pay-file-name">PNG, JPG or PDF · under 8 MB</span>
         <input id="pay-file" name="file" type="file" accept="image/*,application/pdf">
       </label>

@@ -265,7 +265,7 @@
     el.in.textContent = fmtLong(b.checkIn);
     el.out.textContent = fmtLong(b.checkOut);
     el.guests.textContent = plural(b.guests || 0, 'guest') +
-      (b.childrenUnder10 ? ' · ' + b.childrenUnder10 + ' under 10' : '');
+      (b.childrenUnder10 ? ' · ' + b.childrenUnder10 + ' children' : '');
     el.tents.textContent = plural(b.tents || 1, 'tent');
     el.advance.textContent = rupees(b.advance || ADVANCE);
 

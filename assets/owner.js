@@ -23,7 +23,7 @@
     kpiConfirmed: $('#kpi-confirmed'), kpiReview: $('#kpi-review'), kpiReviewNote: $('#kpi-review-note'),
     bars: $('#bars'), arrivals: $('#arrivals'), departures: $('#departures'),
     digest: $('#digest'), digestCopy: $('#digest-copy'), digestSend: $('#digest-send'), digestNote: $('#digest-note'),
-    rows: $('#rows'), upcomingNote: $('#upcoming-note'),
+    rows: $('#rows'), upcomingNote: $('#upcoming-note'), filter: $('#filter-status'),
     blockForm: $('#block-form'), blockIn: $('#block-in'), blockOut: $('#block-out'),
     blockTents: $('#block-tents'), blockNote: $('#block-note'),
     blockSubmit: $('#block-submit'), blockMsg: $('#block-msg')
@@ -185,7 +185,7 @@
       li.innerHTML =
         '<span class="person__name">' + escapeHTML(b.name || '') + '</span>' +
         '<span class="person__meta">' + b.guests + (b.guests === 1 ? ' guest' : ' guests') +
-        (b.children ? ' + ' + b.children + ' under 10' : '') +
+        (b.children ? ' + ' + b.children + ' children' : '') +
         ' · ' + b.tents + ' tent' + (b.tents === 1 ? '' : 's') + ' · ' + escapeHTML(b.reference) + '</span>' +
         (link ? '<a class="person__wa" href="' + link + '" target="_blank" rel="noopener">WhatsApp</a>' : '');
       list.appendChild(li);
@@ -198,7 +198,9 @@
     });
   }
 
-  function paintRows(rows) {
+  function paintRows(all) {
+    var v = el.filter ? el.filter.value : '';
+    var rows = all.filter(function (b) { return !v || b.status === v; });
     el.rows.innerHTML = '';
     if (!rows.length) {
       var tr = document.createElement('tr');
@@ -215,7 +217,7 @@
           '<span class="cell__sub">' + nights(b.checkIn, b.checkOut) + ' nights</span></td>' +
         '<td data-label="Guest"><span class="cell__strong">' + escapeHTML(b.name || '') + '</span>' +
           '<span class="cell__sub">' + b.guests + (b.guests === 1 ? ' guest' : ' guests') +
-          (b.children ? ' + ' + b.children + ' under 10' : '') +
+          (b.children ? ' + ' + b.children + ' children' : '') +
           (link ? ' · <a href="' + link + '" target="_blank" rel="noopener">message</a>' : '') + '</span></td>' +
         '<td data-label="Tents">' + b.tents + '</td>' +
         '<td data-label="Advance">' + rupees(b.advance) + '</td>' +
@@ -228,6 +230,8 @@
       el.rows.appendChild(tr);
     });
   }
+
+  if (el.filter) el.filter.addEventListener('change', function () { if (state.data) paintRows(state.data.upcoming); });
 
   el.rows.addEventListener('click', function (e) {
     var btn = e.target.closest('button[data-act]');

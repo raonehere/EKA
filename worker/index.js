@@ -4,6 +4,7 @@
  *   GET  /health              → checks Notion access + database schema
  *   GET  /availability        → free tents per night
  *   POST /bookings            → validates dates and holds them in Notion (no payment gateway)
+ *   POST /bookings/id         → stores the guest's ID proof (photo or PDF) in Notion
  *   POST /bookings/screenshot → stores the guest's UPI payment screenshot in Notion
  *   GET  /booking             → one booking, for the private manage link
  *   POST /booking/reschedule  → guest moves their own dates (advance carries over)
@@ -33,12 +34,12 @@ const NOTION_VERSION = '2022-06-28';
 const NOTION_FILES_VERSION = '2026-03-11';
 const NOTION = 'https://api.notion.com/v1';
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
-/** Price in rupees. Children 5 to 10 pay half, under 5 is free, lunch is per head per day. */
-function bookingPrice(env, nights, adults, fiveToTen, lunch) {
+/** Price in rupees. Children 5 to 10 pay half, under 5 is free. Lunches are counted per person, at most one a night. */
+function bookingPrice(env, nights, adults, fiveToTen, lunches) {
   const perNight = Number(env.PRICE_PER_NIGHT) || 1850;
   const lunchRate = Number(env.LUNCH_PRICE) || 250;
   const stay = nights * (adults * perNight + fiveToTen * Math.round(perNight / 2));
-  const lunchTotal = lunch ? nights * (adults + fiveToTen) * lunchRate : 0;
+  const lunchTotal = lunches * (adults + fiveToTen) * lunchRate;
   const total = stay + lunchTotal;
   return { stay, lunch: lunchTotal, total, balance: total - advance(env) };
 }
@@ -59,6 +60,7 @@ export default {
       else if (path === '/availability') res = await availability(url, env, ctx);
       else if (path === '/bookings') res = await createBooking(request, env);
       else if (path === '/bookings/screenshot') res = await uploadScreenshot(request, env);
+      else if (path === '/bookings/id') res = await uploadIdProof(request, env);
       else if (path === '/booking' && request.method === 'GET') res = await getBooking(url, env);
       else if (path === '/booking/reschedule') res = await rescheduleBooking(request, env);
       else if (path === '/booking/cancel') res = await cancelBooking(request, env);
@@ -172,6 +174,7 @@ const FIELDS = {
   notes:      { prop: 'Notes (special request)',     type: 'rich_text' },
   status:     { prop: 'Booking status',              type: 'select' },
   screenshot: { prop: 'Payment',                     type: 'files' },
+  idProof:    { prop: 'ID proof',                   type: 'files', optional: true },
 
   /* Optional. */
   tents:      { prop: 'Tents',                       type: 'number', optional: true },
@@ -183,7 +186,8 @@ const FIELDS = {
   paidAt:     { prop: 'Paid at',                     type: 'date', optional: true },
   type:       { prop: 'Type',                        type: 'select', optional: true },
   source:     { prop: 'Source',                      type: 'select', optional: true },
-  terms:      { prop: 'Terms accepted',              type: 'date', optional: true }
+  terms:      { prop: 'Terms accepted',              type: 'date', optional: true },
+  total:      { prop: 'Total amount',                type: 'number', optional: true }
 };
 
 /** Internal name → Notion property title. */
@@ -386,8 +390,6 @@ async function createBooking(request, env) {
   const childrenUnder10 = Math.max(0, parseInt(body.childrenUnder10, 10) || 0);
   const childrenUnder5 = Math.max(0, parseInt(body.childrenUnder5, 10) || 0);
   const childrenFiveToTen = Math.max(0, parseInt(body.childrenFiveToTen, 10) || 0);
-  const lunch = body.lunch === true;
-  const address = clean(body.address, 300);
 
   if (!isDate(checkIn) || !isDate(checkOut)) return json({ error: 'Please pick valid dates.' }, 400);
   if (checkIn < todayIST()) return json({ error: 'Those dates are in the past.' }, 400);
@@ -399,15 +401,14 @@ async function createBooking(request, env) {
   if (nights < 1) return json({ error: 'Check-out must be after check-in.' }, 400);
   if (nights > 10) return json({ error: 'Stays are limited to 10 nights. Message us for longer.' }, 400);
 
+  const lunches = Math.min(nights, Math.min(10, Math.max(0, parseInt(body.lunches, 10) || 0)));
   const cap = capacity(env);
   const total = units(env);
   if (!guests || guests < 1) return json({ error: 'Tell us how many guests are coming.' }, 400);
-  if (adults > total * cap) {
-    return json({ error: `Groups larger than ${total * cap} adults need to reach out to us on WhatsApp first.` }, 400);
-  }
-  if (address.length < 10) return json({ error: 'Please share your full address.' }, 400);
+  // Bigger than the tents can sleep: taken as a request, priced and checked by hand on WhatsApp.
+  const large = adults > total * cap;
 
-  const price = bookingPrice(env, nights, adults, childrenFiveToTen, lunch);
+  const price = bookingPrice(env, nights, adults, childrenFiveToTen, lunches);
   const tents = Math.max(1, Math.ceil(guests / cap));
 
   if (name.length < 2) return json({ error: 'Please share your name.' }, 400);
@@ -416,11 +417,13 @@ async function createBooking(request, env) {
   if (body.termsAccepted !== true) return json({ error: 'Please accept the non-refundable advance.' }, 400);
 
   // Live availability check, so a stale calendar cannot double-book a tent.
-  const stays = await loadStays(env, checkIn, checkOut);
-  const free = computeNights(stays, checkIn, checkOut, total);
-  for (const night of eachNight(checkIn, checkOut)) {
-    if ((free[night] ?? 0) < tents) {
-      return json({ error: 'Those dates were just taken. Please choose another night.' }, 409);
+  if (!large) {
+    const stays = await loadStays(env, checkIn, checkOut);
+    const free = computeNights(stays, checkIn, checkOut, total);
+    for (const night of eachNight(checkIn, checkOut)) {
+      if ((free[night] ?? 0) < tents) {
+        return json({ error: 'Those dates were just taken. Please choose another night.' }, 409);
+      }
     }
   }
 
@@ -428,11 +431,10 @@ async function createBooking(request, env) {
   const token = await manageToken(env, reference);
   const C = await columns(env);
   const notesText = [notes, arrival && `Arrival: ${arrival}`, pets && pets !== 'No' && `Pets: ${pets}`,
-    `Address: ${address}`,
     childrenFiveToTen > 0 && `Children 5 to 10: ${childrenFiveToTen}`,
     childrenUnder5 > 0 && `Children under 5: ${childrenUnder5}`,
-    `Lunch: ${lunch ? 'yes' : 'no'}`,
-    `Total: ₹${price.total}, balance at check-in: ₹${price.balance}`]
+    `Lunches: ${lunches} each`,
+    large ? 'LARGE GROUP: check availability and price on WhatsApp before confirming.' : `Total: ₹${price.total}, balance at check-in: ₹${price.balance}`]
     .filter(Boolean).join(' · ').slice(0, 900);
   const now = new Date();
 
@@ -452,6 +454,7 @@ async function createBooking(request, env) {
       [C.status]: { select: { name: 'Pending payment' } },
       [C.type]: { select: { name: 'Booking' } },
       [C.advance]: { number: advance(env) },
+      [C.total]: { number: large ? null : price.total },
       [C.notes]: { rich_text: notesText ? [{ text: { content: notesText } }] : [] },
       [C.source]: { select: { name: 'Website' } },
       [C.terms]: { date: { start: now.toISOString() } },
@@ -466,9 +469,10 @@ async function createBooking(request, env) {
     reference,
     token,
     manageUrl: token ? manageUrl(env, reference, token) : '',
-    amount: advance(env),
-    total: price.total,
-    balance: price.balance,
+    large,
+    amount: large ? 0 : advance(env),
+    total: large ? null : price.total,
+    balance: large ? null : price.balance,
     currency: 'INR',
     upi: {
       ...upi(env),
@@ -652,6 +656,10 @@ async function uploadScreenshot(request, env) {
   if (booking.status === 'Cancelled') {
     return json({ error: 'This booking was cancelled, so there is nothing to pay.' }, 409, cors);
   }
+  const C0 = await columns(env);
+  if (!((page.properties || {})[C0.idProof]?.files || []).length) {
+    return json({ error: 'Please upload your ID proof first.' }, 409, cors);
+  }
 
   const ext = isPdf ? 'pdf' : (type.split('/')[1] || 'jpg').replace('jpeg', 'jpg').replace(/[^a-z0-9]/g, '');
   const filename = `eka-${reference}.${ext || 'jpg'}`;
@@ -712,6 +720,90 @@ async function uploadScreenshot(request, env) {
     status: 'Payment review',
     manageUrl: manageUrl(env, reference, booking.token || token)
   }, 200, cors);
+}
+
+/** Store the guest's ID proof (photo or PDF) in Notion. The row status does not change. */
+async function uploadIdProof(request, env) {
+  const cors = corsHeaders(request, env);
+
+  let form;
+  try { form = await request.formData(); }
+  catch { return json({ error: 'We could not read that upload. Please try a photo or a screenshot.' }, 400, cors); }
+
+  const reference = clean(form.get('reference'), 40).toUpperCase();
+  const token = clean(form.get('token'), 64);
+  const file = form.get('file');
+
+  if (!reference || !token) return json({ error: 'This upload is missing its booking reference.' }, 400, cors);
+  if (!file || typeof file === 'string' || !file.size) {
+    return json({ error: 'Please attach a photo or PDF of your ID.' }, 400, cors);
+  }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return json({ error: 'That file is too large. Please send a screenshot under 8 MB.' }, 413, cors);
+  }
+
+  const type = clean(file.type, 100).toLowerCase();
+  const isImage = type.startsWith('image/');
+  const isPdf = type === 'application/pdf';
+  if (!isImage && !isPdf) {
+    return json({ error: 'Please upload a photo or a PDF of your ID.' }, 415, cors);
+  }
+
+  const page = await findPageByReference(env, reference);
+  if (!page) return json({ error: 'We could not find that booking.' }, 404, cors);
+
+  const booking = readBooking(page);
+  if (!(await tokenMatches(env, booking.reference, token, booking.token))) {
+    return json({ error: 'That link is not valid for this booking.' }, 403, cors);
+  }
+  if (booking.status === 'Cancelled') {
+    return json({ error: 'This booking was cancelled, so there is nothing to pay.' }, 409, cors);
+  }
+
+  const ext = isPdf ? 'pdf' : (type.split('/')[1] || 'jpg').replace('jpeg', 'jpg').replace(/[^a-z0-9]/g, '');
+  const filename = `eka-id-${reference}.${ext || 'jpg'}`;
+
+  let upload;
+  try {
+    upload = await notion(env, '/file_uploads', {
+      method: 'POST',
+      body: JSON.stringify({ mode: 'single_part', filename, content_type: type })
+    }, NOTION_FILES_VERSION);
+
+    const fd = new FormData();
+    fd.append('file', file, filename);
+    const sent = await fetch(upload.upload_url, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${env.NOTION_TOKEN}`,
+        'notion-version': NOTION_FILES_VERSION
+      },
+      body: fd
+    });
+    if (!sent.ok) {
+      const detail = await sent.text();
+      throw new Error(`file upload ${sent.status}: ${detail.slice(0, 200)}`);
+    }
+  } catch (err) {
+    console.error('Notion file upload failed', err);
+    return json({
+      error: 'We could not store your ID proof. Please try again, or send it to us on WhatsApp.',
+      detail: String(err && err.message || err).slice(0, 200)
+    }, 502, cors);
+  }
+
+  const C = await columns(env);
+  try {
+    await patchPage(env, page.id, {
+      [C.idProof]: {
+        files: [{ type: 'file_upload', file_upload: { id: upload.id }, name: filename }]
+      }
+    }, NOTION_FILES_VERSION);
+  } catch (err) {
+    console.error('ID proof save failed', err);
+    return json({ error: 'We could not save your ID proof. Please try again.' }, 502, cors);
+  }
+  return json({ ok: true, reference });
 }
 
 /* ------------------------------------------------------------------ manage */
@@ -1053,7 +1145,7 @@ function digestText(s) {
   if (s.todayArrivals.length) {
     lines.push('Arriving today:');
     s.todayArrivals.forEach(b => {
-      const kids = b.children ? `, ${b.children} under 10` : '';
+      const kids = b.children ? `, ${b.children} children` : '';
       lines.push(`• ${b.name}, ${b.guests} guests${kids}, ${b.tents} tent${b.tents === 1 ? '' : 's'} (${b.reference})`);
     });
     lines.push('');
