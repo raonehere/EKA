@@ -315,3 +315,7 @@ details p{margin:0;padding:0 20px 20px;font-size:17px;line-height:28px}
 
 .gallery__group{margin-top:28px}
 .gallery__group-title{font:400 20px/28px var(--f-head);margin:0 0 12px;padding-right:var(--pad-r)}
+
+.nav a{white-space:nowrap}
+
+@media (min-width:761px){.nav__group--right{justify-content:flex-start;gap:52px}.nav__group--left{justify-content:flex-end;gap:52px}}
