@@ -396,7 +396,14 @@
     el.sumGuests.textContent = guestLine();
     el.sumTents.textContent = (hasRange || state.start) ? plural(tentsNeeded(), 'tent') : '';
 
-    if (hasRange && n >= 1) {
+    if (hasRange && n >= 1 && isLarge()) {
+      el.sumStay.textContent = 'On WhatsApp';
+      el.sumLunch.textContent = '';
+      el.sumTotal.textContent = 'On WhatsApp';
+      el.sumAdvance.textContent = '';
+      el.sumBalance.textContent = '';
+      el.estimate.textContent = 'Large group: we check availability and send the price on WhatsApp.';
+    } else if (hasRange && n >= 1) {
       var p = priceFor(n);
       el.sumStay.textContent = rupees(p.stay);
       var count = Math.min(parseInt(el.lunches.value, 10) || 0, n);
@@ -437,12 +444,9 @@
     return !msg;
   }
 
+  function isLarge() { return paying() > MAX_GUESTS; }
+
   function validateStay(showHint) {
-    if (paying() > MAX_GUESTS) {
-      el.capacity.textContent = 'Groups of more than ' + MAX_GUESTS + ' guests need to reach out to us on WhatsApp first.';
-      el.capacity.className = 'book__capacity is-bad';
-      return false;
-    }
     if (!state.start) {
       el.capacity.textContent = 'Pick your nights above and we\'ll work out how many tents you need.';
       el.capacity.className = 'book__capacity';
@@ -452,6 +456,11 @@
       el.capacity.textContent = 'Now pick a check-out date.';
       el.capacity.className = 'book__capacity';
       return false;
+    }
+    if (isLarge()) {
+      el.capacity.textContent = 'Large group: send your request and we will check availability for your dates and send the price on WhatsApp.';
+      el.capacity.className = 'book__capacity';
+      return true;
     }
     var need = tentsNeeded();
     var st = rangeStatus(state.start, state.end);
@@ -485,7 +494,6 @@
       first = first || 'dates';
     }
     if (!paying()) fail('adults', 'At least one paying guest is needed.');
-    else if (paying() > MAX_GUESTS) fail('adults', 'Groups larger than ' + MAX_GUESTS + ' adults need to reach out to us on WhatsApp first.');
     var idFile = el.idProof.files && el.idProof.files[0];
     if (!idFile) fail('idproof', 'Upload a photo or PDF of your ID to continue.');
     else if (idFile.size > 8 * 1024 * 1024) fail('idproof', 'That ID file is too large. Please pick one under 8 MB.');
@@ -781,6 +789,10 @@
     }
 
     busy(false);
+    if (state.order.large) {
+      confirmScreen({ reference: state.order.reference, preview: false, large: true, manageUrl: state.order.manageUrl || '' });
+      return;
+    }
     showPayPanel();
   }
 
@@ -815,6 +827,14 @@
       el.confirmTag.style.background = '#a55a1c';
       el.confirmLead.textContent = 'Thank you, your screenshot is in our bookings board. We check UPI credits by hand and confirm on WhatsApp, usually within a few hours.';
       document.getElementById('confirm-title').textContent = 'We\'re checking your payment';
+    }
+
+    if (opts.large) {
+      el.confirmTag.textContent = 'Request received';
+      el.confirmTag.style.background = '#6b5a45';
+      el.confirmLead.textContent = 'Thanks. Groups this size need a quick check first. We will look at availability for your dates and send you the price on WhatsApp. Nothing is charged yet.';
+      el.confirmPaid.textContent = 'On WhatsApp';
+      document.getElementById('confirm-title').textContent = 'We have your request';
     }
 
     el.confirm.hidden = false;

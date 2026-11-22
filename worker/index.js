@@ -405,9 +405,8 @@ async function createBooking(request, env) {
   const cap = capacity(env);
   const total = units(env);
   if (!guests || guests < 1) return json({ error: 'Tell us how many guests are coming.' }, 400);
-  if (adults > total * cap) {
-    return json({ error: `Groups larger than ${total * cap} adults need to reach out to us on WhatsApp first.` }, 400);
-  }
+  // Bigger than the tents can sleep: taken as a request, priced and checked by hand on WhatsApp.
+  const large = adults > total * cap;
 
   const price = bookingPrice(env, nights, adults, childrenFiveToTen, lunches);
   const tents = Math.max(1, Math.ceil(guests / cap));
@@ -418,11 +417,13 @@ async function createBooking(request, env) {
   if (body.termsAccepted !== true) return json({ error: 'Please accept the non-refundable advance.' }, 400);
 
   // Live availability check, so a stale calendar cannot double-book a tent.
-  const stays = await loadStays(env, checkIn, checkOut);
-  const free = computeNights(stays, checkIn, checkOut, total);
-  for (const night of eachNight(checkIn, checkOut)) {
-    if ((free[night] ?? 0) < tents) {
-      return json({ error: 'Those dates were just taken. Please choose another night.' }, 409);
+  if (!large) {
+    const stays = await loadStays(env, checkIn, checkOut);
+    const free = computeNights(stays, checkIn, checkOut, total);
+    for (const night of eachNight(checkIn, checkOut)) {
+      if ((free[night] ?? 0) < tents) {
+        return json({ error: 'Those dates were just taken. Please choose another night.' }, 409);
+      }
     }
   }
 
@@ -433,7 +434,7 @@ async function createBooking(request, env) {
     childrenFiveToTen > 0 && `Children 5 to 10: ${childrenFiveToTen}`,
     childrenUnder5 > 0 && `Children under 5: ${childrenUnder5}`,
     `Lunches: ${lunches} each`,
-    `Total: ₹${price.total}, balance at check-in: ₹${price.balance}`]
+    large ? 'LARGE GROUP: check availability and price on WhatsApp before confirming.' : `Total: ₹${price.total}, balance at check-in: ₹${price.balance}`]
     .filter(Boolean).join(' · ').slice(0, 900);
   const now = new Date();
 
@@ -453,7 +454,7 @@ async function createBooking(request, env) {
       [C.status]: { select: { name: 'Pending payment' } },
       [C.type]: { select: { name: 'Booking' } },
       [C.advance]: { number: advance(env) },
-      [C.total]: { number: price.total },
+      [C.total]: { number: large ? null : price.total },
       [C.notes]: { rich_text: notesText ? [{ text: { content: notesText } }] : [] },
       [C.source]: { select: { name: 'Website' } },
       [C.terms]: { date: { start: now.toISOString() } },
@@ -468,9 +469,10 @@ async function createBooking(request, env) {
     reference,
     token,
     manageUrl: token ? manageUrl(env, reference, token) : '',
-    amount: advance(env),
-    total: price.total,
-    balance: price.balance,
+    large,
+    amount: large ? 0 : advance(env),
+    total: large ? null : price.total,
+    balance: large ? null : price.balance,
     currency: 'INR',
     upi: {
       ...upi(env),
