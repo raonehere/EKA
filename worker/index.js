@@ -390,7 +390,6 @@ async function createBooking(request, env) {
   const childrenUnder10 = Math.max(0, parseInt(body.childrenUnder10, 10) || 0);
   const childrenUnder5 = Math.max(0, parseInt(body.childrenUnder5, 10) || 0);
   const childrenFiveToTen = Math.max(0, parseInt(body.childrenFiveToTen, 10) || 0);
-  const lunches = Math.min(nights, Math.min(10, Math.max(0, parseInt(body.lunches, 10) || 0)));
 
   if (!isDate(checkIn) || !isDate(checkOut)) return json({ error: 'Please pick valid dates.' }, 400);
   if (checkIn < todayIST()) return json({ error: 'Those dates are in the past.' }, 400);
@@ -402,6 +401,7 @@ async function createBooking(request, env) {
   if (nights < 1) return json({ error: 'Check-out must be after check-in.' }, 400);
   if (nights > 10) return json({ error: 'Stays are limited to 10 nights. Message us for longer.' }, 400);
 
+  const lunches = Math.min(nights, Math.min(10, Math.max(0, parseInt(body.lunches, 10) || 0)));
   const cap = capacity(env);
   const total = units(env);
   if (!guests || guests < 1) return json({ error: 'Tell us how many guests are coming.' }, 400);
