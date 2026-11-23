@@ -385,3 +385,73 @@ body.has-menu .site-footer{margin-top:120px}
   body.has-menu .site-footer{margin-top:80px}
   .gallery__more{margin-right:0;text-align:left}
 }
+
+/* ---------- Sticky header: Book left, EKA centre, menu right ---------- */
+body.has-menu .site-header{position:sticky;top:0;z-index:90;max-width:none;width:100%;margin:0;
+  padding:18px var(--pad-r) 18px var(--pad-l);
+  background:rgba(197,184,165,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid transparent;transition:border-color .2s,box-shadow .2s}
+body.has-menu.is-scrolled .site-header{border-bottom-color:rgba(101,67,48,.14);box-shadow:0 12px 30px rgba(36,37,36,.06)}
+body.has-menu .nav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;min-height:0}
+body.has-menu .nav__group--left{display:flex!important;justify-content:flex-start;gap:0;padding:0}
+body.has-menu .nav__group--left li{display:none}
+body.has-menu .nav__group--left li:first-child{display:block}
+body.has-menu .nav__group--right{display:none!important}
+body.has-menu .nav__logo{justify-self:center;align-self:center}
+body.has-menu .nav__logo img{transform:none}
+.menu-btn{top:36px;z-index:110}
+
+/* Footer: brand centred, policy links below, no credit line. */
+body.has-menu .site-footer{margin-top:120px;padding:0 var(--pad-r) 40px var(--pad-l)}
+.footer__brand{text-align:center;font:300 26px/1 var(--f-head);letter-spacing:.22em;text-transform:uppercase;margin:0;color:var(--brown)}
+.footer__legal-links{list-style:none;display:flex;justify-content:center;flex-wrap:wrap;gap:0;margin:18px 0 0;padding:0;font:400 13px/20px var(--f-body)}
+.footer__legal-links li{display:flex;align-items:center}
+.footer__legal-links li:not(:last-child)::after{content:"·";margin:0 18px;opacity:.5}
+.footer__legal-links a{color:var(--text);text-decoration:none}
+.footer__legal-links a:hover{text-decoration:underline;text-underline-offset:4px}
+
+/* Alternating stays and experiences rows. */
+.stays__rows{margin-top:56px;display:flex;flex-direction:column;gap:96px}
+.stay-row{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(32px,6vw,96px);align-items:center}
+.stay-row--reverse{grid-template-columns:.85fr 1.15fr}
+.stay-row--reverse .stay-row__media{order:2}
+.stay-row--reverse .stay-row__body{order:1}
+.stay-row__media{margin:0;border-radius:28px;overflow:hidden;aspect-ratio:4/3;background:var(--ph)}
+.stay-row__media img{width:100%;height:100%;object-fit:cover;display:block}
+.stay-row__body .h2{margin-bottom:16px}
+.stay-row__body p{max-width:46ch}
+.stay-row__body .link{display:inline-block;margin-top:20px}
+
+/* Policy pages. */
+.policy{max-width:72ch;margin-top:28px}
+.policy h2{font:400 22px/30px var(--f-head);text-transform:uppercase;letter-spacing:.05em;margin:34px 0 10px}
+.policy p,.policy li{font-size:17px;line-height:28px}
+.policy ul{padding-left:22px}
+.policy a{color:var(--brown)}
+
+@media (min-width:761px){body.has-menu .book__side{top:140px}}
+@media (max-width:760px){
+  body.has-menu .site-header{padding:14px var(--pad-r) 14px var(--pad-l)}
+  body.has-menu .nav__group a{font-size:14px;letter-spacing:1.4px}
+  .menu-btn{top:14px}
+  .stays__rows{gap:56px;margin-top:36px}
+  .stay-row,.stay-row--reverse{grid-template-columns:1fr;gap:24px}
+  .stay-row--reverse .stay-row__media{order:0}
+  .stay-row--reverse .stay-row__body{order:1}
+}
+
+/* Align the menu button with the sticky header's centre line. */
+.menu-btn{top:20px}
+@media (max-width:760px){
+  body.has-menu .site-header{padding:18px var(--pad-r) 18px var(--pad-l)}
+  .menu-btn{top:9px}
+}
+
+.policy ul{list-style:disc}
+@media (min-width:761px){body.has-menu .book__side{top:112px}}
+
+/* Coming-soon page: Book on the left, matching the site header. */
+.soon__book{position:fixed;top:28px;left:var(--pad-l);z-index:100;font:300 24px/1 var(--f-head);letter-spacing:2.4px;
+  text-transform:uppercase;text-decoration:none;color:var(--brown)}
+.soon__book:hover{text-decoration:underline;text-underline-offset:6px}
+@media (max-width:760px){.soon__book{top:18px;left:var(--pad-l);font-size:14px;letter-spacing:1.4px}}

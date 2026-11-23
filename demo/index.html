@@ -119,94 +119,6 @@
  }
 }
 </script>
-<script type="application/ld+json">
-{
- "@context": "https://schema.org",
- "@type": "FAQPage",
- "mainEntity": [
-  {
-   "@type": "Question",
-   "name": "Where exactly is EKA Forest?",
-   "acceptedAnswer": {
-    "@type": "Answer",
-    "text": "In Vattavada village, Devikulam taluk, Idukki district, Kerala (PIN 685615), about 45 km north-east of Munnar near the Kerala–Tamil Nadu border. We're roughly 4–5 km from Pambadum Shola National Park and 13 km from Top Station. We'll share an exact map pin when you book."
-   }
-  },
-  {
-   "@type": "Question",
-   "name": "How do I book a stay?",
-   "acceptedAnswer": {
-    "@type": "Answer",
-    "text": "Open the availability calendar, pick your nights and pay the flat ₹2,000 advance by UPI to confirm. Prefer to talk first? Message us on WhatsApp or send a DM on Instagram @eka_forest_ with your dates and group size."
-   }
-  },
-  {
-   "@type": "Question",
-   "name": "What are the check-in and check-out times?",
-   "acceptedAnswer": {
-    "@type": "Answer",
-    "text": "Check-in is from 1 PM to 6 PM and check-out is by 11 AM. Because the Pambadum Shola check-post closes at 6 PM, please plan to cross it before then."
-   }
-  },
-  {
-   "@type": "Question",
-   "name": "What is the best time to visit Vattavada?",
-   "acceptedAnswer": {
-    "@type": "Answer",
-    "text": "September to March is the most popular time, with clear skies and green valleys. December and January are the coldest and mistiest months, and nights can get close to freezing. Vattavada sits in a rain-shadow area, so it gets far less rain than Munnar, even during the monsoon."
-   }
-  },
-  {
-   "@type": "Question",
-   "name": "How cold does it get, and what should I pack?",
-   "acceptedAnswer": {
-    "@type": "Answer",
-    "text": "Days are pleasant, but nights are cold all year and can drop to single digits (°C) in winter. Bring a warm jacket, layers, socks, a cap, comfortable walking shoes, a torch, and any medicines you need."
-   }
-  },
-  {
-   "@type": "Question",
-   "name": "Is food available at the property?",
-   "acceptedAnswer": {
-    "@type": "Answer",
-    "text": "Yes. We serve simple home-style meals (breakfast, lunch and dinner on request) in our outdoor dining area, often made with vegetables from Vattavada's farms. Let us know about dietary preferences when you book."
-   }
-  },
-  {
-   "@type": "Question",
-   "name": "Are the bathrooms attached to the tents?",
-   "acceptedAnswer": {
-    "@type": "Answer",
-    "text": "Our tents share clean common washrooms with hot water. If you need an attached bathroom, ask us when booking and we'll tell you what's available for your dates."
-   }
-  },
-  {
-   "@type": "Question",
-   "name": "Are pets and kids welcome?",
-   "acceptedAnswer": {
-    "@type": "Answer",
-    "text": "Yes, families and well-behaved pets are welcome. Please tell us in advance if you're bringing a pet so we can plan your tent."
-   }
-  },
-  {
-   "@type": "Question",
-   "name": "Is there Wi-Fi and mobile network?",
-   "acceptedAnswer": {
-    "@type": "Answer",
-    "text": "Wi-Fi is available, but this is a remote hill village and speeds can vary. Mobile coverage is patchy on some networks, so download maps and tickets before you leave Munnar."
-   }
-  },
-  {
-   "@type": "Question",
-   "name": "What can we do nearby?",
-   "acceptedAnswer": {
-    "@type": "Answer",
-    "text": "Visit Pambadum Shola National Park, catch sunrise at Top Station, walk the strawberry and vegetable farms, and explore Kovilur village. Mattupetty Dam and Kundala Lake are on the way from Munnar."
-   }
-  }
- ]
-}
-</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -232,8 +144,8 @@
 
   <!-- Figma: "What is EKA Forest" (node 2024:119) -->
   <section class="about" aria-labelledby="about-title">
-    <figure class="ph ph--about" data-cms-img="about.photo">
-      <figcaption>Photo: tents among the eucalyptus</figcaption>
+    <figure class="ph ph--about has-photo" data-cms-img="about.photo" style="background-image:url('assets/gallery/aframetent-1.jpg');background-size:cover;background-position:center">
+      <figcaption class="visually-hidden">Tents among the eucalyptus at EKA Forest</figcaption>
     </figure>
     <div class="about__text">
       <h2 id="about-title" class="h2" data-cms="about.title">What is<br>EKA Forest</h2>
@@ -247,33 +159,55 @@
   <!-- NEW (not in Figma): Stays & experiences -->
   <section class="stays" id="stays" aria-labelledby="stays-title">
     <h2 id="stays-title" class="h2" data-cms="stays.title">Stays &amp; experiences</h2>
-    <div class="stays__grid">
-      <article class="card">
-        <div class="ph ph--card" data-cms-img="stays.card1_photo"><span>Photo: forest tent exterior</span></div>
-        <h3 class="h3" data-cms="stays.card1_title">Forest tents</h3>
-        <!-- RESEARCHED (Booking.com data via Casai): luxury tents, mountain view, terrace, garden, Wi-Fi, shared bathroom. ASSUMPTION A3: bedding, tent count, bath details -->
-        <p data-cms="stays.card1_text">Canvas tents set among the trees with mountain views, warm bedding for cold nights, and clean shared washrooms with hot water.</p>
+    <div class="stays__rows">
+      <article class="stay-row">
+        <figure class="stay-row__media">
+          <img src="assets/gallery/aframetent-2.jpg" alt="A-frame tents at EKA Forest in the evening" loading="lazy" width="900" height="675">
+        </figure>
+        <div class="stay-row__body">
+          <p class="eyebrow">Stay</p>
+          <h3 class="h2" data-cms="stays.card1_title">Forest tents</h3>
+          <p data-cms="stays.card1_text">Canvas tents set among the trees with mountain views, warm bedding for cold nights, and clean shared washrooms with hot water.</p>
+          <a class="link" href="book/">Book a stay &rarr;</a>
+        </div>
       </article>
-      <article class="card">
-        <div class="ph ph--card" data-cms-img="stays.card2_photo"><span>Photo: bonfire night</span></div>
-        <h3 class="h3" data-cms="stays.card2_title">Campfire &amp; stargazing</h3>
-        <!-- ASSUMPTION A4: campfire offered; clear night skies are documented for Vattavada -->
-        <p data-cms="stays.card2_text">Nights in Vattavada are cold and clear. Gather around the campfire, and on a good night watch the Milky Way rise over the ridges.</p>
+      <article class="stay-row stay-row--reverse">
+        <figure class="stay-row__media">
+          <img src="assets/gallery/campfire.jpg" alt="Campfire at EKA Forest" loading="lazy" width="900" height="675">
+        </figure>
+        <div class="stay-row__body">
+          <p class="eyebrow">Evenings</p>
+          <h3 class="h2" data-cms="stays.card2_title">Campfire &amp; stargazing</h3>
+          <p data-cms="stays.card2_text">Nights in Vattavada are cold and clear. Gather around the campfire, and on a good night watch the Milky Way rise over the ridges.</p>
+          <a class="link" href="book/">Plan your stay &rarr;</a>
+        </div>
       </article>
-      <article class="card">
-        <div class="ph ph--card" data-cms-img="stays.card3_photo"><span>Photo: Vattavada farm terraces</span></div>
-        <h3 class="h3" data-cms="stays.card3_title">Farms &amp; village walks</h3>
-        <p data-cms="stays.card3_text">Walk past terraced vegetable farms, garlic fields and strawberry patches, and through the old Tamil village of Kovilur and its lanes.</p>
+      <article class="stay-row">
+        <figure class="stay-row__media">
+          <img src="assets/gallery/terracefarming-1.jpg" alt="Terraced farms around Vattavada" loading="lazy" width="900" height="675">
+        </figure>
+        <div class="stay-row__body">
+          <p class="eyebrow">Around EKA</p>
+          <h3 class="h2" data-cms="stays.card3_title">Farms &amp; village walks</h3>
+          <p data-cms="stays.card3_text">Walk past terraced vegetable farms, garlic fields and strawberry patches, and through the old Tamil village of Kovilur and its lanes.</p>
+          <a class="link" href="blog/vattavada-farms-and-village-walk/">Read the farm walk &rarr;</a>
+        </div>
       </article>
-      <article class="card">
-        <div class="ph ph--card" data-cms-img="stays.card4_photo"><span>Photo: shola forest trail</span></div>
-        <h3 class="h3" data-cms="stays.card4_title">Shola &amp; viewpoints</h3>
-        <p data-cms="stays.card4_text">Pambadum Shola National Park is next door, and Top Station's view over Tamil Nadu is a short drive away, best at sunrise when the valley fills with cloud.</p>
+      <article class="stay-row stay-row--reverse">
+        <figure class="stay-row__media">
+          <img src="assets/gallery/sholatrek.jpg" alt="Shola forest and hills near Vattavada" loading="lazy" width="900" height="675">
+        </figure>
+        <div class="stay-row__body">
+          <p class="eyebrow">Explore</p>
+          <h3 class="h2" data-cms="stays.card4_title">Shola &amp; viewpoints</h3>
+          <p data-cms="stays.card4_text">Pambadum Shola National Park is next door, and Top Station's view over Tamil Nadu is a short drive away, best at sunrise when the valley fills with cloud.</p>
+          <a class="link" href="blog/pambadum-shola-top-station-visit/">Read the guide &rarr;</a>
+        </div>
       </article>
     </div>
   </section>
 
-  <!-- NEW (not in Figma): Gallery strip. All tiles are placeholders until client supplies photos -->
+  <!-- Gallery strip -->
   <section class="gallery" id="gallery" aria-labelledby="gallery-title">
     <div class="gallery__head">
       <h2 id="gallery-title" class="h2" data-cms="gallery.title">Gallery</h2>
@@ -296,120 +230,15 @@
     <p class="gallery__more"><a href="gallery/">View full gallery →</a></p>
   </section>
 
-  <!-- Figma: "How to reach?" (node 2024:76) -->
-  <section class="reach" id="reach" aria-labelledby="reach-title">
-    <div class="reach__text">
-      <h2 id="reach-title" class="h2" data-cms="reach.title">How to reach?</h2>
-      <p data-cms="reach.intro">EKA Forest is in Vattavada, about 45&nbsp;km (roughly 2 hours) from Munnar. Drive past Mattupetty, Kundala and Top Station, then through Pambadum Shola National Park. The forest check-post only lets vehicles through between 6&nbsp;AM and 6&nbsp;PM, so plan to arrive before dark.</p>
-      <ul class="reach__list">
-        <li><strong>By air:</strong> <span data-cms="reach.by_air">Cochin International Airport (about 160&nbsp;km, around 5 hours)</span></li>
-        <li><strong>By train:</strong> <span data-cms="reach.by_train">Aluva or Ernakulam Junction, then a taxi or bus to Munnar</span></li>
-        <li><strong>By road:</strong> <span data-cms="reach.by_road">Munnar → Top Station → Vattavada. Taxis and jeeps run from Munnar town</span></li>
-      </ul>
-      <a class="btn" data-cms="reach.button" data-cms-href="contact.maps_url" href="https://www.google.com/maps/search/?api=1&amp;query=Eka+Forest+Vattavada+Kerala" target="_blank" rel="noopener">View on map</a>
-    </div>
-    <div class="reach__map" id="map">
-      <!-- ASSUMPTION A5: map points to the Vattavada area; replace with the exact Google Maps pin of the property -->
-      <a class="map-facade" href="https://www.google.com/maps/search/?api=1&amp;query=Vattavada+Kerala+685615" target="_blank" rel="noopener"
-         data-embed="https://www.google.com/maps?q=Vattavada,+Kerala+685615&amp;z=12&amp;output=embed">
-        <svg class="map-facade__art" viewBox="0 0 546 571" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
-          <g fill="none" stroke="currentColor" stroke-width="1.2" opacity=".35">
-            <path d="M-20 420 C80 380 120 300 210 310 S360 400 420 330 560 260 600 280"/>
-            <path d="M-20 470 C90 430 140 350 230 360 S370 450 440 380 560 320 600 330"/>
-            <path d="M-20 370 C70 330 110 250 200 260 S350 350 410 280 550 200 600 230"/>
-            <path d="M-20 320 C60 280 100 200 190 210 S340 300 400 230 540 150 600 180"/>
-          </g>
-          <path d="M60 450 C130 410 170 380 220 350 S300 290 330 250 400 180 470 150" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="6 7" opacity=".7"/>
-          <g fill="currentColor" font-family="Oswald, sans-serif" font-weight="300" letter-spacing="2">
-            <circle cx="60" cy="450" r="5"/><text x="74" y="456" font-size="18">MUNNAR</text>
-            <circle cx="220" cy="350" r="4"/><text x="234" y="356" font-size="15">TOP STATION</text>
-            <circle cx="330" cy="250" r="4"/><text x="344" y="256" font-size="15">PAMBADUM SHOLA</text>
-            <circle cx="470" cy="150" r="7"/><text x="490" y="126" font-size="20" text-anchor="end">VATTAVADA · EKA</text>
-          </g>
-        </svg>
-        <span class="map-facade__cta">Load interactive map</span>
-      </a>
-    </div>
-  </section>
-
-  <!-- Figma: "Frequently asked questions" (node 2024:118) -->
-  <section class="faq" id="faq" aria-labelledby="faq-title">
-    <h2 id="faq-title" class="h2" data-cms="faq.title">Frequently asked questions</h2>
-    <div class="faq__grid">
-      <div class="faq__col">
-        <details>
-          <summary data-cms="faq.q1">Where exactly is EKA Forest?</summary>
-          <p data-cms="faq.a1">In Vattavada village, Devikulam taluk, Idukki district, Kerala (PIN 685615), about 45&nbsp;km north-east of Munnar near the Kerala–Tamil Nadu border. We're roughly 4–5&nbsp;km from Pambadum Shola National Park and 13&nbsp;km from Top Station. We'll share an exact map pin when you book.</p>
-        </details>
-        <details>
-          <summary data-cms="faq.q2">How do I book a stay?</summary>
-          <p data-cms="faq.a2">Open the <a href="book/">availability calendar</a>, pick your nights and pay the flat ₹2,000 advance to confirm. Prefer to talk first? Message us on WhatsApp or DM <a href="https://www.instagram.com/eka_forest_/" target="_blank" rel="noopener">@eka_forest_</a> with your dates and group size.</p>
-        </details>
-        <details>
-          <summary data-cms="faq.q3">What are the check-in and check-out times?</summary>
-          <p data-cms="faq.a3">Check-in is from 1 PM to 6 PM and check-out is by 11 AM. Because the Pambadum Shola check-post closes at 6 PM, please plan to cross it before then.</p>
-        </details>
-        <details>
-          <summary data-cms="faq.q4">What is the best time to visit Vattavada?</summary>
-          <p data-cms="faq.a4">September to March is the most popular time, with clear skies and green valleys. December and January are the coldest and mistiest months, and nights can get close to freezing. Vattavada sits in a rain-shadow area, so it gets far less rain than Munnar, even during the monsoon.</p>
-        </details>
-        <details>
-          <summary data-cms="faq.q5">How cold does it get, and what should I pack?</summary>
-          <p data-cms="faq.a5">Days are pleasant, but nights are cold all year and can drop to single digits (°C) in winter. Bring a warm jacket, layers, socks, a cap, comfortable walking shoes, a torch, and any medicines you need.</p>
-        </details>
-      </div>
-      <div class="faq__col">
-        <details>
-          <summary data-cms="faq.q6">Is food available at the property?</summary>
-          <p data-cms="faq.a6">Yes. We serve simple home-style meals (breakfast, lunch and dinner on request) in our outdoor dining area, often made with vegetables from Vattavada's farms. Let us know about dietary preferences when you book.</p>
-        </details>
-        <details>
-          <summary data-cms="faq.q7">Are the bathrooms attached to the tents?</summary>
-          <p data-cms="faq.a7">Our tents share clean common washrooms with hot water. If you need an attached bathroom, ask us when booking and we'll tell you what's available for your dates.</p>
-        </details>
-        <details>
-          <summary data-cms="faq.q8">Are pets and kids welcome?</summary>
-          <p data-cms="faq.a8">Yes, families and well-behaved pets are welcome. Please tell us in advance if you're bringing a pet so we can plan your tent.</p>
-        </details>
-        <details>
-          <summary data-cms="faq.q9">Is there Wi-Fi and mobile network?</summary>
-          <p data-cms="faq.a9">Wi-Fi is available, but this is a remote hill village and speeds can vary. Mobile coverage is patchy on some networks, so download maps and tickets before you leave Munnar.</p>
-        </details>
-        <details>
-          <summary data-cms="faq.q10">What can we do nearby?</summary>
-          <p data-cms="faq.a10">Visit Pambadum Shola National Park, catch sunrise at Top Station, walk the strawberry and vegetable farms, and explore Kovilur village. Mattupetty Dam and Kundala Lake are on the way from Munnar.</p>
-        </details>
-      </div>
-    </div>
-  </section>
 </main>
 
 <footer class="site-footer" id="contact">
-  <div class="footer__inner">
-    <img class="footer__mark" src="assets/img/eka-forest-wordmark.svg" width="160" height="146" alt="EKA Forest">
-    <div class="footer__col">
-      <h2 class="h4">Contact</h2>
-      <ul>
-        <li><a href="https://wa.me/917012293538?text=Hi%20EKA%20Forest%2C%20I%27d%20like%20to%20book%20a%20stay." data-cms-wa target="_blank" rel="noopener">WhatsApp: <span data-cms="contact.whatsapp_display">+91 70122 93538</span></a></li>
-        <li><a href="https://www.instagram.com/eka_forest_/" data-cms-href="contact.instagram_url" target="_blank" rel="noopener">Instagram: <span data-cms="contact.instagram_handle">@eka_forest_</span></a></li>
-        <!-- PLACEHOLDER: email -->
-        <li><a href="mailto:hello@ekaforest.com" data-cms-mailto="contact.email" data-cms="contact.email">hello@ekaforest.com</a></li>
-      </ul>
-    </div>
-    <div class="footer__col">
-      <h2 class="h4">Explore</h2>
-      <ul>
-        <li><a href="#stays">Stays &amp; experiences</a></li>
-        <li><a href="events/">Events</a></li>
-        <li><a href="https://maps.app.goo.gl/ZacFg4FmZhpEeB4y6?g_st=iw" target="_blank" rel="noopener">Guest reviews</a></li>
-        <li><a href="blog/">Journal</a></li>
-        <li><a href="#gallery">Gallery</a></li>
-        <li><a href="#reach">How to reach</a></li>
-        <li><a href="#faq">FAQ</a></li>
-      </ul>
-    </div>
-  </div>
-  <p class="footer__legal">© <span id="y">2026</span> <span data-cms="footer.legal">EKA Forest, Vattavada · Designed by Rahul Janardhanan</span></p>
+  <p class="footer__brand">EKA Forest</p>
+  <ul class="footer__legal-links">
+    <li><a href="/privacy/">Privacy Policy</a></li>
+    <li><a href="/terms/">Terms and Conditions</a></li>
+    <li><a href="/cancellation/">Cancellation Policy</a></li>
+  </ul>
 </footer>
 
 <a class="wa-float" href="https://wa.me/917012293538?text=Hi%20EKA%20Forest%2C%20I%27d%20like%20to%20book%20a%20stay." data-cms-wa target="_blank" rel="noopener" aria-label="Chat with EKA Forest on WhatsApp">

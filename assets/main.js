@@ -60,8 +60,6 @@ if (facade) facade.addEventListener('click', e => {
     '    <h3>Explore</h3>',
     '    <ul>',
     '      <li><a href="' + section('stays') + '">Stays &amp; experiences</a></li>',
-    '      <li><a href="' + section('reach') + '">How to reach</a></li>',
-    '      <li><a href="' + section('faq') + '">FAQ</a></li>',
     '      <li><a href="https://maps.app.goo.gl/ZacFg4FmZhpEeB4y6?g_st=iw" target="_blank" rel="noopener">Guest reviews</a></li>',
     '    </ul>',
     '  </div>',
@@ -79,6 +77,12 @@ if (facade) facade.addEventListener('click', e => {
 
   document.body.appendChild(wrap);
   document.body.classList.add('has-menu');
+
+  function onScroll() {
+    document.body.classList.toggle('is-scrolled', window.scrollY > 16);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
 
   var button = wrap.querySelector('.menu-btn');
   var drawer = wrap.querySelector('.menu-drawer');
