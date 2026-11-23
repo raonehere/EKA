@@ -74,7 +74,8 @@ ul{margin:0;padding:0;list-style:none}
 
 /* ---------- What is EKA Forest (Figma: img 105/357 606×571, text 836/360 w468) ---------- */
 /* ---------- Opening photo + intro ---------- */
-.hero{margin:0}
+.hero{margin:0;overflow:hidden}
+.hero__media{will-change:transform;transform-origin:center}
 .hero__media{margin:0;width:100%;aspect-ratio:3/2;max-height:min(80vh,780px);overflow:hidden;background:var(--ph)}
 
 .about{max-width:1440px;margin:0 auto;padding:96px var(--pad-r) 0 var(--pad-l);text-align:center}

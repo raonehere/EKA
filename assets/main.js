@@ -84,6 +84,21 @@ if (facade) facade.addEventListener('click', e => {
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
+  var hero = document.querySelector('.hero__media');
+  if (hero && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var ticking = false;
+    var moveHero = function () {
+      ticking = false;
+      var r = hero.getBoundingClientRect();
+      var p = Math.min(1, Math.max(0, -r.top / (r.height + window.innerHeight)));
+      hero.style.transform = 'scale(' + (1.12 - p * 0.12).toFixed(4) + ') translateY(' + (p * -24).toFixed(1) + 'px)';
+    };
+    window.addEventListener('scroll', function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(moveHero); }
+    }, { passive: true });
+    moveHero();
+  }
+
   var button = wrap.querySelector('.menu-btn');
   var drawer = wrap.querySelector('.menu-drawer');
   var overlay = wrap.querySelector('.menu-overlay');
