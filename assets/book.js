@@ -1009,7 +1009,8 @@
     state.viewM = now.getMonth();
     state.focusDate = TODAY;
 
-    document.getElementById('y').textContent = new Date().getFullYear();
+    var yearEl = document.getElementById('y');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
     if (DEMO) {
       var demoNote = document.getElementById('demo-note');
       if (demoNote) demoNote.hidden = false;
