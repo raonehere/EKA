@@ -84,19 +84,32 @@ if (facade) facade.addEventListener('click', e => {
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
-  var hero = document.querySelector('.hero__media');
-  if (hero && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  var drifts = [];
+  document.querySelectorAll('.hero__media').forEach(function (el) { drifts.push({ box: el, el: el }); });
+  document.querySelectorAll('.stay-row__media').forEach(function (fig) {
+    var img = fig.querySelector('img'); if (img) drifts.push({ box: fig, el: img });
+  });
+  document.querySelectorAll('.gallery__strip .ph--tile').forEach(function (li) {
+    var img = li.querySelector('img'); if (img) drifts.push({ box: li, el: img });
+  });
+  if (drifts.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     var ticking = false;
-    var moveHero = function () {
+    var moveAll = function () {
       ticking = false;
-      var r = hero.getBoundingClientRect();
-      var p = Math.min(1, Math.max(0, -r.top / (r.height + window.innerHeight)));
-      hero.style.transform = 'scale(' + (1.12 - p * 0.12).toFixed(4) + ') translateY(' + (p * -24).toFixed(1) + 'px)';
+      var vh = window.innerHeight;
+      drifts.forEach(function (d) {
+        var r = d.box.getBoundingClientRect();
+        if (r.bottom < -200 || r.top > vh + 200) return;
+        var t = (r.top + r.height / 2 - vh / 2) / (vh / 2 + r.height / 2);
+        t = Math.max(-1, Math.min(1, t));
+        d.el.style.transform = 'translate3d(0,' + (t * -40).toFixed(1) + 'px,0) scale(1.22)';
+      });
     };
     window.addEventListener('scroll', function () {
-      if (!ticking) { ticking = true; requestAnimationFrame(moveHero); }
+      if (!ticking) { ticking = true; requestAnimationFrame(moveAll); }
     }, { passive: true });
-    moveHero();
+    window.addEventListener('resize', moveAll, { passive: true });
+    moveAll();
   }
 
   var button = wrap.querySelector('.menu-btn');
