@@ -17,3 +17,23 @@ if (facade) facade.addEventListener('click', e => {
   f.referrerPolicy = 'no-referrer-when-downgrade'; f.allowFullscreen = true;
   facade.replaceWith(f);
 });
+
+
+// Landing gallery arrows (the strip itself is swipeable without JS)
+document.querySelectorAll('.gallery--carousel').forEach(gallery => {
+  const strip = gallery.querySelector('.gallery__strip');
+  const prev = gallery.querySelector('.gallery__nav--prev');
+  const next = gallery.querySelector('.gallery__nav--next');
+  if (!strip || !prev || !next) return;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const go = dir => {
+    const tile = strip.querySelector('.ph--tile');
+    const styles = getComputedStyle(strip);
+    const gap = parseFloat(styles.columnGap || styles.gap) || 16;
+    const step = tile ? tile.getBoundingClientRect().width + gap : strip.clientWidth * 0.8;
+    const page = Math.max(1, Math.round((strip.clientWidth - 56) / step));
+    strip.scrollBy({ left: dir * step * page, behavior: reduce ? 'auto' : 'smooth' });
+  };
+  prev.addEventListener('click', () => go(-1));
+  next.addEventListener('click', () => go(1));
+});
