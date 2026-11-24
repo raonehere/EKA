@@ -10,10 +10,12 @@ The site is served at **https://ekaforest.com/** from this repository, via GitHu
 python3 -m http.server 8080
 ```
 
-Then open http://localhost:8093/demo/
+Then open http://localhost:8080/
 
 
 ## Booking
+
+The public `/book/` page currently shows a coming-soon screen. The availability calendar and booking flow below stays in the repo for when booking opens.
 
 `/book/` is the availability calendar and booking flow: pick nights → guest
 details → flat **₹2,000 advance** → pay by UPI and upload the screenshot →
