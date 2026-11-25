@@ -384,3 +384,15 @@ details p{margin:0;padding:0 20px 20px;font-size:17px;line-height:28px}
 @media (prefers-reduced-motion:reduce){
   .gallery--carousel .gallery__strip{scroll-behavior:auto}
 }
+
+/* ---------- Quick fixes (Nov 2026) ---------- */
+/* Long buttons (3+ words): Oswald reads better than Sankofa at length; short ones keep Sankofa. */
+.btn.btn--text{font:400 22px/28px var(--f-head);letter-spacing:.14em;padding-top:16px;padding-bottom:16px;text-align:center}
+@media (max-width:719px){
+  .btn.btn--text{font-size:18px;line-height:24px;letter-spacing:.12em;padding:14px 20px}
+}
+/* Mobile nav: >=44px tap targets without moving anything (padding offset by negative margin). */
+@media (max-width:760px){
+  .nav__group a{padding:16px 6px;margin:-16px -7px -16px -6px;background-origin:content-box;background-clip:content-box}
+  .nav__logo{padding:8px;margin:-8px}
+}
