@@ -396,3 +396,26 @@ details p{margin:0;padding:0 20px 20px;font-size:17px;line-height:28px}
   .nav__group a{padding:16px 6px;margin:-16px -7px -16px -6px;background-origin:content-box;background-clip:content-box}
   .nav__logo{padding:8px;margin:-8px}
 }
+
+/* ---------- Book page: WhatsApp is the primary way to reserve a stay ---------- */
+.btn.btn--primary{background:var(--brown);color:var(--paper);border-color:var(--brown)}
+.btn.btn--primary:hover,.btn.btn--primary:focus-visible{background:var(--green);border-color:var(--green);color:var(--paper)}
+.book-cta{margin-top:40px;max-width:28rem}
+.book-cta__wa{gap:14px;min-height:60px;padding-left:28px;padding-right:28px}
+.book-cta__wa svg{width:22px;height:22px;flex:none}
+.book-cta__alt{
+  display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;
+  margin:22px 0 0;font:400 16px/24px var(--f-body);color:var(--text)
+}
+.book-cta__alt a{
+  color:var(--brown);text-underline-offset:4px;
+  padding:10px 0;min-height:44px;display:inline-flex;align-items:center;gap:.35em
+}
+.book-cta__alt a:hover{color:var(--green)}
+.book-cta__dot{margin:0 14px;opacity:.45}
+@media (max-width:760px){
+  .book-cta{max-width:none}
+  .book-cta__wa{width:100%;min-height:52px}
+  .book-cta__alt{flex-direction:column;align-items:flex-start;gap:0}
+  .book-cta__dot{display:none}
+}

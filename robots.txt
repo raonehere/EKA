@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /book/form/
 
 Sitemap: https://ekaforest.com/sitemap.xml
