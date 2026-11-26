@@ -506,29 +506,29 @@ html.lb-lock,body.lb-lock{overflow:hidden}
   object-position:center center;
   display:block;
 }
-/* Desktop: solid theme colour on the left, fading on a soft diagonal
-   (wider at the top, more photo visible at the bottom). Behind the type. */
+/* Desktop: solid theme colour on the left, fading on a gentle diagonal
+   (~8deg off vertical: a little wider at the top). Behind the type. */
 .hero::before{
   content:"";
   position:absolute;
   inset:0;
   z-index:1;
   pointer-events:none;
-  background:linear-gradient(106deg,
+  background:linear-gradient(98deg,
     rgb(var(--hero-scrim)) 0%,
-    rgb(var(--hero-scrim)) 40%,
-    rgba(var(--hero-scrim),.94) 46%,
-    rgba(var(--hero-scrim),.55) 56%,
+    rgb(var(--hero-scrim)) 46%,
+    rgba(var(--hero-scrim),.94) 52%,
+    rgba(var(--hero-scrim),.55) 58%,
     rgba(var(--hero-scrim),0) 66%);
 }
 @media (min-width:1600px){
   .hero::before{
-    background:linear-gradient(106deg,
+    background:linear-gradient(98deg,
       rgb(var(--hero-scrim)) 0%,
-      rgb(var(--hero-scrim)) 48%,
-      rgba(var(--hero-scrim),.94) 54%,
-      rgba(var(--hero-scrim),.55) 64%,
-      rgba(var(--hero-scrim),0) 74%);
+      rgb(var(--hero-scrim)) 50%,
+      rgba(var(--hero-scrim),.94) 56%,
+      rgba(var(--hero-scrim),.55) 62%,
+      rgba(var(--hero-scrim),0) 70%);
   }
 }
 .hero__band{display:contents}
