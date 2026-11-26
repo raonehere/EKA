@@ -63,7 +63,7 @@ ul{margin:0;padding:0;list-style:none}
 .btn{display:inline-flex;align-items:center;justify-content:center;padding:0 30px;
   border:1.5px solid var(--brown);color:var(--brown);text-decoration:none;
   font:400 36px/60px var(--f-disp);letter-spacing:7.2px;text-transform:uppercase;
-  -webkit-text-stroke:0.035em currentColor;paint-order:stroke fill;
+  -webkit-text-stroke:0.0175em currentColor;paint-order:stroke fill;
   transition:background-color .2s,color .2s}
 .btn:hover,.btn:focus-visible{background:var(--brown);color:var(--paper)}
 .link{font:400 16px/24px var(--f-body);text-underline-offset:4px}
