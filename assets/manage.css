@@ -104,7 +104,7 @@
 .manage__confirm-actions{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px}
 .manage__confirm-actions .btn--small{font-size:18px;line-height:46px;letter-spacing:2.4px;padding:0 22px}
 .manage__confirm-actions .linkbtn{align-self:center}
-#m-cancel-confirm{background:#8c2f1f;border-color:#8c2f1f;color:var(--paper);font-family:var(--f-head);font-weight:300;text-transform:uppercase;letter-spacing:.12em}
+#m-cancel-confirm{background:#8c2f1f;border-color:#8c2f1f;color:var(--paper);font-family:var(--f-head);font-weight:500;text-transform:uppercase;letter-spacing:.12em;-webkit-text-stroke:0;paint-order:normal}
 #m-cancel-confirm:hover,#m-cancel-confirm:focus-visible{background:transparent;color:#8c2f1f}
 #m-move-confirm:disabled{opacity:.4;cursor:not-allowed}
 

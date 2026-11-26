@@ -15,10 +15,11 @@
 <meta property="og:url" content="https://ekaforest.com/">
 <meta name="twitter:title" content="EKA Forest · Vattavada, Kerala">
 <meta property="og:image:alt" content="Tents among eucalyptus in Vattavada">
-<meta property="og:image" content="https://ekaforest.com/assets/img/og-image.jpg">
+<meta property="og:image" content="https://ekaforest.com/images/share/og-home.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="assets/img/icon-32.png" sizes="32x32">
-<link rel="apple-touch-icon" href="assets/img/icon-180.png">
+<link rel="preload" as="image" href="images/gallery/views/eka-view-3.jpg" fetchpriority="high">
+<link rel="icon" href="images/brand/icon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="images/brand/icon-180.png">
 <link rel="preload" href="assets/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/styles.css">
@@ -34,7 +35,7 @@
  "name": "EKA Forest",
  "description": "A small forest tent stay among eucalyptus and pine in Vattavada, Idukki, Kerala, past Top Station and Pambadum Shola.",
  "url": "https://ekaforest.com/",
- "image": "https://ekaforest.com/assets/img/og-image.jpg",
+ "image": "https://ekaforest.com/images/share/og-home.jpg",
  "telephone": "+91-70122-93538",
  "numberOfRooms": 11,
  "email": "ekaforestvattavada@gmail.com",
@@ -216,7 +217,7 @@
       <li><a href="blog/">Journals</a></li>
     </ul>
     <a class="nav__logo" href="#top" aria-label="EKA Forest, home">
-      <img src="assets/img/eka-logo.svg" width="117" height="73" alt="EKA Forest logo">
+      <img src="images/brand/logo.svg" width="117" height="73" alt="EKA Forest logo">
     </a>
     <ul class="nav__group nav__group--right">
       <li><a href="events/">Events</a></li>
@@ -230,8 +231,10 @@
 
   <!-- Figma: "What is EKA Forest" (node 2024:119) -->
   <section class="about" aria-labelledby="about-title">
-    <figure class="ph ph--about has-photo" data-cms-img="about.photo" style="background-image:url('assets/gallery/ekaview-3.jpg');background-size:cover;background-position:center">
+    <figure class="ph ph--about has-photo" data-cms-img="about.photo">
+      <img src="images/gallery/views/eka-view-3.jpg" alt="Photo: view from EKA Forest" width="1200" height="675" decoding="async" fetchpriority="high">
       <figcaption class="visually-hidden">Photo: view from EKA Forest</figcaption>
+    
     </figure>
     <div class="about__text">
       <h2 id="about-title" class="h2" data-cms="about.title">What is<br>EKA Forest</h2>
@@ -247,24 +250,36 @@
     <h2 id="stays-title" class="h2" data-cms="stays.title">Stays &amp; experiences</h2>
     <div class="stays__grid">
       <article class="card">
-        <div class="ph ph--card has-photo" data-cms-img="stays.card1_photo" style="background-image:url('assets/gallery/aframetent-1.jpg');background-size:cover;background-position:center"><span class="visually-hidden">Photo: forest tent exterior</span></div>
+        <div class="ph ph--card has-photo" data-cms-img="stays.card1_photo">
+      <img src="images/gallery/accommodation/aframe-tent-1.jpg" alt="Photo: forest tent exterior" width="1200" height="801" decoding="async" loading="lazy">
+      <span class="visually-hidden">Photo: forest tent exterior</span>
+    </div>
         <h3 class="h3" data-cms="stays.card1_title">Forest tents</h3>
         <!-- RESEARCHED (Booking.com data via Casai): luxury tents, mountain view, terrace, garden, Wi-Fi, shared bathroom. ASSUMPTION A3: bedding, tent count, bath details -->
         <p data-cms="stays.card1_text">Tents are set within sturdy protective frames across the terraced landscape, with mountain views, warm bedding for chilly nights, and clean common washrooms.</p>
       </article>
       <article class="card">
-        <div class="ph ph--card has-photo" data-cms-img="stays.card2_photo" style="background-image:url('assets/gallery/campfire.jpg');background-size:cover;background-position:center"><span class="visually-hidden">Photo: bonfire night</span></div>
+        <div class="ph ph--card has-photo" data-cms-img="stays.card2_photo">
+      <img src="images/gallery/reception/campfire.jpg" alt="Photo: bonfire night" width="1200" height="801" decoding="async" loading="lazy">
+      <span class="visually-hidden">Photo: bonfire night</span>
+    </div>
         <h3 class="h3" data-cms="stays.card2_title">Campfire &amp; stargazing</h3>
         <!-- ASSUMPTION A4: campfire offered; clear night skies are documented for Vattavada -->
         <p data-cms="stays.card2_text">Nights in Vattavada are mostly cold and clear. Spend your evenings around the campfire. On clear nights, look up and take in the starry skies.</p>
       </article>
       <article class="card">
-        <div class="ph ph--card has-photo" data-cms-img="stays.card3_photo" style="background-image:url('assets/gallery/villagewalk-1.jpg');background-size:cover;background-position:center"><span class="visually-hidden">Photo: Vattavada farm terraces</span></div>
+        <div class="ph ph--card has-photo" data-cms-img="stays.card3_photo">
+      <img src="images/gallery/village-walks/village-walk-1.jpg" alt="Photo: Vattavada farm terraces" width="1200" height="801" decoding="async" loading="lazy">
+      <span class="visually-hidden">Photo: Vattavada farm terraces</span>
+    </div>
         <h3 class="h3" data-cms="stays.card3_title">Farms &amp; village walks</h3>
         <p data-cms="stays.card3_text">Walk past terraced vegetable farms, garlic fields and strawberry patches, and through the old Tamil village of Kovilur and its lanes.</p>
       </article>
       <article class="card">
-        <div class="ph ph--card has-photo" data-cms-img="stays.card4_photo" style="background-image:url('assets/gallery/sholatrek.jpg');background-size:cover;background-position:center"><span class="visually-hidden">Photo: shola forest trail</span></div>
+        <div class="ph ph--card has-photo" data-cms-img="stays.card4_photo">
+      <img src="images/gallery/trekking/shola-trek.jpg" alt="Photo: shola forest trail" width="1200" height="899" decoding="async" loading="lazy">
+      <span class="visually-hidden">Photo: shola forest trail</span>
+    </div>
         <h3 class="h3" data-cms="stays.card4_title">Shola &amp; viewpoints</h3>
         <p data-cms="stays.card4_text">Pambadum Shola National Park is a short drive away, while Top Station, about 30 km from Eka, offers sweeping views of the valleys and hills beyond. Visit early in the morning to catch the clouds rolling through the valley.</p>
       </article>
@@ -282,50 +297,50 @@
         <span aria-hidden="true">←</span>
       </button>
       <ul class="gallery__strip" id="gallery-strip" tabindex="0" aria-label="Photos of EKA Forest, scroll horizontally">
-        <li class="ph ph--tile"><img src="assets/gallery/aframetent-1.jpg" alt="EKA Forest, A-frame tent" loading="lazy" width="600" height="400"><span class="ph__cap">A-frame tent</span></li>
-        <li class="ph ph--tile ph--tall"><img src="assets/gallery/aframetent-2.jpg" alt="EKA Forest, A-frame tent, evening" loading="lazy" width="600" height="400"><span class="ph__cap">A-frame tent, evening</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/tentinterior.jpg" alt="EKA Forest, Inside the tent" loading="lazy" width="600" height="400"><span class="ph__cap">Inside the tent</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/washroom-1.jpg" alt="EKA Forest, Washroom" loading="lazy" width="600" height="400"><span class="ph__cap">Washroom</span></li>
-        <li class="ph ph--tile ph--tall"><img src="assets/gallery/washroom-2.jpg" alt="EKA Forest, Washroom" loading="lazy" width="600" height="400"><span class="ph__cap">Washroom</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/washroom-3.jpg" alt="EKA Forest, Washroom" loading="lazy" width="600" height="400"><span class="ph__cap">Washroom</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/washroom-4.jpg" alt="EKA Forest, Washroom" loading="lazy" width="600" height="400"><span class="ph__cap">Washroom</span></li>
-        <li class="ph ph--tile ph--tall"><img src="assets/gallery/washroom-5.jpg" alt="EKA Forest, Washroom" loading="lazy" width="600" height="400"><span class="ph__cap">Washroom</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/chilloutspace.jpg" alt="EKA Forest, Chill-out space" loading="lazy" width="600" height="400"><span class="ph__cap">Chill-out space</span></li>
-        <li class="ph ph--tile ph--tall"><img src="assets/gallery/campfire.jpg" alt="EKA Forest, Campfire" loading="lazy" width="600" height="400"><span class="ph__cap">Campfire</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/gardenateka.jpg" alt="EKA Forest, Garden" loading="lazy" width="600" height="400"><span class="ph__cap">Garden</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/walkwaytoeka.jpg" alt="EKA Forest, Walkway to EKA" loading="lazy" width="600" height="400"><span class="ph__cap">Walkway to EKA</span></li>
-        <li class="ph ph--tile ph--tall"><img src="assets/gallery/walkwaytoeka-2.jpg" alt="EKA Forest, Walkway to EKA" loading="lazy" width="600" height="400"><span class="ph__cap">Walkway to EKA</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/walkwaytoeka-3.jpg" alt="EKA Forest, Walkway to EKA" loading="lazy" width="600" height="400"><span class="ph__cap">Walkway to EKA</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/guestsateka-1.jpg" alt="EKA Forest, GuestsAtEKA 1" loading="lazy" width="600" height="400"><span class="ph__cap">GuestsAtEKA 1</span></li>
-        <li class="ph ph--tile ph--tall"><img src="assets/gallery/guestsateka-2.jpg" alt="EKA Forest, GuestsAtEKA 2" loading="lazy" width="600" height="400"><span class="ph__cap">GuestsAtEKA 2</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/guestsateka-3.jpg" alt="EKA Forest, GuestsAtEKA 3" loading="lazy" width="600" height="400"><span class="ph__cap">GuestsAtEKA 3</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/guestsateka-4.jpg" alt="EKA Forest, GuestsAtEKA 4" loading="lazy" width="600" height="400"><span class="ph__cap">GuestsAtEKA 4</span></li>
-        <li class="ph ph--tile ph--tall"><img src="assets/gallery/guestsateka-5.jpg" style="object-position:50% 15%" alt="EKA Forest, GuestsAtEKA 5" loading="lazy" width="600" height="400"><span class="ph__cap">GuestsAtEKA 5</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/guestsateka-6.jpg" alt="EKA Forest, GuestsAtEKA 6" loading="lazy" width="600" height="400"><span class="ph__cap">GuestsAtEKA 6</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/petsateka.jpg" alt="EKA Forest, Pets at EKA" loading="lazy" width="600" height="400"><span class="ph__cap">Pets at EKA</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/ekaview-5.jpg" alt="EKA Forest, EKA view" loading="lazy" width="600" height="400"><span class="ph__cap">EKA view</span></li>
-        <li class="ph ph--tile ph--tall"><img src="assets/gallery/ekaview-1.jpg" alt="EKA Forest, EKA view" loading="lazy" width="600" height="400"><span class="ph__cap">EKA view</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/ekaview-2.jpg" alt="EKA Forest, EKA view" loading="lazy" width="600" height="400"><span class="ph__cap">EKA view</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/ekaview-3.jpg" alt="EKA Forest, EKA view" loading="lazy" width="600" height="400"><span class="ph__cap">EKA view</span></li>
-        <li class="ph ph--tile ph--tall"><img src="assets/gallery/ekaview-4.jpg" alt="EKA Forest, EKA view" loading="lazy" width="600" height="400"><span class="ph__cap">EKA view</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/viewfromeka-1.jpg" alt="EKA Forest, View from EKA" loading="lazy" width="600" height="400"><span class="ph__cap">View from EKA</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/sunsetsateka-1.jpg" alt="EKA Forest, Sunset at EKA" loading="lazy" width="600" height="400"><span class="ph__cap">Sunset at EKA</span></li>
-        <li class="ph ph--tile ph--tall"><img src="assets/gallery/sunsetsateka-2.jpg" alt="EKA Forest, Sunset at EKA" loading="lazy" width="600" height="400"><span class="ph__cap">Sunset at EKA</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/foggedupforest.jpg" alt="EKA Forest, Fog over the forest" loading="lazy" width="600" height="400"><span class="ph__cap">Fog over the forest</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/farmgate.jpg" alt="EKA Forest, Farm gate" loading="lazy" width="600" height="400"><span class="ph__cap">Farm gate</span></li>
-        <li class="ph ph--tile ph--tall"><img src="assets/gallery/terracefarming-1.jpg" alt="EKA Forest, Terrace farming" loading="lazy" width="600" height="400"><span class="ph__cap">Terrace farming</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/villagewalk-1.jpg" alt="EKA Forest, Village walk" loading="lazy" width="600" height="400"><span class="ph__cap">Village walk</span></li>
-        <li class="ph ph--tile ph--tall"><img src="assets/gallery/villagewalk-2.jpg" alt="EKA Forest, Village walk" loading="lazy" width="600" height="400"><span class="ph__cap">Village walk</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/villagewalk-3.jpg" alt="EKA Forest, Village walk" loading="lazy" width="600" height="400"><span class="ph__cap">Village walk</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/villagewalk-4.jpg" alt="EKA Forest, Village walk" loading="lazy" width="600" height="400"><span class="ph__cap">Village walk</span></li>
-        <li class="ph ph--tile ph--tall"><img src="assets/gallery/villagewalk-5.jpg" alt="EKA Forest, Village walk" loading="lazy" width="600" height="400"><span class="ph__cap">Village walk</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/villagewalk-6.jpg" alt="EKA Forest, Village walk" loading="lazy" width="600" height="400"><span class="ph__cap">Village walk</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/villagewalk-7.jpg" alt="EKA Forest, Village walk" loading="lazy" width="600" height="400"><span class="ph__cap">Village walk</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/meadowtrek.jpg" alt="EKA Forest, Meadow trek" loading="lazy" width="600" height="400"><span class="ph__cap">Meadow trek</span></li>
-        <li class="ph ph--tile ph--tall"><img src="assets/gallery/meadowtrekview.jpg" alt="EKA Forest, Meadow trek view" loading="lazy" width="600" height="400"><span class="ph__cap">Meadow trek view</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/sholatrek.jpg" alt="EKA Forest, Shola trek" loading="lazy" width="600" height="400"><span class="ph__cap">Shola trek</span></li>
-        <li class="ph ph--tile"><img src="assets/gallery/waterfall-1.jpg" alt="EKA Forest, Waterfall" loading="lazy" width="600" height="400"><span class="ph__cap">Waterfall</span></li>
-        <li class="ph ph--tile ph--tall"><img src="assets/gallery/waterfall-2.jpg" alt="EKA Forest, Waterfall" loading="lazy" width="600" height="400"><span class="ph__cap">Waterfall</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/accommodation/aframe-tent-1.jpg" alt="EKA Forest, A-frame tent" loading="lazy" width="600" height="400"><span class="ph__cap">A-frame tent</span></li>
+        <li class="ph ph--tile ph--tall"><img src="images/gallery/accommodation/aframe-tent-2.jpg" alt="EKA Forest, A-frame tent, evening" loading="lazy" width="600" height="400"><span class="ph__cap">A-frame tent, evening</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/accommodation/tent-interior.jpg" alt="EKA Forest, Inside the tent" loading="lazy" width="600" height="400"><span class="ph__cap">Inside the tent</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/accommodation/washroom-1.jpg" alt="EKA Forest, Washroom" loading="lazy" width="600" height="400"><span class="ph__cap">Washroom</span></li>
+        <li class="ph ph--tile ph--tall"><img src="images/gallery/accommodation/washroom-2.jpg" alt="EKA Forest, Washroom" loading="lazy" width="600" height="400"><span class="ph__cap">Washroom</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/accommodation/washroom-3.jpg" alt="EKA Forest, Washroom" loading="lazy" width="600" height="400"><span class="ph__cap">Washroom</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/accommodation/washroom-4.jpg" alt="EKA Forest, Washroom" loading="lazy" width="600" height="400"><span class="ph__cap">Washroom</span></li>
+        <li class="ph ph--tile ph--tall"><img src="images/gallery/accommodation/washroom-5.jpg" alt="EKA Forest, Washroom" loading="lazy" width="600" height="400"><span class="ph__cap">Washroom</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/reception/chill-out-space.jpg" alt="EKA Forest, Chill-out space" loading="lazy" width="600" height="400"><span class="ph__cap">Chill-out space</span></li>
+        <li class="ph ph--tile ph--tall"><img src="images/gallery/reception/campfire.jpg" alt="EKA Forest, Campfire" loading="lazy" width="600" height="400"><span class="ph__cap">Campfire</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/reception/garden-at-eka.jpg" alt="EKA Forest, Garden" loading="lazy" width="600" height="400"><span class="ph__cap">Garden</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/reception/walkway-to-eka.jpg" alt="EKA Forest, Walkway to EKA" loading="lazy" width="600" height="400"><span class="ph__cap">Walkway to EKA</span></li>
+        <li class="ph ph--tile ph--tall"><img src="images/gallery/reception/walkway-to-eka-2.jpg" alt="EKA Forest, Walkway to EKA" loading="lazy" width="600" height="400"><span class="ph__cap">Walkway to EKA</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/reception/walkway-to-eka-3.jpg" alt="EKA Forest, Walkway to EKA" loading="lazy" width="600" height="400"><span class="ph__cap">Walkway to EKA</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/reception/guests-at-eka-1.jpg" alt="EKA Forest, Guests at EKA" loading="lazy" width="600" height="400"><span class="ph__cap">Guests at EKA</span></li>
+        <li class="ph ph--tile ph--tall"><img src="images/gallery/reception/guests-at-eka-2.jpg" alt="EKA Forest, Guests at EKA" loading="lazy" width="600" height="400"><span class="ph__cap">Guests at EKA</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/reception/guests-at-eka-7.jpg" alt="EKA Forest, Guests at EKA" loading="lazy" width="600" height="400"><span class="ph__cap">Guests at EKA</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/reception/guests-at-eka-4.jpg" alt="EKA Forest, Guests at EKA" loading="lazy" width="600" height="400"><span class="ph__cap">Guests at EKA</span></li>
+        <li class="ph ph--tile ph--tall"><img src="images/gallery/reception/guests-at-eka-5.jpg" style="object-position:50% 15%" alt="EKA Forest, Guests at EKA" loading="lazy" width="600" height="400"><span class="ph__cap">Guests at EKA</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/reception/guests-at-eka-6.jpg" alt="EKA Forest, Guests at EKA" loading="lazy" width="600" height="400"><span class="ph__cap">Guests at EKA</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/reception/pets-at-eka.jpg" alt="EKA Forest, Pets at EKA" loading="lazy" width="600" height="400"><span class="ph__cap">Pets at EKA</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/views/eka-view-5.jpg" alt="EKA Forest, EKA view" loading="lazy" width="600" height="400"><span class="ph__cap">EKA view</span></li>
+        <li class="ph ph--tile ph--tall"><img src="images/gallery/views/eka-view-1.jpg" alt="EKA Forest, EKA view" loading="lazy" width="600" height="400"><span class="ph__cap">EKA view</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/views/eka-view-2.jpg" alt="EKA Forest, EKA view" loading="lazy" width="600" height="400"><span class="ph__cap">EKA view</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/views/eka-view-3.jpg" alt="EKA Forest, EKA view" loading="lazy" width="600" height="400"><span class="ph__cap">EKA view</span></li>
+        <li class="ph ph--tile ph--tall"><img src="images/gallery/views/eka-view-4.jpg" alt="EKA Forest, EKA view" loading="lazy" width="600" height="400"><span class="ph__cap">EKA view</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/views/view-from-eka-1.jpg" alt="EKA Forest, View from EKA" loading="lazy" width="600" height="400"><span class="ph__cap">View from EKA</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/views/sunsets-at-eka-1.jpg" alt="EKA Forest, Sunset at EKA" loading="lazy" width="600" height="400"><span class="ph__cap">Sunset at EKA</span></li>
+        <li class="ph ph--tile ph--tall"><img src="images/gallery/views/sunsets-at-eka-2.jpg" alt="EKA Forest, Sunset at EKA" loading="lazy" width="600" height="400"><span class="ph__cap">Sunset at EKA</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/views/fogged-up-forest.jpg" alt="EKA Forest, Fog over the forest" loading="lazy" width="600" height="400"><span class="ph__cap">Fog over the forest</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/farm/farm-gate.jpg" alt="EKA Forest, Farm gate" loading="lazy" width="600" height="400"><span class="ph__cap">Farm gate</span></li>
+        <li class="ph ph--tile ph--tall"><img src="images/gallery/farm/terrace-farming-1.jpg" alt="EKA Forest, Terrace farming" loading="lazy" width="600" height="400"><span class="ph__cap">Terrace farming</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/village-walks/village-walk-1.jpg" alt="EKA Forest, Village walk" loading="lazy" width="600" height="400"><span class="ph__cap">Village walk</span></li>
+        <li class="ph ph--tile ph--tall"><img src="images/gallery/village-walks/village-walk-2.jpg" alt="EKA Forest, Village walk" loading="lazy" width="600" height="400"><span class="ph__cap">Village walk</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/village-walks/village-walk-3.jpg" alt="EKA Forest, Village walk" loading="lazy" width="600" height="400"><span class="ph__cap">Village walk</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/village-walks/village-walk-4.jpg" alt="EKA Forest, Village walk" loading="lazy" width="600" height="400"><span class="ph__cap">Village walk</span></li>
+        <li class="ph ph--tile ph--tall"><img src="images/gallery/village-walks/village-walk-5.jpg" alt="EKA Forest, Village walk" loading="lazy" width="600" height="400"><span class="ph__cap">Village walk</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/village-walks/village-walk-6.jpg" alt="EKA Forest, Village walk" loading="lazy" width="600" height="400"><span class="ph__cap">Village walk</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/village-walks/village-walk-7.jpg" alt="EKA Forest, Village walk" loading="lazy" width="600" height="400"><span class="ph__cap">Village walk</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/trekking/meadow-trek.jpg" alt="EKA Forest, Meadow trek" loading="lazy" width="600" height="400"><span class="ph__cap">Meadow trek</span></li>
+        <li class="ph ph--tile ph--tall"><img src="images/gallery/trekking/meadow-trek-view.jpg" alt="EKA Forest, Meadow trek view" loading="lazy" width="600" height="400"><span class="ph__cap">Meadow trek view</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/trekking/shola-trek.jpg" alt="EKA Forest, Shola trek" loading="lazy" width="600" height="400"><span class="ph__cap">Shola trek</span></li>
+        <li class="ph ph--tile"><img src="images/gallery/trekking/waterfall-1.jpg" alt="EKA Forest, Waterfall" loading="lazy" width="600" height="400"><span class="ph__cap">Waterfall</span></li>
+        <li class="ph ph--tile ph--tall"><img src="images/gallery/trekking/waterfall-2.jpg" alt="EKA Forest, Waterfall" loading="lazy" width="600" height="400"><span class="ph__cap">Waterfall</span></li>
       </ul>
       <button type="button" class="gallery__nav gallery__nav--next" aria-label="Next photos" aria-controls="gallery-strip">
         <span aria-hidden="true">→</span>
@@ -424,7 +439,7 @@
 
 <footer class="site-footer" id="contact">
   <div class="footer__inner">
-    <img class="footer__mark" src="assets/img/eka-forest-wordmark.svg" width="160" height="146" alt="EKA Forest">
+    <img class="footer__mark" src="images/brand/wordmark.svg" width="160" height="146" alt="EKA Forest">
     <div class="footer__col">
       <h2 class="h4">Contact</h2>
       <ul>

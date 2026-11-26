@@ -232,7 +232,7 @@
 .terms strong{font-weight:600;color:var(--brown)}
 
 .btn--pay{
-  width:100%;font-family:var(--f-head);font-weight:300;font-size:23px;line-height:56px;letter-spacing:.14em;
+  width:100%;font-family:var(--f-head);font-weight:500;font-size:23px;line-height:56px;letter-spacing:.14em;-webkit-text-stroke:0;paint-order:normal;
   padding:0 16px;background:var(--brown);color:var(--white);border-color:var(--brown);text-transform:uppercase;
 }
 .btn--pay:hover:not(:disabled),.btn--pay:focus-visible:not(:disabled){background:transparent;color:var(--brown)}
@@ -286,7 +286,7 @@
 .confirm__card{
   position:relative;
   width:100%;max-width:560px;background:var(--paper);
-  background-image:url(img/grain.png);background-size:160px;
+  background-image:url(../images/brand/grain.png);background-size:160px;
   border:1px solid rgba(101,67,48,.4);border-radius:28px;
   padding:38px 38px 30px;box-shadow:0 30px 80px rgba(36,37,36,.3);
   animation:rise .35s cubic-bezier(.2,.8,.3,1) both;
@@ -386,7 +386,7 @@ body.is-locked{overflow:hidden}
 .paypanel[hidden]{display:none}
 .paypanel__card{
   position:relative;width:100%;max-width:660px;background:var(--paper);
-  background-image:url(img/grain.png);background-size:160px;
+  background-image:url(../images/brand/grain.png);background-size:160px;
   border:1px solid rgba(101,67,48,.4);border-radius:28px;
   padding:34px 34px 26px;box-shadow:0 30px 80px rgba(36,37,36,.3);
   animation:rise .35s cubic-bezier(.2,.8,.3,1) both;

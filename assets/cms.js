@@ -11,11 +11,82 @@
                events: 'Events', blog: 'Journals' };
   var ALLOWED = { BR: 1, STRONG: 1, EM: 1, A: 1 };
 
-  // Site root, so sheet values like "assets/img/x.jpg" work from /blog/ too.
+  // Site root, so sheet values like "images/gallery/views/eka-view-3.jpg" work from /blog/ too.
   var ROOT = (function () {
     var s = document.querySelector('script[src*="cms.js"]');
     return s ? s.src.replace(/assets\/cms\.js.*$/, '') : '';
   })();
+
+  // Map older sheet paths (assets/gallery/…, assets/img/…) to the images/ folder
+  // so the live site keeps working whether or not the sheet has been updated yet.
+  var IMAGE_MAP = {
+    "assets/img/events/flow-state-retreat.jpg": "images/events/flow-state-retreat.jpg",
+    "assets/gallery/terracefarming-1.jpg": "images/gallery/farm/terrace-farming-1.jpg",
+    "assets/img/events/clay-workshop.jpg": "images/events/clay-workshop.jpg",
+    "assets/img/eka-forest-wordmark.svg": "images/brand/wordmark.svg",
+    "assets/gallery/walkwaytoeka-2.jpg": "images/gallery/reception/walkway-to-eka-2.jpg",
+    "assets/gallery/walkwaytoeka-3.jpg": "images/gallery/reception/walkway-to-eka-3.jpg",
+    "assets/gallery/sunsetsateka-1.jpg": "images/gallery/views/sunsets-at-eka-1.jpg",
+    "assets/gallery/sunsetsateka-2.jpg": "images/gallery/views/sunsets-at-eka-2.jpg",
+    "assets/gallery/foggedupforest.jpg": "images/gallery/views/fogged-up-forest.jpg",
+    "assets/gallery/meadowtrekview.jpg": "images/gallery/trekking/meadow-trek-view.jpg",
+    "assets/gallery/chilloutspace.jpg": "images/gallery/reception/chill-out-space.jpg",
+    "assets/gallery/guestsateka-1.jpg": "images/gallery/reception/guests-at-eka-1.jpg",
+    "assets/gallery/guestsateka-2.jpg": "images/gallery/reception/guests-at-eka-2.jpg",
+    "assets/gallery/guestsateka-3.jpg": "images/gallery/reception/guests-at-eka-7.jpg",
+    "assets/gallery/guestsateka-4.jpg": "images/gallery/reception/guests-at-eka-4.jpg",
+    "assets/gallery/guestsateka-5.jpg": "images/gallery/reception/guests-at-eka-5.jpg",
+    "assets/gallery/guestsateka-6.jpg": "images/gallery/reception/guests-at-eka-6.jpg",
+    "assets/gallery/viewfromeka-1.jpg": "images/gallery/views/view-from-eka-1.jpg",
+    "assets/gallery/villagewalk-1.jpg": "images/gallery/village-walks/village-walk-1.jpg",
+    "assets/gallery/villagewalk-2.jpg": "images/gallery/village-walks/village-walk-2.jpg",
+    "assets/gallery/villagewalk-3.jpg": "images/gallery/village-walks/village-walk-3.jpg",
+    "assets/gallery/villagewalk-4.jpg": "images/gallery/village-walks/village-walk-4.jpg",
+    "assets/gallery/villagewalk-5.jpg": "images/gallery/village-walks/village-walk-5.jpg",
+    "assets/gallery/villagewalk-6.jpg": "images/gallery/village-walks/village-walk-6.jpg",
+    "assets/gallery/villagewalk-7.jpg": "images/gallery/village-walks/village-walk-7.jpg",
+    "assets/gallery/aframetent-1.jpg": "images/gallery/accommodation/aframe-tent-1.jpg",
+    "assets/gallery/aframetent-2.jpg": "images/gallery/accommodation/aframe-tent-2.jpg",
+    "assets/gallery/tentinterior.jpg": "images/gallery/accommodation/tent-interior.jpg",
+    "assets/gallery/walkwaytoeka.jpg": "images/gallery/reception/walkway-to-eka.jpg",
+    "assets/gallery/gardenateka.jpg": "images/gallery/reception/garden-at-eka.jpg",
+    "assets/gallery/waterfall-1.jpg": "images/gallery/trekking/waterfall-1.jpg",
+    "assets/gallery/waterfall-2.jpg": "images/gallery/trekking/waterfall-2.jpg",
+    "assets/gallery/washroom-1.jpg": "images/gallery/accommodation/washroom-1.jpg",
+    "assets/gallery/washroom-2.jpg": "images/gallery/accommodation/washroom-2.jpg",
+    "assets/gallery/washroom-3.jpg": "images/gallery/accommodation/washroom-3.jpg",
+    "assets/gallery/washroom-4.jpg": "images/gallery/accommodation/washroom-4.jpg",
+    "assets/gallery/washroom-5.jpg": "images/gallery/accommodation/washroom-5.jpg",
+    "assets/gallery/meadowtrek.jpg": "images/gallery/trekking/meadow-trek.jpg",
+    "assets/img/events/newyear.jpg": "images/events/slow-forest-new-year.jpg",
+    "assets/gallery/petsateka.jpg": "images/gallery/reception/pets-at-eka.jpg",
+    "assets/gallery/ekaview-1.jpg": "images/gallery/views/eka-view-1.jpg",
+    "assets/gallery/ekaview-2.jpg": "images/gallery/views/eka-view-2.jpg",
+    "assets/gallery/ekaview-3.jpg": "images/gallery/views/eka-view-3.jpg",
+    "assets/gallery/ekaview-4.jpg": "images/gallery/views/eka-view-4.jpg",
+    "assets/gallery/ekaview-5.jpg": "images/gallery/views/eka-view-5.jpg",
+    "assets/gallery/sholatrek.jpg": "images/gallery/trekking/shola-trek.jpg",
+    "assets/gallery/campfire.jpg": "images/gallery/reception/campfire.jpg",
+    "assets/gallery/farmgate.jpg": "images/gallery/farm/farm-gate.jpg",
+    "assets/img/og-gallery.jpg": "images/share/og-gallery.jpg",
+    "assets/img/og-events.jpg": "images/share/og-events.jpg",
+    "assets/img/eka-logo.svg": "images/brand/logo.svg",
+    "assets/img/icon-180.png": "images/brand/icon-180.png",
+    "assets/img/og-image.jpg": "images/share/og-home.jpg",
+    "assets/img/icon-32.png": "images/brand/icon-32.png",
+    "assets/img/grain.png": "images/brand/grain.png"
+  };
+  function mapImagePath(v) {
+    v = String(v || '').trim();
+    if (IMAGE_MAP[v]) return IMAGE_MAP[v];
+    var keys = Object.keys(IMAGE_MAP);
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      if (v.indexOf(k) !== -1) return v.split(k).join(IMAGE_MAP[k]);
+    }
+    return v;
+  }
+
 
   function url(tab) {
     return 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
@@ -179,13 +250,17 @@
       });
     }
     document.querySelectorAll('[data-cms-img]').forEach(function (el) {
-      var v = get(el.getAttribute('data-cms-img')); if (!v || !/^(https?:|assets\/)/.test(v)) return;
-      // "assets/..." is relative to the site root, not to the current page:
-      // without this, /blog/ asked for /blog/assets/... and every journal
-      // photo 404ed.
-      if (v.indexOf('assets/') === 0) v = ROOT + v;
-      el.style.backgroundImage = 'url("' + v.replace(/"/g, '%22') + '")';
-      el.style.backgroundSize = 'cover'; el.style.backgroundPosition = 'center';
+      var v = get(el.getAttribute('data-cms-img')); if (!v || !/^(https?:|assets\/|images\/)/.test(v)) return;
+      // "images/..." (and older "assets/...") is relative to the site root, not the page.
+      v = mapImagePath(v);
+      if (v.indexOf('assets/') === 0 || v.indexOf('images/') === 0) v = ROOT + v;
+      var img = el.tagName === 'IMG' ? el : el.querySelector('img');
+      if (img) {
+        img.src = v;
+      } else {
+        el.style.backgroundImage = 'url("' + v.replace(/"/g, '%22') + '")';
+        el.style.backgroundSize = 'cover'; el.style.backgroundPosition = 'center';
+      }
       el.classList.add('has-photo');
       var cap = el.querySelector('span, figcaption'); if (cap) cap.classList.add('visually-hidden');
     });
