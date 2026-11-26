@@ -478,11 +478,20 @@ html.lb-lock,body.lb-lock{overflow:hidden}
 
 
 /* ---------- Homepage hero: full-viewport photo, copy in the mist ---------- */
-/* Scrim tint is sampled from the photo (see main.js). Defaults are for a misty/light image. */
+/* Scrim tint is sampled from the photo (see main.js). Defaults are for a misty/light image.
+   Number/color custom properties are registered so the haze can tween between slides. */
+@property --hero-s-r{syntax:"<number>";inherits:true;initial-value:255}
+@property --hero-s-g{syntax:"<number>";inherits:true;initial-value:255}
+@property --hero-s-b{syntax:"<number>";inherits:true;initial-value:255}
+@property --hero-ink{syntax:"<color>";inherits:true;initial-value:#654330}
 .hero{
-  --hero-scrim: 255, 255, 255;
+  --hero-s-r:255;
+  --hero-s-g:255;
+  --hero-s-b:255;
+  --hero-scrim: var(--hero-s-r), var(--hero-s-g), var(--hero-s-b);
   --hero-ink: var(--brown);
-  --hero-shadow: 255, 255, 255;
+  --hero-shadow: var(--hero-s-r), var(--hero-s-g), var(--hero-s-b);
+  --hero-fade:1.8s;
   position:relative;
   isolation:isolate;
   min-height:100vh;
@@ -490,6 +499,10 @@ html.lb-lock,body.lb-lock{overflow:hidden}
   display:flex;
   flex-direction:column;
   color:var(--hero-ink);
+  transition:--hero-s-r var(--hero-fade) ease,--hero-s-g var(--hero-fade) ease,--hero-s-b var(--hero-fade) ease,--hero-ink var(--hero-fade) ease,color var(--hero-fade) ease;
+}
+@media (prefers-reduced-motion:reduce){
+  .hero{--hero-fade:0.01s}
 }
 .hero__photo{
   position:absolute;
@@ -499,13 +512,18 @@ html.lb-lock,body.lb-lock{overflow:hidden}
   pointer-events:none;
 }
 .hero__photo img{
+  position:absolute;
+  inset:0;
   width:100%;
   height:100%;
   max-width:none;
   object-fit:cover;
   object-position:center center;
   display:block;
+  opacity:0;
+  transition:opacity var(--hero-fade) ease;
 }
+.hero__photo img.is-on{opacity:1}
 /* Desktop: solid theme colour on the left, fading on a gentle diagonal
    (~8deg off vertical: a little wider at the top). Behind the type. */
 .hero::before{
@@ -535,7 +553,11 @@ html.lb-lock,body.lb-lock{overflow:hidden}
 }
 .hero__band{display:contents}
 .hero .site-header{position:relative;z-index:2;width:100%}
-.hero .nav__group a{color:var(--hero-ink)}
+.hero .nav__group a{
+  color:var(--hero-ink);
+  transition:color var(--hero-fade) ease,background-size .25s;
+}
+.hero .nav__logo img{transition:filter var(--hero-fade) ease}
 .hero[data-hero-tone="dark"] .nav__logo img{
   filter:brightness(0) invert(1);
 }
@@ -551,15 +573,34 @@ html.lb-lock,body.lb-lock{overflow:hidden}
   flex-direction:column;
   justify-content:flex-start;
 }
+@media (min-width:761px){
+  /* Optical vertical center in the space below the header.
+     flex-shrink:0 so a short window grows the hero instead of clipping the button. */
+  .hero__copy{
+    justify-content:safe center;
+    flex:1 0 auto;
+    padding-top:24px;
+    padding-bottom:24px;
+  }
+}
+/* Short desktop windows (e.g. 1024×640): tighten the header and copy so the block still fits. */
+@media (min-width:761px) and (max-height:760px){
+  .hero .site-header{padding-top:36px}
+  .hero__copy{padding-top:8px;padding-bottom:16px}
+  .hero__text .h2{margin-bottom:10px;line-height:44px}
+  .hero__text p{margin-bottom:8px;line-height:26px}
+  .hero__text p:last-of-type{margin-bottom:14px}
+}
 .hero__text{
   position:relative;
   max-width:25rem;
 }
-.hero__text .h2{color:var(--hero-ink);margin-bottom:16px}
+.hero__text .h2{color:var(--hero-ink);margin-bottom:16px;transition:color var(--hero-fade) ease}
 .hero__text p{
   color:var(--hero-ink);
   margin:0 0 14px;
   text-shadow:0 1px 10px rgba(var(--hero-shadow),.9),0 0 3px rgba(var(--hero-shadow),.75);
+  transition:color var(--hero-fade) ease,text-shadow var(--hero-fade) ease;
 }
 .hero__text p:last-of-type{margin-bottom:24px}
 .hero__text .btn{
@@ -583,6 +624,7 @@ html.lb-lock,body.lb-lock{overflow:hidden}
     height:46%;
   }
   .hero__photo img{object-position:60% 85%}
+  .hero__photo img[data-hero="view"]{object-position:center 40%}
   /* Solid theme-colour band for nav + copy, fading down into the photo */
   .hero__band{
     display:block;

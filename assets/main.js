@@ -40,12 +40,19 @@ document.querySelectorAll('.gallery--carousel').forEach(gallery => {
 
 
 
-// Hero scrim: sample the left/top of the photo and pick a light or dark tint
+// Hero: sample each slide for a white or brown haze, and cross-fade three photos
 (function () {
   var hero = document.querySelector('.hero');
   if (!hero) return;
-  var img = hero.querySelector('.hero__photo img');
-  if (!img) return;
+  var slides = Array.prototype.slice.call(hero.querySelectorAll('.hero__photo img'));
+  if (!slides.length) return;
+
+  var HOLD = 6500;
+  var FADE = 1800;
+  var cache = {};
+  var current = 0;
+  var timer = null;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function luma(r, g, b) {
     function lin(c) {
@@ -57,19 +64,26 @@ document.querySelectorAll('.gallery--carousel').forEach(gallery => {
 
   function apply(light) {
     if (light) {
-      hero.style.setProperty('--hero-scrim', '255, 255, 255');
-      hero.style.setProperty('--hero-shadow', '255, 255, 255');
+      hero.style.setProperty('--hero-s-r', '255');
+      hero.style.setProperty('--hero-s-g', '255');
+      hero.style.setProperty('--hero-s-b', '255');
       hero.style.setProperty('--hero-ink', '#654330');
       hero.setAttribute('data-hero-tone', 'light');
     } else {
-      hero.style.setProperty('--hero-scrim', '101, 67, 48');
-      hero.style.setProperty('--hero-shadow', '101, 67, 48');
+      hero.style.setProperty('--hero-s-r', '101');
+      hero.style.setProperty('--hero-s-g', '67');
+      hero.style.setProperty('--hero-s-b', '48');
       hero.style.setProperty('--hero-ink', '#e9edef');
       hero.setAttribute('data-hero-tone', 'dark');
     }
   }
 
-  function sample() {
+  function sample(img) {
+    var key = img.currentSrc || img.src;
+    if (key && cache[key] != null) {
+      apply(cache[key]);
+      return;
+    }
     if (!img.naturalWidth) return;
     try {
       var iw = img.naturalWidth, ih = img.naturalHeight;
@@ -95,12 +109,76 @@ document.querySelectorAll('.gallery--carousel').forEach(gallery => {
         n += 1;
       }
       if (!n) return;
-      apply(luma(r / n, g / n, b / n) >= 0.45);
+      var light = luma(r / n, g / n, b / n) >= 0.45;
+      cache[key] = light;
+      apply(light);
     } catch (err) {
       // Keep the CSS defaults if the canvas read fails.
     }
   }
 
-  if (img.complete) sample();
-  else img.addEventListener('load', sample);
+  function show(index, instant) {
+    current = (index + slides.length) % slides.length;
+    slides.forEach(function (img, i) {
+      var on = i === current;
+      img.classList.toggle('is-on', on);
+      if (on) {
+        img.removeAttribute('aria-hidden');
+      } else {
+        img.setAttribute('aria-hidden', 'true');
+      }
+    });
+    if (instant) hero.style.setProperty('--hero-fade', '0.01s');
+    sample(slides[current]);
+    if (instant) {
+      // Restore the fade length on the next frame so later transitions stay slow.
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          hero.style.removeProperty('--hero-fade');
+        });
+      });
+    }
+  }
+
+  function tick() {
+    show(current + 1, false);
+    timer = setTimeout(tick, HOLD);
+  }
+
+  function start() {
+    stop();
+    timer = setTimeout(tick, HOLD);
+  }
+
+  function stop() {
+    if (timer) { clearTimeout(timer); timer = null; }
+  }
+
+  var params = new URLSearchParams(window.location.search);
+  var startAt = 0;
+  var freeze = false;
+  if (params.has('slide')) {
+    startAt = parseInt(params.get('slide'), 10);
+    if (isNaN(startAt)) startAt = 0;
+    startAt = Math.max(0, Math.min(slides.length - 1, startAt));
+    freeze = true;
+  }
+
+  slides.forEach(function (img) {
+    if (!img.complete) img.addEventListener('load', function () {
+      if (img === slides[current]) sample(img);
+    });
+  });
+
+  show(startAt, true);
+  if (!freeze && !reduce) {
+    if (slides[0].complete) start();
+    else slides[0].addEventListener('load', start);
+  }
+
+  window.__heroGo = function (i, keep) {
+    stop();
+    show(i, !keep);
+    if (keep && !reduce) start();
+  };
 })();
