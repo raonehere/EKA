@@ -514,21 +514,23 @@ html.lb-lock,body.lb-lock{overflow:hidden}
   inset:0;
   z-index:1;
   pointer-events:none;
+  /* Solid band ~40% of the viewport, then a soft 8deg fade into ~60% photo. */
   background:linear-gradient(98deg,
     rgb(var(--hero-scrim)) 0%,
-    rgb(var(--hero-scrim)) 46%,
-    rgba(var(--hero-scrim),.94) 52%,
-    rgba(var(--hero-scrim),.55) 58%,
-    rgba(var(--hero-scrim),0) 66%);
+    rgb(var(--hero-scrim)) 36%,
+    rgba(var(--hero-scrim),.94) 42%,
+    rgba(var(--hero-scrim),.5) 50%,
+    rgba(var(--hero-scrim),0) 58%);
 }
 @media (min-width:1600px){
   .hero::before{
+    /* Copy is centred in 1440px, so the solid band is a touch wider to cover it. */
     background:linear-gradient(98deg,
       rgb(var(--hero-scrim)) 0%,
-      rgb(var(--hero-scrim)) 50%,
-      rgba(var(--hero-scrim),.94) 56%,
-      rgba(var(--hero-scrim),.55) 62%,
-      rgba(var(--hero-scrim),0) 70%);
+      rgb(var(--hero-scrim)) 42%,
+      rgba(var(--hero-scrim),.94) 48%,
+      rgba(var(--hero-scrim),.5) 56%,
+      rgba(var(--hero-scrim),0) 64%);
   }
 }
 .hero__band{display:contents}
@@ -551,7 +553,7 @@ html.lb-lock,body.lb-lock{overflow:hidden}
 }
 .hero__text{
   position:relative;
-  max-width:28rem;
+  max-width:25rem;
 }
 .hero__text .h2{color:var(--hero-ink);margin-bottom:16px}
 .hero__text p{
@@ -616,4 +618,54 @@ html.lb-lock,body.lb-lock{overflow:hidden}
 .hero + #main .stays{padding-top:120px}
 @media (max-width:760px){
   .hero + #main .stays{padding-top:88px}
+}
+
+/* ---------- Mobile ≤600px: logo on the left, smaller hero type, more space above the title ---------- */
+@media (max-width:600px){
+  .hero__copy{padding-top:48px}
+  .hero__text .h2{font-size:28px;line-height:34px}
+  .hero__text p{font-size:14px;line-height:22px}
+
+  .site-header{padding:28px 22px 0}
+  .nav{
+    display:flex;
+    justify-content:flex-start;
+    align-items:flex-end;
+    gap:0;
+  }
+  .nav__logo{
+    order:-1;
+    flex:none;
+    margin-right:16px;
+  }
+  .nav__logo img{
+    width:40px;
+    transform:translateY(0);
+  }
+  .nav__group{display:contents}
+  .nav__group--left,
+  .nav__group--right{padding:0}
+  .nav__group--left::after,
+  .nav__group--right::before{content:none;display:none}
+  .nav li{
+    flex:1 1 0;
+    min-width:0;
+    margin:0 !important;
+    text-align:center;
+  }
+  .nav__group a{
+    font-size:13px;
+    letter-spacing:1.2px;
+    margin-inline-end:-1.2px;
+  }
+}
+@media (max-width:360px){
+  .site-header{padding:24px 16px 0}
+  .nav__logo{margin-right:10px}
+  .nav__logo img{width:36px}
+  .nav__group a{
+    font-size:11.5px;
+    letter-spacing:.8px;
+    margin-inline-end:-.8px;
+  }
 }
