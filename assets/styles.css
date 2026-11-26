@@ -78,7 +78,7 @@ ul{margin:0;padding:0;list-style:none}
 /* ---------- What is EKA Forest (intro photo is 1:1; column widths still follow the 1440 layout) ---------- */
 .about{max-width:1440px;margin:0 auto;padding:196px var(--pad-r) 0 105px;
   display:grid;grid-template-columns:606fr 468fr;column-gap:125px;align-items:start}
-.ph--about{aspect-ratio:1/1}
+.ph--about{aspect-ratio:4/3}
 .about__text{padding-top:3px}
 .about__text .h2{margin-bottom:12px}
 .about__text p{margin:0 0 14px}

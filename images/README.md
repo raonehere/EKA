@@ -17,7 +17,7 @@ The high-resolution masters are not in the repo (they added about 120 MB to ever
 | `events/` | Event card photos | Events page, Events share image source |
 | `share/` | Open Graph images (`og-home`, `og-events`, `og-gallery`) | Link previews |
 | `brand/` | Logo, wordmark, favicons, paper grain texture | Header, footer, icons, page background |
-| `about/`, `stays/`, `journals/` | Empty for now | When a slot needs its own crop (1:1 intro, 4:3 cards, 16:9 headers), drop the new file here and point the page or the sheet at it. Until then those slots reuse the gallery file, so we don’t keep copies. |
+| `about/`, `stays/`, `journals/` | Empty for now | When a slot needs its own crop (4:3 intro, 4:3 cards, 16:9 headers), drop the new file here and point the page or the sheet at it. Until then those slots reuse the gallery file, so we don’t keep copies. |
 
 ## Naming
 
@@ -33,7 +33,7 @@ Export as JPEG, sRGB, quality 80–90. Crop from the original, not from another 
 
 | Folder or slot | Ratio | Export size |
 | --- | --- | --- |
-| Homepage intro (when a dedicated crop is ready, in `about/`) | **1:1** | 1600 × 1600 |
+| Homepage intro (when a dedicated crop is ready, in `about/`) | **4:3** | 1600 × 1200 |
 | Stays cards (`stays/`, or a 4:3 crop of a gallery photo) | **4:3** | 1600 × 1200 |
 | Journal cards | **4:3** | 1600 × 1200 |
 | Journal post headers | **16:9** | 1920 × 1080 |
@@ -52,6 +52,6 @@ For Events, keep faces in the middle 60% of the height: phones use a wider crop 
 2. Replace the file in this folder (keep the path and name).
 3. That’s it — every page that uses that photo will update on the next publish.
 
-To use a new file name, or to give a slot its own crop (for example a 1:1 intro in `about/`), change the path in the page or in the Google Sheet “EKA Forest – Website Content” (About, Stays, Journals, Events). Paths are relative to the site root, like `images/gallery/views/eka-view-3.jpg`.
+To use a new file name, or to give a slot its own crop (for example a 4:3 intro in `about/`), change the path in the page or in the Google Sheet “EKA Forest – Website Content” (About, Stays, Journals, Events). Paths are relative to the site root, like `images/gallery/views/eka-view-3.jpg`.
 
 The Gallery on the site is written in the HTML, not read from the Gallery tab of the sheet.
