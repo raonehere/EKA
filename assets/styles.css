@@ -506,18 +506,30 @@ html.lb-lock,body.lb-lock{overflow:hidden}
   object-position:center center;
   display:block;
 }
-/* Desktop: solid theme colour on the left, fading into the photo. Behind the type, not over it. */
+/* Desktop: solid theme colour on the left, fading on a soft diagonal
+   (wider at the top, more photo visible at the bottom). Behind the type. */
 .hero::before{
   content:"";
   position:absolute;
   inset:0;
   z-index:1;
   pointer-events:none;
-  background:linear-gradient(to right,
+  background:linear-gradient(106deg,
     rgb(var(--hero-scrim)) 0%,
-    rgba(var(--hero-scrim),.97) 26%,
-    rgba(var(--hero-scrim),.72) 36%,
-    rgba(var(--hero-scrim),0) 48%);
+    rgb(var(--hero-scrim)) 40%,
+    rgba(var(--hero-scrim),.94) 46%,
+    rgba(var(--hero-scrim),.55) 56%,
+    rgba(var(--hero-scrim),0) 66%);
+}
+@media (min-width:1600px){
+  .hero::before{
+    background:linear-gradient(106deg,
+      rgb(var(--hero-scrim)) 0%,
+      rgb(var(--hero-scrim)) 48%,
+      rgba(var(--hero-scrim),.94) 54%,
+      rgba(var(--hero-scrim),.55) 64%,
+      rgba(var(--hero-scrim),0) 74%);
+  }
 }
 .hero__band{display:contents}
 .hero .site-header{position:relative;z-index:2;width:100%}
@@ -561,6 +573,7 @@ html.lb-lock,body.lb-lock{overflow:hidden}
 }
 
 @media (max-width:760px){
+  .hero{overflow-x:hidden}
   .hero::before{content:none}
   /* Photo sits in the lower half so the tall frame can show more of the tents. */
   .hero__photo{
@@ -578,12 +591,18 @@ html.lb-lock,body.lb-lock{overflow:hidden}
   .hero__band::after{
     content:"";
     position:absolute;
-    left:0;
-    right:0;
-    top:100%;
-    height:7rem;
+    left:-15%;
+    right:-15%;
+    top:calc(100% - 0.5rem);
+    height:9rem;
     pointer-events:none;
-    background:linear-gradient(to bottom, rgb(var(--hero-scrim)), rgba(var(--hero-scrim),0));
+    /* Shallow angle so the fade stays soft across a short, wide strip
+       and is fully clear at the bottom (no hard edge). */
+    background:linear-gradient(185deg,
+      rgb(var(--hero-scrim)) 0%,
+      rgb(var(--hero-scrim)) 26%,
+      rgba(var(--hero-scrim),.7) 50%,
+      rgba(var(--hero-scrim),0) 74%);
   }
   .hero__copy{padding:16px var(--pad-r) 28px var(--pad-l);flex:0 0 auto}
   .hero__text{max-width:none}
