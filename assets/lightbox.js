@@ -10,6 +10,7 @@
 
   function groupOf(ph) {
     if (ph.closest('.post-card')) return null;
+    if (ph.closest('.hero')) return null;
     if (ph.closest('a[href]')) return null;
     if (ph.closest('.gallery-page')) return 'gallery';
     if (ph.closest('.gallery--carousel')) return 'carousel';

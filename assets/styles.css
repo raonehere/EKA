@@ -472,3 +472,106 @@ html.lb-lock,body.lb-lock{overflow:hidden}
   .lightbox__next{right:8px}
 }
 @media (prefers-reduced-motion:reduce){.lightbox{transition:none}}
+
+
+
+/* ---------- Homepage hero: full-viewport photo, copy in the mist ---------- */
+.hero{
+  position:relative;
+  isolation:isolate;
+  min-height:100vh;
+  min-height:100svh;
+  display:flex;
+  flex-direction:column;
+  color:var(--brown);
+}
+.hero__photo{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  overflow:hidden;
+  pointer-events:none;
+}
+.hero__photo img{
+  width:100%;
+  height:100%;
+  max-width:none;
+  object-fit:cover;
+  object-position:center center;
+  display:block;
+}
+.hero .site-header{position:relative;z-index:2;width:100%}
+.hero__copy{
+  position:relative;
+  z-index:1;
+  max-width:1440px;
+  width:100%;
+  margin:0 auto;
+  padding:36px var(--pad-r) 64px var(--pad-l);
+  flex:1 1 auto;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+}
+.hero__text{
+  position:relative;
+  max-width:28rem;
+}
+/* Soft scrim only behind the type: a paper-mist hold, warmed with EKA brown.
+   The fade reaches full transparency inside this box so no hard edge shows. */
+.hero__text::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  pointer-events:none;
+  top:-100px;
+  right:-200px;
+  bottom:-260px;
+  left:calc(-1 * var(--pad-l) - 24px);
+  background:radial-gradient(ellipse 36rem 24rem at 28% 42%,
+    rgba(197,184,165,.88) 0%,
+    rgba(197,184,165,.55) 34%,
+    rgba(101,67,48,.12) 58%,
+    rgba(101,67,48,0) 74%);
+}
+.hero__text .h2{color:var(--brown);margin-bottom:16px}
+.hero__text p{color:var(--text);margin:0 0 14px;text-shadow:0 1px 10px rgba(197,184,165,.85),0 0 3px rgba(197,184,165,.7)}
+.hero__text p:last-of-type{margin-bottom:24px}
+.hero__text .btn{
+  margin-top:0;
+  background:rgba(197,184,165,.82);
+}
+.hero__text .btn:hover,
+.hero__text .btn:focus-visible{
+  background:var(--brown);
+  color:var(--paper);
+}
+
+@media (max-width:760px){
+  .hero__photo img{object-position:65% center}
+  .hero__copy{padding:22px var(--pad-r) 32px var(--pad-l)}
+  .hero__text{max-width:none}
+  .hero__text::before{
+    top:-28px;
+    right:-40px;
+    bottom:-80px;
+    left:calc(-1 * var(--pad-l) - 8px);
+    background:radial-gradient(ellipse 26rem 26rem at 42% 52%,
+      rgba(197,184,165,.90) 0%,
+      rgba(197,184,165,.60) 32%,
+      rgba(197,184,165,.30) 52%,
+      rgba(101,67,48,.12) 68%,
+      rgba(101,67,48,0) 82%);
+  }
+  .hero__text .btn{background:rgba(197,184,165,.86)}
+
+  .hero__text .h2{margin-bottom:14px}
+  .hero__text p{margin-bottom:12px}
+  .hero__text p:last-of-type{margin-bottom:20px}
+}
+
+/* After the full-bleed photo, the next section doesn't need the old "clear the nav" gap */
+.hero + #main .stays{padding-top:120px}
+@media (max-width:760px){
+  .hero + #main .stays{padding-top:88px}
+}
