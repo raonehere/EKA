@@ -422,3 +422,53 @@ details p{margin:0;padding:0 20px 20px;font-size:17px;line-height:28px}
   .book-cta__alt{flex-direction:column;align-items:flex-start;gap:0}
   .book-cta__dot{display:none}
 }
+
+/* ---------- Lightbox ---------- */
+.ph.is-lb{cursor:zoom-in}
+.ph.is-lb:focus-visible{outline:2px solid var(--brown);outline-offset:4px}
+html.lb-lock,body.lb-lock{overflow:hidden}
+.lightbox{
+  position:fixed;inset:0;z-index:300;
+  display:flex;align-items:center;justify-content:center;
+  padding:72px 72px 80px;
+  opacity:0;pointer-events:none;
+  transition:opacity .2s ease;
+}
+.lightbox[hidden]{display:none}
+.lightbox.is-open{opacity:1;pointer-events:auto}
+.lightbox__backdrop{position:absolute;inset:0;background:rgba(101,67,48,.94)}
+.lightbox__figure{
+  position:relative;z-index:1;margin:0;max-width:100%;max-height:100%;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+}
+.lightbox__img{
+  display:block;width:auto;height:auto;object-fit:contain;
+  max-width:min(100%, calc(100vw - 144px));
+  max-height:calc(100vh - 160px);
+}
+.lightbox__cap{
+  margin:0;color:var(--white);font:400 14px/20px var(--f-body);
+  letter-spacing:.02em;text-align:center;max-width:40rem;
+}
+.lightbox__close,.lightbox__nav{
+  position:absolute;z-index:2;width:44px;height:44px;padding:0;
+  border:1.5px solid var(--white);background:transparent;color:var(--white);
+  display:grid;place-items:center;cursor:pointer;
+}
+.lightbox__nav[hidden]{display:none}
+.lightbox__close:hover,.lightbox__nav:hover,
+.lightbox__close:focus-visible,.lightbox__nav:focus-visible{
+  background:var(--white);color:var(--brown);outline:none;
+}
+.lightbox__close{top:16px;right:16px}
+.lightbox__prev{left:16px;top:50%;transform:translateY(-50%)}
+.lightbox__next{right:16px;top:50%;transform:translateY(-50%)}
+@media (max-width:719px){
+  .lightbox{padding:64px 16px 72px}
+  .lightbox.has-nav{padding-left:56px;padding-right:56px}
+  .lightbox__img{max-width:calc(100vw - 32px);max-height:calc(100vh - 150px)}
+  .lightbox.has-nav .lightbox__img{max-width:calc(100vw - 120px)}
+  .lightbox__prev{left:8px}
+  .lightbox__next{right:8px}
+}
+@media (prefers-reduced-motion:reduce){.lightbox{transition:none}}
