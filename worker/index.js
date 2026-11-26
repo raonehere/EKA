@@ -405,7 +405,7 @@ async function createBooking(request, env) {
   const cap = capacity(env);
   const total = units(env);
   if (!guests || guests < 1) return json({ error: 'Tell us how many guests are coming.' }, 400);
-  // Bigger than the tents can sleep: taken as a request, priced and checked by hand on WhatsApp.
+  // Bigger than the A-frame tents can sleep: taken as a request, priced and checked by hand on WhatsApp.
   const large = adults > total * cap;
 
   const price = bookingPrice(env, nights, adults, childrenFiveToTen, lunches);
@@ -1137,7 +1137,7 @@ function digestText(s) {
   const lines = [];
   lines.push(`EKA Forest, ${prettyDate(s.today)}`);
   lines.push('');
-  lines.push(`Tonight: ${s.tonight.tents} of ${s.units} tents, ${s.tonight.guests} guests, ${s.tonight.free} free`);
+  lines.push(`Tonight: ${s.tonight.tents} of ${s.units} A-frame tents, ${s.tonight.guests} guests, ${s.tonight.free} free`);
   lines.push(`Today: ${s.todayArrivals.length} arriving, ${s.todayDepartures.length} leaving`);
   lines.push(`Next 7 days: ${s.next7.arrivals} arriving, ${s.next7.departures} leaving`);
   lines.push('');
@@ -1146,14 +1146,14 @@ function digestText(s) {
     lines.push('Arriving today:');
     s.todayArrivals.forEach(b => {
       const kids = b.children ? `, ${b.children} children` : '';
-      lines.push(`• ${b.name}, ${b.guests} guests${kids}, ${b.tents} tent${b.tents === 1 ? '' : 's'} (${b.reference})`);
+      lines.push(`• ${b.name}, ${b.guests} guests${kids}, ${b.tents} A-frame tent${b.tents === 1 ? '' : 's'} (${b.reference})`);
     });
     lines.push('');
   }
   if (s.todayDepartures.length) {
     lines.push('Leaving today:');
     s.todayDepartures.forEach(b => {
-      lines.push(`• ${b.name}, ${b.tents} tent${b.tents === 1 ? '' : 's'} (${b.reference})`);
+      lines.push(`• ${b.name}, ${b.tents} A-frame tent${b.tents === 1 ? '' : 's'} (${b.reference})`);
     });
     lines.push('');
   }
@@ -1213,9 +1213,9 @@ async function ownerStatus(request, env) {
   return json({ ok: true, reference, status });
 }
 
-/** Owner takes some tents out of sale for a run of nights (e.g. booked elsewhere).
+/** Owner takes some A-frame tents out of sale for a run of nights (e.g. booked elsewhere).
  *  It is stored as a "Blocked" row, which the public calendar counts like a stay.
- *  Cancel the row from the dashboard to give the tents back. */
+ *  Cancel the row from the dashboard to give the A-frame tents back. */
 async function ownerBlock(request, env) {
   if (!ownerOk(request, env)) return json({ error: 'Not found' }, 404);
   let body;
@@ -1230,7 +1230,7 @@ async function ownerBlock(request, env) {
     return json({ error: 'Pick a start date and an end date after it.' }, 400);
   }
   if (!(tents >= 1 && tents <= units(env))) {
-    return json({ error: `Tents must be between 1 and ${units(env)}.` }, 400);
+    return json({ error: `A-frame tents must be between 1 and ${units(env)}.` }, 400);
   }
 
   const reference = `BLK-${checkIn.slice(2).replace(/-/g, '')}-${Math.random().toString(36).slice(2, 6).toUpperCase().padEnd(4, 'X')}`;

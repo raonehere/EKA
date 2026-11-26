@@ -266,7 +266,7 @@
     el.out.textContent = fmtLong(b.checkOut);
     el.guests.textContent = plural(b.guests || 0, 'guest') +
       (b.childrenUnder10 ? ' · ' + b.childrenUnder10 + ' children' : '');
-    el.tents.textContent = plural(b.tents || 1, 'tent');
+    el.tents.textContent = plural(b.tents || 1, 'A-frame tent');
     el.advance.textContent = rupees(b.advance || ADVANCE);
 
     var closes = state.closesAt ? new Date(state.closesAt) : null;
@@ -277,7 +277,7 @@
     var bits = ['Your ' + rupees(ADVANCE) + ' advance comes off the final bill.'];
     if (state.canChange) {
       bits.push('You can move these dates as often as you like until ' + closesText +
-        ' (' + state.cutoffHours + ' hours before check-in). The advance carries over, subject to tents being free.');
+        ' (' + state.cutoffHours + ' hours before check-in). The advance carries over, subject to A-frame tents being free.');
     } else if (b.status === 'Confirmed') {
       bits.push('Changes closed on ' + closesText + '. Message us on WhatsApp if something has come up.');
     }
@@ -369,7 +369,7 @@
       else if (full) { cls += ' day--full'; stateText = 'fully booked'; }
       else {
         cls += free <= 2 ? ' day--few' : ' day--open';
-        stateText = free + (free === 1 ? ' tent free' : ' tents free');
+        stateText = free + (free === 1 ? ' A-frame tent free' : ' A-frame tents free');
       }
       if (date === TODAY) cls += ' day--today';
 
@@ -465,7 +465,7 @@
     var n = diffDays(state.start, state.end);
     var st = rangeStatus(state.start, state.end);
     el.summary.innerHTML = 'New stay: <strong>' + fmtLong(state.start) + ' → ' + fmtLong(state.end) +
-      '</strong> · ' + plural(n, 'night') + ' · ' + plural(nightsNeeded(), 'tent') + '. ' +
+      '</strong> · ' + plural(n, 'night') + ' · ' + plural(nightsNeeded(), 'A-frame tent') + '. ' +
       (st.ok ? 'Your advance carries over.' : st.reason);
     el.moveConfirm.disabled = !st.ok;
   }

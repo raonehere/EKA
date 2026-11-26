@@ -246,7 +246,7 @@
       else if (full) { cls += ' day--full'; stateText = 'fully booked'; }
       else {
         cls += free <= 2 ? ' day--few' : ' day--open';
-        stateText = free + (free === 1 ? ' tent free' : ' tents free');
+        stateText = free + (free === 1 ? ' A-frame tent free' : ' A-frame tents free');
       }
       if (date === TODAY) cls += ' day--today';
 
@@ -394,7 +394,7 @@
 
     el.sumNights.textContent = hasRange ? plural(n, 'night') : '';
     el.sumGuests.textContent = guestLine();
-    el.sumTents.textContent = (hasRange || state.start) ? plural(tentsNeeded(), 'tent') : '';
+    el.sumTents.textContent = (hasRange || state.start) ? plural(tentsNeeded(), 'A-frame tent') : '';
 
     if (hasRange && n >= 1 && isLarge()) {
       el.sumStay.textContent = 'On WhatsApp';
@@ -448,7 +448,7 @@
 
   function validateStay(showHint) {
     if (!state.start) {
-      el.capacity.textContent = 'Pick your nights above and we\'ll work out how many tents you need.';
+      el.capacity.textContent = 'Pick your nights above and we\'ll work out how many A-frame tents you need.';
       el.capacity.className = 'book__capacity';
       return false;
     }
@@ -470,12 +470,12 @@
       return false;
     }
     if (st.minFree < need) {
-      el.capacity.textContent = 'Only ' + plural(st.minFree, 'tent') + ' free on one of those nights, and ' +
+      el.capacity.textContent = 'Only ' + plural(st.minFree, 'A-frame tent') + ' free on one of those nights, and ' +
         plural(paying(), 'paying guest') + ' needs ' + need + '. Reduce the group or choose other dates.';
       el.capacity.className = 'book__capacity is-bad';
       return false;
     }
-    el.capacity.textContent = guestLine() + ' · ' + plural(need, 'tent') + ' for ' + plural(diffDays(state.start, state.end), 'night') +
+    el.capacity.textContent = guestLine() + ' · ' + plural(need, 'A-frame tent') + ' for ' + plural(diffDays(state.start, state.end), 'night') +
       '. Your ₹' + ADVANCE.toLocaleString('en-IN') + ' advance covers the whole group.';
     el.capacity.className = 'book__capacity';
     return true;
@@ -802,7 +802,7 @@
     var n = diffDays(state.start, state.end);
     el.confirmRef.textContent = opts.reference;
     el.confirmDates.textContent = fmtShort(state.start) + ' → ' + fmtShort(state.end) + ' · ' + plural(n, 'night');
-    el.confirmGuests.textContent = guestLine() + ' · ' + plural(tentsNeeded(), 'tent');
+    el.confirmGuests.textContent = guestLine() + ' · ' + plural(tentsNeeded(), 'A-frame tent');
     el.confirmPaid.textContent = '₹' + ADVANCE.toLocaleString('en-IN');
     el.confirmPreview.hidden = !opts.preview;
 

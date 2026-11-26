@@ -46,7 +46,7 @@ ul{margin:0;padding:0;list-style:none}
 .site-header{max-width:1440px;margin:0 auto;padding:88px 0 0}
 .nav{display:grid;grid-template-columns:1fr auto 1fr;align-items:end}
 .nav__group{margin-top:0;display:flex;align-items:flex-end;gap:0}
-.nav__group a{font:400 24px/1 var(--f-head);letter-spacing:2.4px;text-transform:uppercase;text-decoration:none;
+.nav__group a{font:300 24px/1 var(--f-head);letter-spacing:2.4px;text-transform:uppercase;text-decoration:none;
   /* cancel trailing letter-spacing so gaps measure from last ink */
   margin-inline-end:-2.4px;
   background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;transition:background-size .25s}
@@ -389,7 +389,7 @@ details p{margin:0;padding:0 20px 20px;font-size:17px;line-height:28px}
 }
 
 /* ---------- Quick fixes (Nov 2026) ---------- */
-/* Long buttons (3+ words): Oswald reads better than Sankofa at length; short ones keep Sankofa. */
+/* Short rectangle buttons (1–2 words) use thick Sankofa. Buttons of 3+ words use Oswald at weight 500. Nav links stay at 300 and are not buttons. */
 .btn.btn--text{font:500 22px/28px var(--f-head);letter-spacing:.14em;padding-top:16px;padding-bottom:16px;text-align:center;-webkit-text-stroke:0;paint-order:normal}
 @media (max-width:719px){
   .btn.btn--text{font-size:18px;line-height:24px;letter-spacing:.12em;padding:14px 20px}

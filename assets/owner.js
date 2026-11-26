@@ -186,7 +186,7 @@
         '<span class="person__name">' + escapeHTML(b.name || '') + '</span>' +
         '<span class="person__meta">' + b.guests + (b.guests === 1 ? ' guest' : ' guests') +
         (b.children ? ' + ' + b.children + ' children' : '') +
-        ' · ' + b.tents + ' tent' + (b.tents === 1 ? '' : 's') + ' · ' + escapeHTML(b.reference) + '</span>' +
+        ' · ' + b.tents + ' A-frame tent' + (b.tents === 1 ? '' : 's') + ' · ' + escapeHTML(b.reference) + '</span>' +
         (link ? '<a class="person__wa" href="' + link + '" target="_blank" rel="noopener">WhatsApp</a>' : '');
       list.appendChild(li);
     });
@@ -219,7 +219,7 @@
           '<span class="cell__sub">' + b.guests + (b.guests === 1 ? ' guest' : ' guests') +
           (b.children ? ' + ' + b.children + ' children' : '') +
           (link ? ' · <a href="' + link + '" target="_blank" rel="noopener">message</a>' : '') + '</span></td>' +
-        '<td data-label="Tents">' + b.tents + '</td>' +
+        '<td data-label="A-frame tents">' + b.tents + '</td>' +
         '<td data-label="Advance">' + rupees(b.advance) + '</td>' +
         '<td data-label="Status"><span class="chip chip--' + String(b.status).toLowerCase().replace(/\s+/g, '-') + '">' +
           statusLabel(b.status) + '</span></td>' +
@@ -281,7 +281,7 @@
       return paintBlockMsg('Pick a start date and an end date after it.', true);
     }
     if (!(tents >= 1 && tents <= (state.data ? state.data.units : 99))) {
-      return paintBlockMsg('Enter how many tents to take off sale.', true);
+      return paintBlockMsg('Enter how many A-frame tents to take off sale.', true);
     }
 
     if (DEMO) {
@@ -303,7 +303,7 @@
     }).then(function () {
       el.blockForm.reset();
       el.blockTents.value = '1';
-      paintBlockMsg('Done. ' + tents + ' tent' + (tents === 1 ? '' : 's') + ' off sale for ' + shortDay(checkIn) + ' → ' + shortDay(checkOut) + '.', false);
+      paintBlockMsg('Done. ' + tents + ' A-frame tent' + (tents === 1 ? '' : 's') + ' off sale for ' + shortDay(checkIn) + ' → ' + shortDay(checkOut) + '.', false);
       load();
     }).catch(function (err) {
       paintBlockMsg(err.message, true);
@@ -366,14 +366,14 @@
 
   function localDigest(s) {
     var out = ['EKA Forest, ' + day(s.today), ''];
-    out.push('Tonight: ' + s.tonight.tents + ' of ' + s.units + ' tents, ' + s.tonight.guests + ' guests, ' + s.tonight.free + ' free');
+    out.push('Tonight: ' + s.tonight.tents + ' of ' + s.units + ' A-frame tents, ' + s.tonight.guests + ' guests, ' + s.tonight.free + ' free');
     out.push('Today: ' + s.todayArrivals.length + ' arriving, ' + s.todayDepartures.length + ' leaving');
     out.push('Next 7 days: ' + s.next7.arrivals + ' arriving, ' + s.next7.departures + ' leaving');
     if (s.todayArrivals.length) {
       out.push('');
       out.push('Arriving today:');
       s.todayArrivals.forEach(function (b) {
-        out.push('• ' + b.name + ', ' + b.guests + ' guests, ' + b.tents + ' tent' + (b.tents === 1 ? '' : 's') + ' (' + b.reference + ')');
+        out.push('• ' + b.name + ', ' + b.guests + ' guests, ' + b.tents + ' A-frame tent' + (b.tents === 1 ? '' : 's') + ' (' + b.reference + ')');
       });
     }
     out.push('');

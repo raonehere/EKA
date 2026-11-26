@@ -1,6 +1,6 @@
 # EKA Forest
 
-Static site for **EKA Forest**, a tent stay in the eucalyptus and pine woods of Vattavada (past Top Station, about 45 km from Munnar, Kerala).
+Static site for **EKA Forest**, an A-frame tent stay in the eucalyptus and pine woods of Vattavada (past Top Station, about 45 km from Munnar, Kerala).
 
 The site is served at **https://ekaforest.com/** from this repository, via GitHub Pages (branch `main`, folder `/`). There is no build step. Asset links are relative, so the same files work locally and at the domain root.
 
