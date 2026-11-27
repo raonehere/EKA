@@ -70,9 +70,9 @@ document.querySelectorAll('.gallery--carousel').forEach(gallery => {
       hero.style.setProperty('--hero-ink', '#654330');
       hero.setAttribute('data-hero-tone', 'light');
     } else {
-      hero.style.setProperty('--hero-s-r', '101');
-      hero.style.setProperty('--hero-s-g', '67');
-      hero.style.setProperty('--hero-s-b', '48');
+      hero.style.setProperty('--hero-s-r', '29');
+      hero.style.setProperty('--hero-s-g', '43');
+      hero.style.setProperty('--hero-s-b', '69');
       hero.style.setProperty('--hero-ink', '#e9edef');
       hero.setAttribute('data-hero-tone', 'dark');
     }
