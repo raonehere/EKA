@@ -12,7 +12,7 @@
   var UNITS = cfg.units || [];
   var TOTAL = UNITS.length;
   var PER_TENT = UNITS.reduce(function (m, u) { return Math.min(m, u.capacity || 3); }, 9);
-  var ADVANCE = cfg.advance || 2000;
+  var ADVANCE_PCT = cfg.advancePercent || 20;
   var API = (cfg.apiBase || '').replace(/\/+$/, '');
   var DEMO = !!cfg.demo || !API;
   var HORIZON = cfg.horizonMonths || 12;
@@ -85,11 +85,11 @@
     sumTotal: $('#sum-total'),
     sumAdvance: $('#sum-advance'),
     sumBalance: $('#sum-balance'),
+    advanceDue: $('#advance-due'),
     adults: $('#adults'),
     children: $('#children'),
     infants: $('#infants'),
     lunches: $('#lunches'),
-    estimate: $('#estimate'),
     idProof: $('#id-proof'),
     capacity: $('#capacity-note'),
     payBtn: $('#pay-btn'),
@@ -99,8 +99,6 @@
     phone: $('#phone'),
     email: $('#email'),
     notes: $('#notes'),
-    arrival: $('#arrival'),
-    pets: $('#pets'),
     paying: $('#paying'),
     payingText: $('#paying-text'),
     confirm: $('#confirm'),
@@ -122,7 +120,6 @@
     payUpi: $('#pay-upi-id'),
     payCopy: $('#pay-copy'),
     payRef: $('#pay-ref'),
-    payOpen: $('#pay-open-app'),
     payQr: $('#pay-qr'),
     payHold: $('#pay-hold'),
     payForm: $('#pay-form'),
@@ -311,7 +308,14 @@
     var lunchHeads = paying() + under10();
     var count = Math.min(parseInt(el.lunches.value, 10) || 0, nights);
     var lunch = count * lunchHeads * P.lunchPerHeadPerDay;
-    return { stay: stay, lunch: lunch, total: stay + lunch, balance: stay + lunch - ADVANCE };
+    var total = stay + lunch, due = advanceFor(total);
+    return { stay: stay, lunch: lunch, total: total, advance: due, balance: total - due };
+  }
+  function advanceFor(total) { return Math.round(total * ADVANCE_PCT / 100); }
+  /* The advance due right now, worked out from the form so the page never shows a stale figure. */
+  function advanceDue() {
+    if (!state.start || !state.end) return 0;
+    return priceFor(diffDays(state.start, state.end)).advance;
   }
   function tentsNeeded() {
     if (!PER_TENT) return 1;
@@ -394,7 +398,8 @@
 
     el.sumNights.textContent = hasRange ? plural(n, 'night') : '';
     el.sumGuests.textContent = guestLine();
-    el.sumTents.textContent = (hasRange || state.start) ? plural(tentsNeeded(), 'A-frame tent') : '';
+    el.sumTents.textContent = (hasRange || state.start) && !isLarge() ? plural(tentsNeeded(), 'A-frame tent') : '';
+    el.sumBalance.parentElement.hidden = step < 2;
 
     if (hasRange && n >= 1 && isLarge()) {
       el.sumStay.textContent = 'On WhatsApp';
@@ -402,23 +407,23 @@
       el.sumTotal.textContent = 'On WhatsApp';
       el.sumAdvance.textContent = '';
       el.sumBalance.textContent = '';
-      el.estimate.textContent = 'Large group: we check availability and send the price on WhatsApp.';
+      el.advanceDue.textContent = '–';
     } else if (hasRange && n >= 1) {
       var p = priceFor(n);
       el.sumStay.textContent = rupees(p.stay);
       var count = Math.min(parseInt(el.lunches.value, 10) || 0, n);
       el.sumLunch.textContent = count ? count + (count === 1 ? ' lunch' : ' lunches') + ' each · ' + rupees(p.lunch) : 'None';
-      el.estimate.textContent = 'Estimated total ' + rupees(p.total) + ' for ' + plural(n, 'night') + ' · ' + rupees(ADVANCE) + ' advance now';
       el.sumTotal.textContent = rupees(p.total);
-      el.sumAdvance.textContent = rupees(ADVANCE);
+      el.sumAdvance.textContent = rupees(p.advance);
       el.sumBalance.textContent = rupees(p.balance);
+      el.advanceDue.textContent = rupees(p.advance);
     } else {
-      el.estimate.textContent = 'Pick your dates to see the total.';
       el.sumStay.textContent = '';
       el.sumLunch.textContent = '';
       el.sumTotal.textContent = '';
       el.sumAdvance.textContent = '';
       el.sumBalance.textContent = '';
+      el.advanceDue.textContent = '–';
     }
 
     el.payLabel.textContent = (state.order && !state.paid) ? 'Finish payment' : 'Reserve these dates';
@@ -476,47 +481,111 @@
       return false;
     }
     el.capacity.textContent = guestLine() + ' · ' + plural(need, 'A-frame tent') + ' for ' + plural(diffDays(state.start, state.end), 'night') +
-      '. Your ₹' + ADVANCE.toLocaleString('en-IN') + ' advance covers the whole group.';
+      '. Your advance is ' + ADVANCE_PCT + '% of the total.';
     el.capacity.className = 'book__capacity';
     return true;
   }
 
-  function validateForm() {
-    var ok = true, first = null;
+  /* ---------------- steps ----------------------------------------------- */
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  var ID_MAX = 8 * 1024 * 1024;
+  var step = 1;
+
+  /* Checks one step, shows its errors and returns the first field that failed (or null). */
+  function checkStep(n) {
+    var first = null;
     function fail(name, msg) {
-      if (!setError(name, msg)) { ok = false; if (!first) first = name; }
+      setError(name, msg);
+      if (msg && !first) first = name;
     }
-    setError('name', ''); setError('phone', ''); setError('email', ''); setError('terms', ''); setError('adults', ''); setError('idproof', '');
 
-    if (!state.start || !state.end) {
-      ok = false;
-      hint('Choose your check-in and check-out dates first.', 'bad');
-      first = first || 'dates';
-    }
-    if (!paying()) fail('adults', 'At least one paying guest is needed.');
-    var idFile = el.idProof.files && el.idProof.files[0];
-    if (!idFile) fail('idproof', 'Upload a photo or PDF of your ID to continue.');
-    else if (idFile.size > 8 * 1024 * 1024) fail('idproof', 'That ID file is too large. Please pick one under 8 MB.');
-    if (!el.name.value.trim() || el.name.value.trim().length < 2) fail('name', 'Please tell us your name.');
-    var ph = el.phone.value.replace(/\D/g, '');
-    if (ph.length !== 10) fail('phone', 'Enter a 10-digit Indian mobile number.');
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(el.email.value.trim())) fail('email', 'Enter a valid email address.');
-    if (!el.terms.checked) fail('terms', 'Please accept the non-refundable advance to continue.');
-    if (!validateStay(true)) ok = false;
-
-    el.formError.hidden = true;
-    if (!ok) {
-      if (first === 'dates') {
-        document.getElementById('step-dates').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else if (first) {
-        var node = $('#' + first);
-        if (node) {
-          node.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          try { node.focus({ preventScroll: true }); } catch (e) {}
-        }
+    if (n === 1) {
+      if (!state.start || !state.end) {
+        hint('Choose your check-in and check-out dates first.', 'bad');
+        first = 'calendar';
       }
     }
-    return ok;
+
+    if (n === 2) {
+      fail('adults', paying() ? '' : 'At least one paying guest is needed.');
+      if (!first && !validateStay(true)) first = 'adults';
+      fail('name', el.name.value.trim().length < 2 ? 'Please tell us your name.' : '');
+      fail('phone', el.phone.value.replace(/\D/g, '').length === 10 ? '' : 'Enter a 10-digit Indian mobile number.');
+      var mail = el.email.value.trim();
+      fail('email', !mail || EMAIL_RE.test(mail) ? '' : 'Enter a valid email address.');
+    }
+
+    if (n === 3) {
+      var idFile = el.idProof.files && el.idProof.files[0];
+      fail('idproof', !idFile ? 'Upload a photo or PDF of your ID to continue.'
+        : idFile.size > ID_MAX ? 'That ID file is too large. Please pick one under 8 MB.' : '');
+    }
+
+    return first;
+  }
+
+  function focusField(name) {
+    if (name === 'calendar') {
+      var day = el.grid.querySelector('.day[data-date]:not([disabled])');
+      if (day) day.focus({ preventScroll: true });
+      document.getElementById('calendar').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    var node = $('#' + (name === 'idproof' ? 'id-proof' : name));
+    if (!node) return;
+    node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    try { node.focus({ preventScroll: true }); } catch (e) {}
+  }
+
+  function showStep(n) {
+    step = n;
+    el.form.setAttribute('data-step', String(n));
+    updateSummary();
+    Array.prototype.forEach.call(document.querySelectorAll('.wz-step'), function (s) {
+      s.hidden = +s.getAttribute('data-step') !== n;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.wz-progress__item'), function (li) {
+      var k = +li.getAttribute('data-step');
+      li.classList.toggle('is-done', k < n);
+      li.classList.toggle('is-current', k === n);
+      if (k === n) li.setAttribute('aria-current', 'step');
+      else li.removeAttribute('aria-current');
+    });
+  }
+
+  function goNext() {
+    var bad = checkStep(step);
+    if (bad) { focusField(bad); return; }
+    showStep(Math.min(4, step + 1));
+    var top = el.form.getBoundingClientRect().top + window.pageYOffset - 24;
+    window.scrollTo({ top: top, behavior: 'smooth' });
+  }
+
+  function goBack() {
+    showStep(Math.max(1, step - 1));
+    var top = el.form.getBoundingClientRect().top + window.pageYOffset - 24;
+    window.scrollTo({ top: top, behavior: 'smooth' });
+  }
+
+  function validateForm() {
+    var bad = null, badStep = 0;
+    for (var s = 1; s <= 3 && !bad; s++) {
+      bad = checkStep(s);
+      if (bad) badStep = s;
+    }
+    if (!bad && !el.terms.checked) {
+      setError('terms', 'Please accept the advance terms to continue.');
+      bad = 'terms'; badStep = 4;
+    }
+    if (!bad && !validateStay(true)) { bad = 'calendar'; badStep = 1; }
+
+    el.formError.hidden = true;
+    if (bad) {
+      showStep(badStep);
+      focusField(bad);
+      return false;
+    }
+    return true;
   }
 
   /* ---------------- payload --------------------------------------------- */
@@ -534,8 +603,6 @@
       name: el.name.value.trim(),
       phone: '+91' + el.phone.value.replace(/\D/g, ''),
       email: el.email.value.trim(),
-      arrival: el.arrival.value,
-      pets: el.pets.value,
       notes: el.notes.value.trim(),
       termsAccepted: true
     };
@@ -551,13 +618,12 @@
     return (o && o.name) || (cfg.upi && cfg.upi.name) || 'EKA';
   }
   function upiLinkFor(reference) {
-    if (state.order && state.order.upi && state.order.upi.link) return state.order.upi.link;
     var id = upiId();
     if (!id) return '';
     return 'upi://pay?' + [
       'pa=' + encodeURIComponent(id),
       'pn=' + encodeURIComponent(upiName()),
-      'am=' + ADVANCE,
+      'am=' + advanceDue(),
       'cu=INR',
       'tn=' + encodeURIComponent('EKA Forest advance ' + reference)
     ].join('&');
@@ -581,7 +647,7 @@
 
   var NOT_HELD = 'Your dates are not blocked yet, sending the screenshot is what claims them. ' +
     'Do it within a couple of hours. If someone else gets in first, message us and we will move your ' +
-    '₹2,000 to other dates.';
+    'advance to other dates.';
 
   function busy(on, text) {
     state.busy = on;
@@ -609,7 +675,7 @@
       reference: ref,
       token: 'demo',
       manageUrl: '',
-      amount: ADVANCE,
+      amount: advanceDue(),
       upi: { id: (cfg.upi && cfg.upi.id) || 'eka.82200883@hdfcbank', name: (cfg.upi && cfg.upi.name) || 'EKA', link: '' }
     };
   }
@@ -623,21 +689,13 @@
     var link = upiLinkFor(order.reference);
 
     el.payRef.textContent = order.reference;
-    el.payAmount.textContent = '₹' + (order.amount || ADVANCE).toLocaleString('en-IN');
+    el.payAmount.textContent = rupees(advanceDue());
     el.payUpi.textContent = id || 'not set';
     el.payCopy.hidden = !id;
     el.payHold.textContent = NOT_HELD;
     el.payError.textContent = '';
     el.payFileName.textContent = 'PNG, JPG or PDF · under 8 MB';
     el.payFile.value = '';
-
-    if (link) {
-      el.payOpen.href = link;
-      el.payOpen.hidden = false;
-    } else {
-      el.payOpen.hidden = true;
-      el.payOpen.removeAttribute('href');
-    }
 
     renderQr(link);
 
@@ -653,7 +711,7 @@
     document.body.classList.remove('is-locked');
     if (state.order && !state.paid) {
       el.payLabel.textContent = 'Finish payment';
-      hint('Your dates are not blocked yet. Pay ₹' + ADVANCE.toLocaleString('en-IN') +
+      hint('Your dates are not blocked yet. Pay ' + rupees(advanceDue()) +
         ' by UPI and upload the screenshot to claim them.', 'warn');
       el.payBtn.focus();
     }
@@ -802,8 +860,8 @@
     var n = diffDays(state.start, state.end);
     el.confirmRef.textContent = opts.reference;
     el.confirmDates.textContent = fmtShort(state.start) + ' → ' + fmtShort(state.end) + ' · ' + plural(n, 'night');
-    el.confirmGuests.textContent = guestLine() + ' · ' + plural(tentsNeeded(), 'A-frame tent');
-    el.confirmPaid.textContent = '₹' + ADVANCE.toLocaleString('en-IN');
+    el.confirmGuests.textContent = guestLine() + (isLarge() ? '' : ' · ' + plural(tentsNeeded(), 'A-frame tent'));
+    el.confirmPaid.textContent = rupees(advanceDue());
     el.confirmPreview.hidden = !opts.preview;
 
     if (el.confirmManage) {
@@ -957,8 +1015,19 @@
   el.form.addEventListener('submit', function (e) {
     e.preventDefault();
     if (state.paid) return;
+    if (step < 4) { goNext(); return; }
     if (state.order) { showPayPanel(); return; }
     submit();
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-next]'), function (b) {
+    b.addEventListener('click', goNext);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-back]'), function (b) {
+    b.addEventListener('click', goBack);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-adv-pct]'), function (n) {
+    n.textContent = ADVANCE_PCT;
   });
 
   el.form.addEventListener('input', function (e) {
@@ -1017,6 +1086,7 @@
     }
 
     el.month.textContent = monthName(state.viewY, state.viewM);
+    showStep(1);
     updateSummary();
     validateStay(false);
     loadAvailability();

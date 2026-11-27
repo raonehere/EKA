@@ -11,7 +11,7 @@
 <link rel="preload" href="../assets/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../assets/styles.css">
-<link rel="stylesheet" href="../assets/owner.css">
+<link rel="stylesheet" href="../assets/owner.css?v=2">
 </head>
 <body>
 
@@ -169,6 +169,7 @@
           <option value="Confirmed">Confirmed</option>
         </select>
       </label>
+      <p class="panel__note discount-note">To give a discount, type a percentage under the guest's name. The rupee amount appears in the Discount column, and the percentage is saved to Notion.</p>
       <div class="tablewrap">
         <table class="booktable">
           <thead>
@@ -177,6 +178,7 @@
               <th scope="col">Guest</th>
               <th scope="col">A-frame tents</th>
               <th scope="col">Advance</th>
+              <th scope="col">Discount</th>
               <th scope="col">Status</th>
               <th scope="col">Do</th>
             </tr>
@@ -186,7 +188,7 @@
       </div>
     </section>
 
-    <p class="dash__foot">Notion is the source of truth. Anything you change here is written straight back to the database.</p>
+    <p class="dash__foot"><a href="accounts/">Monthly accounts</a> · Notion is the source of truth. Anything you change here is written straight back to the database.</p>
   </section>
 
   <div class="dash-loading" id="loading" hidden>
@@ -200,6 +202,6 @@
 </footer>
 
 <script src="../assets/booking-config.js?v=3"></script>
-<script src="../assets/owner.js?v=4" defer></script>
+<script src="../assets/owner.js?v=5" defer></script>
 </body>
 </html>

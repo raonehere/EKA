@@ -4,7 +4,7 @@ The site is static (GitHub Pages), so it cannot hold API keys. The booking page
 talks to a small Cloudflare Worker, and the Worker is the only thing that knows
 your Notion token.
 
-There is **no payment gateway**. The guest pays the ₹2,000 advance by UPI,
+There is **no payment gateway**. The guest pays the advance (20% of the total) by UPI,
 uploads the screenshot, and the Worker files it in your Notion row so you can
 check the credit yourself.
 
@@ -67,7 +67,7 @@ and a booking still saves.
 | Column | Type | What it buys you |
 |---|---|---|
 | `Tents` | Number | overrides the tent count. Without it: one tent per two guests, and a solo guest gets a whole tent |
-| `Advance` | Number | stamps ₹2,000 on each row. Without it the dashboard uses the `ADVANCE` setting |
+| `Advance` | Number | the advance (20% of the total) for each row |
 | `Children under 10` | Number | declared children, kept out of `Number of people` |
 | `Manage token` | Text | holds the private move/cancel key. Without it one is derived from `MANAGE_SECRET`, which works just as well |
 | `Moves` | Number | how many times the guest changed dates |
@@ -75,7 +75,15 @@ and a booking still saves.
 | `Paid at` | Date | **time on**, stamped when you press Confirm |
 | `Type` | Select | `Booking` / `Blocked` |
 | `Source` | Select | `Website` / `WhatsApp` / `Manual` |
-| `Terms accepted` | Date | **time on**, proof the guest accepted the non-refundable advance |
+| `Terms accepted` | Date | **time on**, proof the guest accepted the advance terms |
+| `Total amount` | Number | the full price for the stay, before any discount |
+| `Discount` | Number | a **percentage**, 0 to 100, typed beside the guest's name on the dashboard. The rupee amount is worked out from `Total amount` |
+
+`Discount` is a percentage, not rupees, so 10 means ten percent. The dashboard
+shows the rupee amount next to it, and the monthly accounts and invoice use that
+amount. On the first save the Worker tries to add the `Discount` column itself;
+if your Notion integration is not allowed to edit the database, add a Number
+column named `Discount` by hand and it will be used from then on.
 
 There is no `Nights` column: the Worker works the nights out from the two dates.
 
@@ -97,7 +105,7 @@ the same column. You never have to get the capitals exactly right.
 | `Cancelled` | guest cancelled, or you did | no |
 
 **Your daily job:** open Notion, look at rows in **Payment review**, open the
-screenshot in `Payment`, check your bank or UPI app for ₹2,000 from that name or
+screenshot in `Payment`, check your bank or UPI app for the advance amount from that name or
 reference, then set `Booking status = Confirmed`. If the money never arrived,
 set `Cancelled` and the dates free themselves. The `/owner/` dashboard does the
 same two clicks for you.
@@ -142,7 +150,7 @@ You need the UPI ID you actually receive money on, the same one you use in
 GPay / PhonePe / Paytm. For example `ekaforest@okhdfcbank` or
 `9876543210@ybl`.
 
-That is the only setting. The page builds a UPI link for exactly ₹2,000, renders
+That is the only setting. The page builds a UPI link for exactly the advance (20% of the total), renders
 a QR from it, and shows the ID underneath for anyone who prefers to type it.
 Nothing is charged automatically; you verify each payment by hand.
 
@@ -175,7 +183,7 @@ every guest who reaches the payment step.
    | `ALLOWED_ORIGINS` | Text | `https://ekaforest.com,https://www.ekaforest.com` |
    | `UNITS` | Text | `11` |
    | `TENT_CAPACITY` | Text | `2` |
-   | `ADVANCE` | Text | `2000` |
+   | `ADVANCE_PERCENT` | Text | `20` |
    | `CHANGE_CUTOFF_HOURS` | Text | `48` (optional) |
 
 5. **Deploy** again after adding the variables.
@@ -370,11 +378,11 @@ placeholder UPI ID, and nothing is saved, useful for review.
 ## 10. Test before going live
 
 1. Calendar shows the current month with today outlined, past dates disabled.
-2. Pick a range; the summary shows nights, guests, tents and ₹2,000.
+2. Pick a range; the summary shows nights, guests, tents and the advance.
 3. Three paying guests → **two tents**. A solo guest → one whole tent.
 4. Submit with an empty name / bad phone / unchecked terms → inline errors.
 5. Submit properly → the payment panel opens with a QR and your UPI ID.
-6. Scan the QR with your own phone: it should open your UPI app with **₹2,000**
+6. Scan the QR with your own phone: it should open your UPI app with the advance amount
    and the reference in the note.
 7. Upload a screenshot → confirmation screen says "We're checking your payment".
 8. In Notion: a row exists with `Booking status = Payment review`, the
@@ -387,22 +395,22 @@ placeholder UPI ID, and nothing is saved, useful for review.
     screenshot → the dates disappear from the calendar.
 12. Open the manage link → move to free dates, then cancel. Both update Notion.
 
-Do one real ₹2,000 payment from your own account and confirm the round trip
+Do one real payment from your own account and confirm the round trip
 before announcing it.
 
 ---
 
 ## 11. How the money works
 
-- Advance: **₹2,000 flat**, whatever the group size. Eleven tents, two guests
+- Advance: **20% of the total**, whatever the group size. Eleven tents, two guests
   each; a solo guest still takes a whole tent, so three people book two tents.
   Under-10s are free, share your tent, and are only declared.
-- Non-refundable. The guest ticks a box that says so, and the time is stored in
+- The guest ticks a box that accepts the advance terms, and the time is stored in
   Notion (`Terms accepted`).
-- Transferable: moving the dates from the private link carries the ₹2,000 over
+- Transferable: moving the dates from the private link carries the advance over
   (as often as they like before the 48-hour cutoff).
 - It is **adjusted against the final bill**; the balance is collected at the
-  property. Nothing on the site charges more than ₹2,000.
+  property. Nothing on the site charges more than the advance shown.
 - Refunds are manual and entirely your call. The site promises none.
 
 ---

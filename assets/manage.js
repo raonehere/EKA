@@ -12,7 +12,7 @@
   var UNITS = cfg.units || [];
   var TOTAL = UNITS.length || 11;
   var PER_TENT = UNITS.reduce(function (m, u) { return Math.min(m, u.capacity || 2); }, 9) || 2;
-  var ADVANCE = cfg.advance || 2000;
+
   var API = (cfg.apiBase || '').replace(/\/+$/, '');
   var DEMO = !!cfg.demo || !API;
   var HORIZON = cfg.horizonMonths || 12;
@@ -157,7 +157,7 @@
       childrenUnder10: 0,
       tents: 1,
       status: 'Confirmed',
-      advance: ADVANCE
+      advance: 1480
     };
   }
   function saveDemo(booking) {
@@ -267,14 +267,14 @@
     el.guests.textContent = plural(b.guests || 0, 'guest') +
       (b.childrenUnder10 ? ' · ' + b.childrenUnder10 + ' children' : '');
     el.tents.textContent = plural(b.tents || 1, 'A-frame tent');
-    el.advance.textContent = rupees(b.advance || ADVANCE);
+    el.advance.textContent = rupees(b.advance || 0);
 
     var closes = state.closesAt ? new Date(state.closesAt) : null;
     var closesText = closes ? closes.toLocaleString('en-IN', {
       weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit'
     }) : '';
 
-    var bits = ['Your ' + rupees(ADVANCE) + ' advance comes off the final bill.'];
+    var bits = ['Your advance comes off the final bill.'];
     if (state.canChange) {
       bits.push('You can move these dates as often as you like until ' + closesText +
         ' (' + state.cutoffHours + ' hours before check-in). The advance carries over, subject to A-frame tents being free.');
@@ -291,8 +291,7 @@
       if (b.status === 'Payment review') {
         el.closed.textContent = 'We are checking your payment screenshot. You will get a WhatsApp confirmation once it clears, usually within a few hours.';
       } else if (b.status === 'Pending payment') {
-        el.closed.textContent = 'No payment has reached us yet. Pay the ₹' + Number(b.advance || ADVANCE).toLocaleString('en-IN') +
-          ' advance by UPI and upload the screenshot from your booking page, or message us on WhatsApp.';
+        el.closed.textContent = 'No payment has reached us yet. Pay the advance by UPI and upload the screenshot from your booking page, or message us on WhatsApp.';
       } else {
         el.closed.textContent = 'This booking is ' + b.status.toLowerCase() + '. Message us on WhatsApp if you need anything.';
       }

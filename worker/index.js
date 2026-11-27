@@ -15,13 +15,13 @@
  *   POST /owner/status        → confirm or cancel a booking from the dashboard
  *   POST /owner/block         → take tents out of sale for some nights (owner only)
  *
- * Money is settled by UPI: the guest scans a QR, pays ₹2,000, and uploads the
- * screenshot. The Worker files it in Notion and marks the row "Payment review"
- * so the owner confirms it by hand.
+ * Money is settled by UPI: the guest scans a QR, pays the advance (a percentage
+ * of their total), and uploads the screenshot. The Worker files it in Notion and
+ * marks the row "Payment review" so the owner confirms it by hand.
  *
  * Secrets and settings live in Worker environment variables:
  *   NOTION_TOKEN, NOTION_DB, UPI_ID, UPI_NAME, MANAGE_SECRET, SITE_URL,
- *   ALLOWED_ORIGINS, UNITS, TENT_CAPACITY, ADVANCE, CHANGE_CUTOFF_HOURS,
+ *   ALLOWED_ORIGINS, UNITS, TENT_CAPACITY, ADVANCE_PERCENT, CHANGE_CUTOFF_HOURS,
  *   OWNER_TOKEN, WA_NOTIFY
  *
  * Notion property names live in FIELDS, just below. That map is the only place
@@ -41,7 +41,8 @@ function bookingPrice(env, nights, adults, fiveToTen, lunches) {
   const stay = nights * (adults * perNight + fiveToTen * Math.round(perNight / 2));
   const lunchTotal = lunches * (adults + fiveToTen) * lunchRate;
   const total = stay + lunchTotal;
-  return { stay, lunch: lunchTotal, total, balance: total - advance(env) };
+  const due = advanceFor(env, total);
+  return { stay, lunch: lunchTotal, total, advance: due, balance: total - due };
 }
 
 export default {
@@ -67,7 +68,9 @@ export default {
       else if (path === '/owner/summary' && request.method === 'GET') res = await ownerSummary(request, env);
       else if (path === '/owner/digest' && request.method === 'GET') res = await ownerDigest(request, env);
       else if (path === '/owner/status' && request.method === 'POST') res = await ownerStatus(request, env);
+      else if (path === '/owner/discount' && request.method === 'POST') res = await ownerDiscount(request, env);
       else if (path === '/owner/block' && request.method === 'POST') res = await ownerBlock(request, env);
+      else if (path === '/owner/month' && request.method === 'GET') res = await ownerMonth(request, env);
       else res = json({ error: 'Not found' }, 404);
 
       if (!Object.keys(cors).length) return res;
@@ -107,7 +110,8 @@ function corsHeaders(request, env) {
 
 function units(env) { return Math.max(1, parseInt(env.UNITS || '11', 10)); }
 function capacity(env) { return Math.max(1, parseInt(env.TENT_CAPACITY || '2', 10)); }
-function advance(env) { return Math.max(1, parseInt(env.ADVANCE || '2000', 10)); }
+function advancePercent(env) { return Math.min(100, Math.max(1, parseInt(env.ADVANCE_PERCENT || '20', 10))); }
+function advanceFor(env, total) { return Math.round(total * advancePercent(env) / 100); }
 function cutoffHours(env) { return Math.max(0, parseInt(env.CHANGE_CUTOFF_HOURS || '48', 10)); }
 
 function todayIST() {
@@ -187,7 +191,10 @@ const FIELDS = {
   type:       { prop: 'Type',                        type: 'select', optional: true },
   source:     { prop: 'Source',                      type: 'select', optional: true },
   terms:      { prop: 'Terms accepted',              type: 'date', optional: true },
-  total:      { prop: 'Total amount',                type: 'number', optional: true }
+  total:      { prop: 'Total amount',                type: 'number', optional: true },
+  /* Stored as a percentage (0 to 100). The rupee amount is worked out from
+     Total amount whenever a booking is read, so the two cannot drift apart. */
+  discount:   { prop: 'Discount',                    type: 'number', optional: true }
 };
 
 /** Internal name → Notion property title. */
@@ -216,6 +223,29 @@ function resolveColumns(propertyKeys) {
 /** The database's real property titles, resolved once and kept for five minutes
  *  so a booking does not pay for an extra Notion request. */
 let COLUMNS = { db: '', at: 0, map: null };
+
+/* Columns this isolate has already checked or added, so the schema is not
+   fetched again for every discount. */
+let ENSURED = { db: '', keys: new Set() };
+
+/** Add an optional column to the Notion database if it is not there yet.
+ *  The integration needs permission to edit the database for this to work;
+ *  if it does not, the caller reports a clear error. */
+async function ensureColumn(env, key) {
+  if (ENSURED.db !== env.NOTION_DB) ENSURED = { db: env.NOTION_DB, keys: new Set() };
+  if (ENSURED.keys.has(key)) return;
+  const want = FIELDS[key].prop;
+  const db = await notion(env, `/databases/${env.NOTION_DB}`);
+  const exists = Object.keys(db.properties || {}).some(n => norm(n) === norm(want));
+  if (!exists) {
+    await notion(env, `/databases/${env.NOTION_DB}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ properties: { [want]: { number: { format: 'number' } } } })
+    });
+    COLUMNS = { db: '', at: 0, map: null };
+  }
+  ENSURED.keys.add(key);
+}
 
 async function columns(env) {
   const now = Date.now();
@@ -334,7 +364,7 @@ async function availability(url, env, ctx) {
     from, to,
     units: total,
     capacity: capacity(env),
-    advance: advance(env),
+    advancePercent: advancePercent(env),
     currency: 'INR',
     nights
   }, 200, { 'cache-control': 'public, max-age=30' });
@@ -355,14 +385,14 @@ function referenceFor(checkIn) {
 
 /* ------------------------------------------------------------- upi details */
 
-function upi(env) {
+function upi(env, amount) {
   const id = clean(env.UPI_ID, 60);
   const name = clean(env.UPI_NAME || 'EKA Forest', 40);
-  return { id, name, amount: advance(env) };
+  return { id, name, amount };
 }
 
-function upiLink(env, reference) {
-  const u = upi(env);
+function upiLink(env, reference, amount) {
+  const u = upi(env, amount);
   const params = new URLSearchParams({
     pa: u.id,
     pn: u.name,
@@ -409,12 +439,13 @@ async function createBooking(request, env) {
   const large = adults > total * cap;
 
   const price = bookingPrice(env, nights, adults, childrenFiveToTen, lunches);
+  const advanceDue = large ? 0 : price.advance;
   const tents = Math.max(1, Math.ceil(guests / cap));
 
   if (name.length < 2) return json({ error: 'Please share your name.' }, 400);
   if (!/^\+91\d{10}$/.test(phone)) return json({ error: 'Enter a 10-digit Indian mobile number.' }, 400);
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return json({ error: 'Enter a valid email address.' }, 400);
-  if (body.termsAccepted !== true) return json({ error: 'Please accept the non-refundable advance.' }, 400);
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return json({ error: 'Enter a valid email address.' }, 400);
+  if (body.termsAccepted !== true) return json({ error: 'Please accept the advance terms.' }, 400);
 
   // Live availability check, so a stale calendar cannot double-book a tent.
   if (!large) {
@@ -445,7 +476,7 @@ async function createBooking(request, env) {
       [C.name]: { title: [{ text: { content: name } }] },
       [C.reference]: { rich_text: [{ text: { content: reference } }] },
       [C.phone]: { phone_number: phone },
-      [C.email]: { email },
+      [C.email]: { email: email || null },
       [C.checkIn]: { date: { start: checkIn } },
       [C.checkOut]: { date: { start: checkOut } },
       [C.guests]: { number: guests },
@@ -453,7 +484,7 @@ async function createBooking(request, env) {
       [C.tents]: { number: tents },
       [C.status]: { select: { name: 'Pending payment' } },
       [C.type]: { select: { name: 'Booking' } },
-      [C.advance]: { number: advance(env) },
+      [C.advance]: { number: advanceDue },
       [C.total]: { number: large ? null : price.total },
       [C.notes]: { rich_text: notesText ? [{ text: { content: notesText } }] : [] },
       [C.source]: { select: { name: 'Website' } },
@@ -470,13 +501,13 @@ async function createBooking(request, env) {
     token,
     manageUrl: token ? manageUrl(env, reference, token) : '',
     large,
-    amount: large ? 0 : advance(env),
+    amount: advanceDue,
     total: large ? null : price.total,
     balance: large ? null : price.balance,
     currency: 'INR',
     upi: {
-      ...upi(env),
-      link: env.UPI_ID ? upiLink(env, reference) : ''
+      ...upi(env, advanceDue),
+      link: env.UPI_ID ? upiLink(env, reference, advanceDue) : ''
     }
   });
 }
@@ -586,6 +617,8 @@ function readBooking(page, env) {
   const checkOut = pick(pr, P('checkOut'))?.date?.start?.slice(0, 10) || '';
   const guests = num('guests');
   const cap = env ? capacity(env) : 2;
+  const total = num('total');
+  const discountPercent = Math.min(100, Math.max(0, num('discount')));
 
   return {
     pageId: page.id,
@@ -602,7 +635,10 @@ function readBooking(page, env) {
     tents: Math.max(1, num('tents') || Math.ceil(guests / cap) || 1),
     status: pick(pr, P('status'))?.select?.name || '',
     type: pick(pr, P('type'))?.select?.name || 'Booking',
-    advance: num('advance') || (env ? advance(env) : 0),
+    advance: num('advance'),
+    total,
+    discountPercent,
+    discount: Math.round(total * discountPercent / 100),
     notes: text(pick(pr, P('notes'))),
     token: text(pick(pr, P('token'))),
     moves: num('moves'),
@@ -694,7 +730,7 @@ async function uploadScreenshot(request, env) {
   }
 
   const note = [booking.notes,
-    `Payment screenshot uploaded ${todayIST()}, please check the ₹${booking.advance || advance(env)} UPI credit.`]
+    `Payment screenshot uploaded ${todayIST()}, please check the ₹${booking.advance} UPI credit.`]
     .filter(Boolean).join(' · ').slice(0, 1800);
 
   const C = await columns(env);
@@ -941,7 +977,7 @@ async function cancelBooking(request, env) {
   }
   if (booking.status !== 'Confirmed') return json({ error: 'This booking is not confirmed yet.' }, 409, cors);
 
-  const note = [booking.notes, `Cancelled by guest on ${todayIST()}. Advance of ₹${booking.advance} is non-refundable.`]
+  const note = [booking.notes, `Cancelled by guest on ${todayIST()}. Advance of ₹${booking.advance} is not refunded.`]
     .filter(Boolean).join(' · ').slice(0, 1800);
 
   try {
@@ -1086,14 +1122,15 @@ async function buildSummary(env) {
       reference: b.reference, name: b.name, phone: b.phone,
       checkIn: b.checkIn, checkOut: b.checkOut, nights: b.nights,
       guests: b.guests, children: b.childrenUnder10, tents: b.tents,
-      status: b.status, advance: b.advance, moves: b.moves, notes: b.notes
+      status: b.status, advance: b.advance, total: b.total,
+      discount: b.discount, discountPercent: b.discountPercent, moves: b.moves, notes: b.notes
     }));
 
   return {
     today,
     units: total,
     capacity: capacity(env),
-    advance: advance(env),
+    advancePercent: advancePercent(env),
     tonight: { tents: tentsTonight, free: Math.max(0, total - tentsTonight), guests: guestsTonight },
     todayArrivals: todayArrivals.map(slim),
     todayDepartures: todayDepartures.map(slim),
@@ -1120,6 +1157,32 @@ function money(n) { return '₹' + Number(n || 0).toLocaleString('en-IN'); }
 function prettyDate(d) {
   return new Date(d + 'T00:00:00+05:30')
     .toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' });
+}
+
+/** Every booking that checks in during one calendar month, for the monthly accounts. */
+async function ownerMonth(request, env) {
+  if (!ownerOk(request, env)) return json({ error: 'Not found' }, 404);
+  const key = clean(new URL(request.url).searchParams.get('month'), 7);
+  if (!/^\d{4}-\d{2}$/.test(key)) return json({ error: 'Pick a month like 2026-11.' }, 400);
+  const first = `${key}-01`;
+  const last = `${key}-${String(daysInMonth(key)).padStart(2, '0')}`;
+  try {
+    const all = await allBookings(env, first);
+    const rows = all
+      .filter(b => b.type !== 'Blocked' && b.checkIn >= first && b.checkIn <= last)
+      .sort((a, b) => (a.checkIn < b.checkIn ? -1 : a.checkIn > b.checkIn ? 1 : a.name.localeCompare(b.name)))
+      .map(b => ({
+        reference: b.reference, name: b.name, phone: b.phone, email: b.email,
+        checkIn: b.checkIn, checkOut: b.checkOut, nights: b.nights,
+        guests: b.guests, children: b.childrenUnder10, tents: b.tents,
+        status: b.status, total: b.total, discount: b.discount,
+        discountPercent: b.discountPercent, advance: b.advance
+      }));
+    return json({ month: key, days: daysInMonth(key), first, last, rows });
+  } catch (err) {
+    console.error('owner month failed', err);
+    return json({ error: 'Could not read Notion. Check NOTION_TOKEN and NOTION_DB.' }, 502);
+  }
 }
 
 async function ownerSummary(request, env) {
@@ -1213,6 +1276,48 @@ async function ownerStatus(request, env) {
   return json({ ok: true, reference, status });
 }
 
+/** Owner sets a discount percentage on one booking. Notion keeps the
+ *  percentage; the dashboard and accounts show the rupee amount, which is
+ *  total × percent ÷ 100. */
+async function ownerDiscount(request, env) {
+  if (!ownerOk(request, env)) return json({ error: 'Not found' }, 404);
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Invalid request.' }, 400); }
+
+  const reference = clean(body.reference, 40).toUpperCase();
+  if (!reference) return json({ error: 'Missing booking reference.' }, 400);
+
+  const raw = body.percent;
+  const percent = raw === '' || raw == null ? 0 : Number(raw);
+  if (!isFinite(percent) || percent < 0 || percent > 100) {
+    return json({ error: 'Discount must be between 0 and 100.' }, 400);
+  }
+  const rounded = Math.round(percent * 100) / 100;
+
+  const page = await findPageByReference(env, reference);
+  if (!page) return json({ error: 'No booking with that reference.' }, 404);
+
+  try {
+    await ensureColumn(env, 'discount');
+    const C = await columns(env);
+    await patchPage(env, page.id, { [C.discount]: { number: rounded } });
+  } catch (err) {
+    console.error('owner discount failed', err);
+    return json({
+      error: 'Notion would not accept the discount. Add a Number column named Discount, or let the integration edit the database.'
+    }, 502);
+  }
+
+  const total = Number(pick(page.properties, P('total'))?.number) || 0;
+  return json({
+    ok: true,
+    reference,
+    discountPercent: rounded,
+    discount: Math.round(total * rounded / 100),
+    total
+  });
+}
+
 /** Owner takes some A-frame tents out of sale for a run of nights (e.g. booked elsewhere).
  *  It is stored as a "Blocked" row, which the public calendar counts like a stay.
  *  Cancel the row from the dashboard to give the A-frame tents back. */
@@ -1293,7 +1398,7 @@ async function health(env) {
     notion: reachable,
     units: units(env),
     capacity: capacity(env),
-    advance: advance(env),
+    advancePercent: advancePercent(env),
     blocks: ['Payment review', 'Confirmed'],
     owner: !!env.OWNER_TOKEN,
     notify: clean(env.WA_NOTIFY, 20),
