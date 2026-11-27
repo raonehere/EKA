@@ -47,8 +47,8 @@ document.querySelectorAll('.gallery--carousel').forEach(gallery => {
   var slides = Array.prototype.slice.call(hero.querySelectorAll('.hero__photo img'));
   if (!slides.length) return;
 
-  var HOLD = 6500;
-  var FADE = 1800;
+  var HOLD = 10000;
+  var FADE = 1000;
   var cache = {};
   var current = 0;
   var timer = null;

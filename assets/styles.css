@@ -491,7 +491,7 @@ html.lb-lock,body.lb-lock{overflow:hidden}
   --hero-scrim: var(--hero-s-r), var(--hero-s-g), var(--hero-s-b);
   --hero-ink: var(--brown);
   --hero-shadow: var(--hero-s-r), var(--hero-s-g), var(--hero-s-b);
-  --hero-fade:1.8s;
+  --hero-fade:1s;
   position:relative;
   isolation:isolate;
   min-height:100vh;
