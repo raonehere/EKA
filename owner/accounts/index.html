@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monthly accounts · EKA Forest</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#c5b8a5">
+<link rel="icon" href="../../images/brand/icon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="../../images/brand/icon-180.png">
+<link rel="preload" href="../../assets/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../assets/styles.css">
+<link rel="stylesheet" href="../../assets/owner.css">
+<link rel="stylesheet" href="../../assets/accounts.css?v=2">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="nav" aria-label="Main">
+    <ul class="nav__group nav__group--left">
+      <li><a href="../">Dashboard</a></li>
+      <li><a href="../../book/">Book</a></li>
+    </ul>
+    <a class="nav__logo" href="../../" aria-label="EKA Forest, home">
+      <img src="../../images/brand/logo.svg" width="117" height="73" alt="EKA Forest logo">
+    </a>
+    <ul class="nav__group nav__group--right">
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main" class="page owner">
+
+  <!-- ---------- key gate ---------- -->
+  <section class="gate" id="gate" hidden>
+    <p class="eyebrow">Private</p>
+    <h1 class="h1">Monthly accounts</h1>
+    <p class="gate__lead">Paste the owner key you set in the Worker as <code>OWNER_TOKEN</code>. It stays in this browser.</p>
+    <form class="gate__form" id="gate-form" novalidate>
+      <label class="field">
+        <span class="field__label">Owner key</span>
+        <input type="password" id="gate-key" autocomplete="current-password" spellcheck="false" placeholder="long random string">
+      </label>
+      <p class="field__err" id="gate-error" role="alert"></p>
+      <button class="btn" type="submit">Open accounts</button>
+    </form>
+  </section>
+
+  <section class="dash" id="dash" hidden>
+    <header class="dash__head">
+      <div>
+        <p class="eyebrow">Money</p>
+        <h1 class="h1">Monthly accounts</h1>
+      </div>
+      <div class="dash__tools">
+        <label class="field acc__month">
+          <span class="field__label">Month</span>
+          <input type="month" id="acc-month">
+        </label>
+        <label class="field acc__month">
+          <span class="field__label">From</span>
+          <input type="date" id="acc-from">
+        </label>
+        <label class="field acc__month">
+          <span class="field__label">To</span>
+          <input type="date" id="acc-to">
+        </label>
+        <button class="btn btn--small" type="button" id="acc-refresh">Refresh</button>
+      </div>
+    </header>
+
+    <p class="acc__range" id="acc-range"></p>
+    <p class="acc__demo" id="acc-demo" hidden>Preview data. Connect the Worker to see real bookings.</p>
+    <p class="acc__loading" id="acc-loading" hidden>Reading bookings…</p>
+    <p class="acc__error" id="acc-error" role="alert" hidden></p>
+
+    <div class="acc__kpis">
+      <div class="kpi kpi--money"><p class="kpi__label">Sales (confirmed)</p><p class="kpi__value" id="k-sales">₹0</p></div>
+      <div class="kpi"><p class="kpi__label">Expenses</p><p class="kpi__value" id="k-exp">₹0</p></div>
+      <div class="kpi"><p class="kpi__label">Other expenses</p><p class="kpi__value" id="k-misc">₹0</p></div>
+      <div class="kpi"><p class="kpi__label">Net</p><p class="kpi__value" id="k-net">₹0</p></div>
+    </div>
+
+    <!-- ---------- 1. Sales (automatic) ---------- -->
+    <section class="panel">
+      <div class="panel__head">
+        <h2 class="h3">1. Sales <span class="acc__tag">filled automatically from bookings</span></h2>
+        <div class="acc__btns">
+          <button class="btn btn--small btn--text" type="button" id="dl-sales">Download sales PDF</button>
+        </div>
+      </div>
+      <p class="panel__note" id="sales-note"></p>
+      <div class="tablewrap">
+        <table class="booktable">
+          <thead>
+            <tr><th scope="col">Day</th><th scope="col">Bookings checking in</th><th scope="col">Sales</th></tr>
+          </thead>
+          <tbody id="sales-days"></tbody>
+          <tfoot>
+            <tr><th scope="row">Total</th><th></th><th id="sales-total">₹0</th></tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <h3 class="acc__sub">Bookings this month</h3>
+      <div class="tablewrap">
+        <table class="booktable">
+          <thead>
+            <tr><th scope="col">Check-in</th><th scope="col">Guest</th><th scope="col">Status</th><th scope="col">Total</th><th scope="col">Discount</th><th scope="col">Sales</th><th scope="col">Invoice</th></tr>
+          </thead>
+          <tbody id="bookings"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ---------- 2. Expenses (you fill) ---------- -->
+    <section class="panel">
+      <div class="panel__head">
+        <h2 class="h3">2. Expenses <span class="acc__tag">you fill</span></h2>
+        <div class="acc__btns">
+          <button class="btn btn--small" type="button" id="exp-add">Add expense</button>
+          <button class="btn btn--small btn--text" type="button" id="dl-exp">Download expenses PDF</button>
+        </div>
+      </div>
+      <p class="panel__note">Salaries, food, electricity, maintenance and similar running costs. Saved in this browser as you type.</p>
+      <div class="tablewrap">
+        <table class="booktable acc__entry">
+          <thead>
+            <tr><th scope="col">Date</th><th scope="col">Description</th><th scope="col">Category</th><th scope="col">Amount (₹)</th><th scope="col"><span class="visually-hidden">Remove</span></th></tr>
+          </thead>
+          <tbody id="exp-rows"></tbody>
+          <tfoot>
+            <tr><th scope="row">Total</th><th></th><th></th><th id="exp-total">₹0</th><th></th></tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+
+    <!-- ---------- 3. Other / miscellaneous (you fill) ---------- -->
+    <section class="panel">
+      <div class="panel__head">
+        <h2 class="h3">3. Other &amp; miscellaneous <span class="acc__tag">you fill</span></h2>
+        <div class="acc__btns">
+          <button class="btn btn--small" type="button" id="misc-add">Add item</button>
+          <button class="btn btn--small btn--text" type="button" id="dl-misc">Download other PDF</button>
+        </div>
+      </div>
+      <p class="panel__note">Anything that doesn't fit above: bank charges, repairs, gifts, one-off purchases.</p>
+      <div class="tablewrap">
+        <table class="booktable acc__entry">
+          <thead>
+            <tr><th scope="col">Date</th><th scope="col">Description</th><th scope="col">Amount (₹)</th><th scope="col"><span class="visually-hidden">Remove</span></th></tr>
+          </thead>
+          <tbody id="misc-rows"></tbody>
+          <tfoot>
+            <tr><th scope="row">Total</th><th></th><th id="misc-total">₹0</th><th></th></tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+
+    <div class="acc__full">
+      <button class="btn" type="button" id="dl-full">Download full monthly statement (PDF)</button>
+      <p class="panel__note">Sales, expenses and other items on one page. Use your browser's “Save as PDF” option in the print window.</p>
+    </div>
+
+    <p class="dash__foot">Sales come from confirmed bookings, counted on their check-in day, after discount. Expenses and other items are kept in this browser, so download the PDF to keep a copy.</p>
+  </section>
+
+  <div class="dash-loading" id="loading" hidden>
+    <span class="dash-spinner" aria-hidden="true"></span>
+    <p>Working…</p>
+  </div>
+</main>
+
+<footer class="site-footer" id="contact">
+  <p>EKA Forest · Vattavada, Kerala</p>
+</footer>
+
+<script src="../../assets/booking-config.js?v=5"></script>
+<script src="../../assets/accounts.js?v=4" defer></script>
+</body>
+</html>

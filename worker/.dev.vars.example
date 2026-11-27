@@ -4,7 +4,7 @@
 NOTION_TOKEN=ntn_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 NOTION_DB=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-# Your UPI ID (the one that receives the ₹2,000 advance).
+# Your UPI ID (the one that receives the advance).
 UPI_ID=eka.82200883@hdfcbank
 UPI_NAME=EKA
 
@@ -22,5 +22,5 @@ SITE_URL=https://ekaforest.com
 
 UNITS=11
 TENT_CAPACITY=2
-ADVANCE=2000
+ADVANCE_PERCENT=20
 CHANGE_CUTOFF_HOURS=48

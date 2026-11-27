@@ -204,7 +204,7 @@
     el.rows.innerHTML = '';
     if (!rows.length) {
       var tr = document.createElement('tr');
-      tr.innerHTML = '<td colspan="6" class="booktable__empty">No bookings in the next month.</td>';
+      tr.innerHTML = '<td colspan="7" class="booktable__empty">No bookings in the next month.</td>';
       el.rows.appendChild(tr);
       return;
     }
@@ -212,15 +212,21 @@
       var tr = document.createElement('tr');
       tr.className = 'status-' + String(b.status).toLowerCase().replace(/\s+/g, '-');
       var link = waLink(b.phone, 'Hi ' + (b.name || '') + ', this is EKA Forest about your stay ' + b.reference + '.');
+      var pct = Number(b.discountPercent) || 0;
       tr.innerHTML =
         '<td data-label="Dates"><span class="cell__strong">' + shortDay(b.checkIn) + ' → ' + shortDay(b.checkOut) + '</span>' +
           '<span class="cell__sub">' + nights(b.checkIn, b.checkOut) + ' nights</span></td>' +
         '<td data-label="Guest"><span class="cell__strong">' + escapeHTML(b.name || '') + '</span>' +
           '<span class="cell__sub">' + b.guests + (b.guests === 1 ? ' guest' : ' guests') +
           (b.children ? ' + ' + b.children + ' children' : '') +
-          (link ? ' · <a href="' + link + '" target="_blank" rel="noopener">message</a>' : '') + '</span></td>' +
+          (link ? ' · <a href="' + link + '" target="_blank" rel="noopener">message</a>' : '') + '</span>' +
+          '<span class="cell__disc"><label>Discount %</label>' +
+            '<input type="number" min="0" max="100" step="any" inputmode="decimal" placeholder="0"' +
+            ' value="' + (pct ? pct : '') + '" data-discount="' + escapeHTML(b.reference) + '"' +
+            ' aria-label="Discount percent for ' + escapeHTML(b.name || 'this booking') + '"></span></td>' +
         '<td data-label="A-frame tents">' + b.tents + '</td>' +
         '<td data-label="Advance">' + rupees(b.advance) + '</td>' +
+        '<td data-label="Discount" data-discount-amt="' + escapeHTML(b.reference) + '">' + (b.discount ? rupees(b.discount) : '—') + '</td>' +
         '<td data-label="Status"><span class="chip chip--' + String(b.status).toLowerCase().replace(/\s+/g, '-') + '">' +
           statusLabel(b.status) + '</span></td>' +
         '<td class="cell__actions" data-label="Do">' +
@@ -265,6 +271,55 @@
       window.alert(err.message);
       btn.disabled = false;
     }).then(function () { busy(false); });
+  });
+
+  /* ---------------- discount ---------------------------------------------- */
+
+  function paintDiscount(b) {
+    var cell = el.rows.querySelector('[data-discount-amt="' + b.reference + '"]');
+    if (cell) cell.textContent = b.discount ? rupees(b.discount) : '—';
+  }
+
+  el.rows.addEventListener('change', function (e) {
+    var input = e.target.closest ? e.target.closest('input[data-discount]') : null;
+    if (!input || !state.data || state.busy) return;
+
+    var reference = input.getAttribute('data-discount');
+    var b = state.data.upcoming.find(function (x) { return x.reference === reference; });
+    if (!b) return;
+
+    var pct = Number(input.value);
+    if (!isFinite(pct) || pct < 0) pct = 0;
+    if (pct > 100) pct = 100;
+    pct = Math.round(pct * 100) / 100;
+    input.value = pct ? pct : '';
+
+    if (DEMO) {
+      b.discountPercent = pct;
+      b.discount = Math.round((Number(b.total) || 0) * pct / 100);
+      paintDiscount(b);
+      return;
+    }
+
+    input.disabled = true;
+    fetch(API + '/owner/discount?k=' + encodeURIComponent(state.key), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ reference: reference, percent: pct })
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (body) {
+        if (!res.ok) throw new Error(body.error || 'Could not save that discount.');
+        return body;
+      });
+    }).then(function (body) {
+      b.discountPercent = body.discountPercent;
+      b.discount = body.discount;
+      if (typeof body.total === 'number') b.total = body.total;
+      paintDiscount(b);
+    }).catch(function (err) {
+      window.alert(err.message);
+      input.value = b.discountPercent ? b.discountPercent : '';
+    }).then(function () { input.disabled = false; });
   });
 
   /* ---------------- reduce availability ----------------------------------- */
@@ -407,22 +462,22 @@
     }
 
     var upcoming = [
-      { reference: 'EKA-261119-A1B2', name: 'Meera Nair', phone: '919000000001', checkIn: t, checkOut: plus(2), nights: 2, guests: 2, children: 0, tents: 1, status: 'Confirmed', advance: 2000, moves: 0, notes: '' },
-      { reference: 'EKA-261120-C3D4', name: 'Arjun & family', phone: '919000000002', checkIn: t, checkOut: plus(3), nights: 3, guests: 4, children: 2, tents: 2, status: 'Payment review', advance: 2000, moves: 1, notes: '' },
-      { reference: 'EKA-261122-E5F6', name: 'Lena Fischer', phone: '491700000003', checkIn: plus(4), checkOut: plus(7), nights: 3, guests: 1, children: 0, tents: 1, status: 'Confirmed', advance: 2000, moves: 0, notes: '' },
-      { reference: 'EKA-261125-G7H8', name: 'Ravi Kumar', phone: '919000000004', checkIn: plus(7), checkOut: plus(9), nights: 2, guests: 3, children: 0, tents: 2, status: 'Pending payment', advance: 2000, moves: 2, notes: '' }
+      { reference: 'EKA-261119-A1B2', name: 'Meera Nair', phone: '919000000001', checkIn: t, checkOut: plus(2), nights: 2, guests: 2, children: 0, tents: 1, status: 'Confirmed', advance: 1480, total: 7400, discount: 0, discountPercent: 0, moves: 0, notes: '' },
+      { reference: 'EKA-261120-C3D4', name: 'Arjun & family', phone: '919000000002', checkIn: t, checkOut: plus(3), nights: 3, guests: 4, children: 2, tents: 2, status: 'Payment review', advance: 3330, total: 16650, discount: 1665, discountPercent: 10, moves: 1, notes: '' },
+      { reference: 'EKA-261122-E5F6', name: 'Lena Fischer', phone: '491700000003', checkIn: plus(4), checkOut: plus(7), nights: 3, guests: 1, children: 0, tents: 1, status: 'Confirmed', advance: 1110, total: 11100, discount: 555, discountPercent: 5, moves: 0, notes: '' },
+      { reference: 'EKA-261125-G7H8', name: 'Ravi Kumar', phone: '919000000004', checkIn: plus(7), checkOut: plus(9), nights: 2, guests: 3, children: 0, tents: 2, status: 'Pending payment', advance: 2220, total: 11100, discount: 0, discountPercent: 0, moves: 2, notes: '' }
     ];
 
     var arrive = upcoming.filter(function (b) { return b.checkIn === t; });
     var leave = upcoming.filter(function (b) { return b.checkOut === t; });
 
     return {
-      today: t, units: 11, capacity: 2, advance: 2000,
+      today: t, units: 11, capacity: 2, advancePercent: 20,
       tonight: { tents: 7, free: 4, guests: 13 },
       todayArrivals: arrive, todayDepartures: leave,
       next7: { arrivals: 6, departures: 4 },
       months: months,
-      money: { confirmed: 48000, review: 4000, pending: 2000 },
+      money: { confirmed: 48000, review: 4000, pending: 2220 },
       changes: { today: 1, last7: 3 },
       cancellations: { upcoming: 1 },
       upcoming: upcoming

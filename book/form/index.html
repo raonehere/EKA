@@ -5,13 +5,13 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Check availability &amp; book · EKA Forest, Vattavada</title>
-<meta name="description" content="Check which nights are free at EKA Forest in Vattavada, tell us who's coming, and confirm your stay with a ₹2,000 advance.">
+<meta name="description" content="Check which nights are free at EKA Forest in Vattavada, tell us who's coming, and confirm your stay with an advance of 20% of your total.">
 <link rel="canonical" href="https://ekaforest.com/book/form/">
 <meta name="theme-color" content="#c5b8a5">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="EKA Forest">
 <meta property="og:title" content="Check availability &amp; book · EKA Forest">
-<meta property="og:description" content="Pick your nights among the eucalyptus. Confirm with a flat ₹2,000 advance.">
+<meta property="og:description" content="Pick your nights among the eucalyptus. Confirm with an advance of 20% of your total.">
 <meta property="og:url" content="https://ekaforest.com/book/form/">
 <meta property="og:image" content="https://ekaforest.com/images/share/og-home.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -20,7 +20,7 @@
 <link rel="preload" href="../../assets/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../../assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../../assets/styles.css">
-<link rel="stylesheet" href="../../assets/book.css">
+<link rel="stylesheet" href="../../assets/book.css?v=4">
 </head>
 <body>
 
@@ -47,13 +47,13 @@
   <header class="page__head book__head">
     <p class="eyebrow">Book your stay</p>
     <h1 class="h1">Check availability</h1>
-    <p class="page__intro">EKA Forest is a small stay of A-frame tents in the eucalyptus woods of Vattavada. Pick the nights you want, tell us who's coming, and confirm with a <strong>₹2,000 advance</strong>, the same flat amount whether you're two people or a full group. It comes off your final bill.</p>
+    <p class="page__intro">EKA Forest is a small stay of A-frame tents in the eucalyptus woods of Vattavada. Pick the nights you want, tell us who's coming, and confirm with an advance of <strong><span data-adv-pct>20</span>% of your total</strong>. It comes off your final bill.</p>
   </header>
 
   <div class="book__meta" aria-hidden="true">
     <p><span class="book__meta-k">Check-in</span> from 1 PM</p>
     <p><span class="book__meta-k">Check-out</span> by 11 AM</p>
-    <p><span class="book__meta-k">Advance</span> ₹2,000, non-refundable</p>
+    <p><span class="book__meta-k">Advance</span> <span><span data-adv-pct>20</span>% of your total</span></p>
   </div>
 
   <section class="inclusions" aria-labelledby="inclusions-title">
@@ -63,20 +63,33 @@
       <li>A-frame tent for the night</li>
       <li>Dinner and breakfast</li>
       <li>Guided trekking</li>
-      <li>Campfire every evening</li>
+      <li>Campfire</li>
     </ul>
-    <p class="inclusions__note">Optional lunch: ₹250 per person, added below if you want it. Children aged 5 to 10 pay half (₹925). Under 5 is free. Your ₹2,000 advance comes off the total, and you pay the rest at the camp.</p>
+    <p class="inclusions__note">Optional lunch: ₹250 per person, added below if you want it. Children aged 5 to 10 pay half (₹925). Under 5 is free. Your advance (<span data-adv-pct>20</span>% of your total) comes off the bill, and you pay the rest at the camp.</p>
   </section>
 
-  <form class="book__layout" id="booking-form" novalidate>
+  <form class="book__layout" id="booking-form" data-step="1" novalidate>
 
-    <!-- ============ 01, DATES ============ -->
-    <section class="book__main step" id="step-dates" aria-labelledby="step-dates-title">
+    <!-- ============ PROGRESS ============ -->
+    <nav class="book__main wz-progress" aria-label="Booking steps">
+      <ol class="wz-progress__list">
+        <li class="wz-progress__item" data-step="1"><span class="wz-progress__num">1</span><span class="wz-progress__label">Nights</span></li>
+        <li class="wz-progress__item" data-step="2"><span class="wz-progress__num">2</span><span class="wz-progress__label">Guests &amp; details</span></li>
+        <li class="wz-progress__item" data-step="3"><span class="wz-progress__num">3</span><span class="wz-progress__label">ID proof</span></li>
+        <li class="wz-progress__item" data-step="4"><span class="wz-progress__num">4</span><span class="wz-progress__label">Notes &amp; reserve</span></li>
+      </ol>
+    </nav>
+
+    <!-- ============ 01, GUESTS & DATES ============ -->
+    <section class="book__main wz-step" data-step="1" id="step-dates" aria-labelledby="step-dates-title">
       <div class="step__head">
         <span class="step__num" aria-hidden="true">01</span>
         <h2 class="h2" id="step-dates-title">Choose your nights</h2>
       </div>
 
+      <p class="book__capacity" id="capacity-note" aria-live="polite"></p>
+
+      <h3 class="wz-sub">Pick your nights</h3>
       <div class="cal" id="calendar">
         <div class="cal__bar">
           <button class="cal__nav" type="button" id="cal-prev" aria-label="Previous month">
@@ -114,31 +127,24 @@
       <noscript>
         <p class="book__note">The calendar needs JavaScript. You can still <a href="https://wa.me/917012293538?text=Hi%20EKA%20Forest%2C%20I%27d%20like%20to%20book%20a%20stay." target="_blank" rel="noopener">book on WhatsApp</a>.</p>
       </noscript>
+
+      <div class="wz-nav">
+        <span></span>
+        <button class="btn wz-next" type="button" data-next>Next: guests &amp; details</button>
+      </div>
     </section>
 
-    <!-- ============ 02, GUESTS & DETAILS ============ -->
-    <section class="book__main book__strip" aria-labelledby="strip-title">
-      <h2 class="h3" id="strip-title">What your stay looks like</h2>
-      <ul class="gallery__strip" tabindex="0" aria-label="Photos of the stay, scroll horizontally">
-        <li class="ph ph--tile"><img src="../../images/gallery/accommodation/aframe-tent-1.jpg" alt="An A-frame tent for two" loading="lazy" width="600" height="400"><span class="ph__cap">An A-frame tent for two</span></li>
-        <li class="ph ph--tile"><img src="../../images/gallery/accommodation/tent-interior.jpg" alt="Inside the A-frame tent" loading="lazy" width="600" height="400"><span class="ph__cap">Inside the A-frame tent</span></li>
-        <li class="ph ph--tile"><img src="../../images/gallery/reception/walkway-to-eka.jpg" alt="Walkway to EKA" loading="lazy" width="600" height="400"><span class="ph__cap">Walkway to EKA</span></li>
-        <li class="ph ph--tile"><img src="../../images/gallery/reception/campfire.jpg" alt="Campfire" loading="lazy" width="600" height="400"><span class="ph__cap">Campfire</span></li>
-        <li class="ph ph--tile"><img src="../../images/gallery/village-walks/village-walk-1.jpg" alt="A village walk" loading="lazy" width="600" height="400"><span class="ph__cap">A village walk</span></li>
-        <li class="ph ph--tile"><img src="../../images/gallery/trekking/meadow-trek.jpg" alt="Trekking" loading="lazy" width="600" height="400"><span class="ph__cap">Trekking</span></li>
-      </ul>
-    </section>
-
-    <section class="book__main step" id="step-details" aria-labelledby="step-details-title">
+    <!-- ============ 02, YOUR DETAILS ============ -->
+    <section class="book__main wz-step" data-step="2" id="step-you" aria-labelledby="step-you-title" hidden>
       <div class="step__head">
         <span class="step__num" aria-hidden="true">02</span>
-        <h2 class="h2" id="step-details-title">Tell us who's coming</h2>
+        <h2 class="h2" id="step-you-title">Guests &amp; your details</h2>
       </div>
 
       <fieldset class="field-row">
         <legend class="fieldset-legend">Guests</legend>
         <div class="field">
-          <label for="adults">Adults (11 and over)</label>
+          <label for="adults">Adults aged 11 and over</label>
           <input id="adults" name="adults" type="number" inputmode="numeric" min="1" step="1" value="2" required autocomplete="off">
           <p class="field__hint">An A-frame tent sleeps two, and a solo guest still gets a whole one.</p>
           <p class="field__err" data-err-for="adults"></p>
@@ -170,9 +176,6 @@
         </div>
       </fieldset>
 
-      <p class="book__estimate" id="estimate" aria-live="polite">Pick your dates to see the total.</p>
-      <p class="book__capacity" id="capacity-note" aria-live="polite"></p>
-
       <div class="field">
         <label for="name">Full name</label>
         <input id="name" name="name" type="text" autocomplete="name" required placeholder="As it should appear on the booking">
@@ -192,38 +195,10 @@
           <p class="field__err" data-err-for="phone"></p>
         </div>
         <div class="field">
-          <label for="email">Email</label>
-          <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@email.com">
+          <label for="email">Email <span class="field__opt">(optional)</span></label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="you@email.com">
           <p class="field__err" data-err-for="email"></p>
         </div>
-      </div>
-
-      <div class="field-row">
-        <div class="field">
-          <label for="arrival">Expected arrival</label>
-          <select id="arrival" name="arrival">
-            <option value="1–3 PM">1–3 PM</option>
-            <option value="3–5 PM">3–5 PM</option>
-            <option value="5–6 PM">5–6 PM (before the check-post closes)</option>
-            <option value="Not sure yet" selected>Not sure yet</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="pets">Bringing a pet?</label>
-          <select id="pets" name="pets">
-            <option value="No" selected>No</option>
-            <option value="One dog">One dog</option>
-            <option value="More than one pet">More than one pet</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="id-proof">ID proof <span class="field__req">(required)</span></label>
-        <input id="id-proof" name="idProof" type="file" accept="image/*,application/pdf" required>
-        <p class="field__hint">Aadhaar, passport or driving licence. A photo or PDF, under 8 MB. Every guest over 18 must have one.</p>
-        <p class="field__err" data-err-for="idproof"></p>
       </div>
 
       <div class="field">
@@ -244,9 +219,49 @@
         <p class="field__hint">₹250 per person for each lunch, up to one a night. Dinner, breakfast, trekking and campfire are already included in the ₹1,850 per head per night.</p>
       </div>
 
+      <div class="wz-nav">
+        <button class="linkbtn wz-back" type="button" data-back>Back</button>
+        <button class="btn wz-next" type="button" data-next>Next: ID proof</button>
+      </div>
+    </section>
+
+    <!-- ============ 03, ID PROOF ============ -->
+    <section class="book__main wz-step" data-step="3" id="step-id" aria-labelledby="step-id-title" hidden>
+      <div class="step__head">
+        <span class="step__num" aria-hidden="true">03</span>
+        <h2 class="h2" id="step-id-title">ID proof</h2>
+      </div>
+
+      <p class="wz-lead">Every guest over 18 needs a photo ID. We keep it with your booking and only use it to check in.</p>
+
       <div class="field">
-        <label for="notes">Anything we should know? <span class="field__opt">(optional)</span></label>
+        <label for="id-proof">ID proof <span class="field__req">(required)</span></label>
+        <input id="id-proof" name="idProof" type="file" accept="image/*,application/pdf" required>
+        <p class="field__hint">Aadhaar, passport or driving licence. A photo or PDF, under 8 MB.</p>
+        <p class="field__err" data-err-for="idproof"></p>
+      </div>
+
+      <div class="wz-nav">
+        <button class="linkbtn wz-back" type="button" data-back>Back</button>
+        <button class="btn wz-next" type="button" data-next>Next: notes &amp; reserve</button>
+      </div>
+    </section>
+
+    <!-- ============ 04, STAY & FINISH ============ -->
+    <section class="book__main wz-step" data-step="4" id="step-finish" aria-labelledby="step-finish-title" hidden>
+      <div class="step__head">
+        <span class="step__num" aria-hidden="true">04</span>
+        <h2 class="h2" id="step-finish-title">Anything we should know?</h2>
+      </div>
+
+      <div class="field">
+        <label for="notes">Your notes <span class="field__opt">(optional)</span></label>
         <textarea id="notes" name="notes" rows="3" placeholder="Dietary needs, a birthday, travelling with kids, questions about reaching us…"></textarea>
+      </div>
+
+      <div class="wz-nav">
+        <button class="linkbtn wz-back" type="button" data-back>Back</button>
+        <p class="wz-hint">Check your stay on the right, then reserve.</p>
       </div>
     </section>
 
@@ -277,54 +292,71 @@
           <div><dt>Lunch</dt><dd id="sum-lunch"></dd></div>
           <div><dt>Total</dt><dd id="sum-total"></dd></div>
           <div><dt>Advance now</dt><dd id="sum-advance"></dd></div>
-          <div><dt>Balance at EKA Forest</dt><dd id="sum-balance"></dd></div>
+          <div hidden><dt>Balance at EKA Forest</dt><dd id="sum-balance"></dd></div>
         </dl>
 
         <div class="summary__pay">
           <div class="summary__amount">
-            <span class="summary__amount-label">Advance due now</span>
-            <span class="summary__amount-value">₹2,000</span>
+            <span class="summary__amount-label">Advance due now (<span data-adv-pct>20</span>%)</span>
+            <span class="summary__amount-value" id="advance-due">–</span>
           </div>
-          <p class="summary__fine">Flat advance, whatever the group size. It comes off your final bill, and moves with your dates if plans change.</p>
+          <p class="summary__fine">A fixed <span data-adv-pct>20</span>% of your total, so it grows with your nights and group. It comes off your final bill, and moves with your dates if plans change.</p>
         </div>
 
-        <label class="terms" for="terms">
-          <input type="checkbox" id="terms" name="terms" required>
-          <span>I understand the ₹2,000 advance is <strong>non-refundable</strong>, that I'll pay it by UPI and upload the screenshot, and that the balance is paid at EKA Forest.</span>
-        </label>
-        <p class="field__err" data-err-for="terms"></p>
+        <div class="wz-final">
+          <label class="terms" for="terms">
+            <input type="checkbox" id="terms" name="terms" required>
+            <span>I understand the advance (<span data-adv-pct>20</span>% of my total) is paid by UPI with the screenshot, and that the balance is paid at EKA Forest.</span>
+          </label>
+          <p class="field__err" data-err-for="terms"></p>
 
-        <button class="btn btn--pay" type="submit" id="pay-btn">
-          <span id="pay-btn-label">Reserve these dates</span>
-        </button>
+          <button class="btn btn--pay" type="submit" id="pay-btn">
+            <span id="pay-btn-label">Reserve these dates</span>
+          </button>
 
-        <p class="summary__secure">
-          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-          Pay ₹2,000 by UPI after reserving. We check the screenshot by hand and confirm on WhatsApp.
-        </p>
+          <p class="summary__secure">
+            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+            Pay your advance by UPI after reserving. We check the screenshot by hand and confirm on WhatsApp.
+          </p>
+        </div>
 
         <p class="summary__help">Questions? <a data-wa-link href="#" target="_blank" rel="noopener">WhatsApp us</a>.</p>
       </div>
 
       <p class="summary__policy">
-        <strong>How it works.</strong> Fill the form, pay the ₹2,000 by UPI and upload the screenshot, that is what blocks your dates. We check the credit by hand and confirm on WhatsApp, usually within a few hours. The advance comes off your final bill, moves with your dates up to 48 hours before check-in, and is not refunded if you cancel.
+        <strong>How it works.</strong> Fill the form, pay the advance (<span data-adv-pct>20</span>% of your total) by UPI and upload the screenshot, that is what blocks your dates. We check the credit by hand and confirm on WhatsApp, usually within a few hours. The advance comes off your final bill, moves with your dates up to 48 hours before check-in, and is not refunded if you cancel.
       </p>
     </aside>
 
     <p class="book__error" id="form-error" role="alert" hidden></p>
   </form>
 
+  <section class="book__strip" aria-labelledby="strip-title">
+    <h2 class="h2" id="strip-title">What your stay looks like</h2>
+    <ul class="gallery__strip" tabindex="0" aria-label="Photos of the stay, scroll horizontally">
+      <li class="ph ph--tile"><img src="../../images/gallery/views/eka-view-5.jpg" alt="The EKA view" loading="lazy" width="600" height="400"><span class="ph__cap">The EKA view</span></li>
+      <li class="ph ph--tile"><img src="../../images/gallery/accommodation/aframe-tent-1.jpg" alt="An A-frame tent for two" loading="lazy" width="600" height="400"><span class="ph__cap">An A-frame tent for two</span></li>
+      <li class="ph ph--tile"><img src="../../images/gallery/views/eka-view-1.jpg" alt="The EKA property at dusk" loading="lazy" width="600" height="400"><span class="ph__cap">The property at dusk</span></li>
+      <li class="ph ph--tile"><img src="../../images/gallery/accommodation/tent-interior.jpg" alt="Inside the A-frame tent" loading="lazy" width="600" height="400"><span class="ph__cap">Inside the A-frame tent</span></li>
+      <li class="ph ph--tile"><img src="../../images/gallery/reception/walkway-to-eka.jpg" alt="Walkway to EKA" loading="lazy" width="600" height="400"><span class="ph__cap">Walkway to EKA</span></li>
+      <li class="ph ph--tile"><img src="../../images/gallery/reception/campfire.jpg" alt="Campfire" loading="lazy" width="600" height="400"><span class="ph__cap">Campfire</span></li>
+      <li class="ph ph--tile"><img src="../../images/gallery/village-walks/village-walk-1.jpg" alt="A village walk" loading="lazy" width="600" height="400"><span class="ph__cap">A village walk</span></li>
+      <li class="ph ph--tile"><img src="../../images/gallery/trekking/meadow-trek.jpg" alt="Trekking" loading="lazy" width="600" height="400"><span class="ph__cap">Trekking</span></li>
+      <li class="ph ph--tile"><img src="../../images/gallery/trekking/waterfall-1.jpg" alt="A waterfall nearby" loading="lazy" width="600" height="400"><span class="ph__cap">A waterfall nearby</span></li>
+    </ul>
+  </section>
+
   <section class="book__faq" aria-labelledby="book-faq-title">
     <h2 class="h2" id="book-faq-title">Before you book</h2>
     <div class="faq__grid">
       <div class="faq__col">
         <details>
-          <summary>How does the ₹2,000 advance work?</summary>
-          <p>It's a flat amount, a solo A-frame tent or a group of ten, it stays ₹2,000. You reserve your nights, pay by UPI (scan the QR or use the ID), and upload the screenshot; we check it and confirm on WhatsApp. It's non-refundable and comes off your final bill, which you settle at EKA Forest.</p>
+          <summary>How does the advance work?</summary>
+          <p>The advance is <span data-adv-pct>20</span>% of your total, so it grows with your nights and your group. You reserve your nights, pay by UPI (scan the QR or use the ID), and upload the screenshot; we check it and confirm on WhatsApp. It comes off your final bill, which you settle at EKA Forest.</p>
         </details>
         <details>
           <summary>What if I need to change my dates?</summary>
-          <p>Your confirmation includes a private link to move the booking yourself. Pick any free nights and the ₹2,000 advance carries over, no charge, and you can do it more than once. Changes close 48 hours before check-in; after that, message us on WhatsApp.</p>
+          <p>Your confirmation includes a private link to move the booking yourself. Pick any free nights and the advance carries over, no charge, and you can do it more than once. Changes close 48 hours before check-in; after that, message us on WhatsApp.</p>
         </details>
         <details>
           <summary>How many people can come?</summary>
@@ -342,7 +374,7 @@
         </details>
         <details>
           <summary>Can I pay the full amount now?</summary>
-          <p>No need. The ₹2,000 advance by UPI confirms the booking; the balance is settled when you're here.</p>
+          <p>No need. The advance by UPI confirms the booking; the balance is settled when you're here.</p>
         </details>
       </div>
     </div>
@@ -399,7 +431,7 @@
     <dl class="confirm__list">
       <div><dt>Dates</dt><dd id="confirm-dates"></dd></div>
       <div><dt>Guests</dt><dd id="confirm-guests"></dd></div>
-      <div><dt>Advance</dt><dd id="confirm-paid">₹2,000</dd></div>
+      <div><dt>Advance</dt><dd id="confirm-paid"></dd></div>
     </dl>
 
     <p class="confirm__next">We'll message you on WhatsApp within a few hours with your A-frame tent, directions and the map pin. The balance is paid when you arrive.</p>
@@ -426,7 +458,7 @@
     </button>
 
     <p class="confirm__tag" id="pay-tag">Dates held</p>
-    <h2 class="h2" id="pay-title">Pay ₹2,000 by UPI</h2>
+    <h2 class="h2" id="pay-title">Pay your advance by UPI</h2>
     <p class="paypanel__lead">Scan the code with any UPI app, or pay to the ID below. The screenshot is what blocks your dates, we check it by hand and confirm on WhatsApp.</p>
 
     <div class="paypanel__grid">
@@ -437,7 +469,7 @@
 
       <div class="paypanel__meta">
         <p class="paypanel__label">Amount</p>
-        <p class="paypanel__amount" id="pay-amount">₹2,000</p>
+        <p class="paypanel__amount" id="pay-amount"></p>
 
         <p class="paypanel__label">UPI ID</p>
         <p class="paypanel__upi">
@@ -448,7 +480,6 @@
         <p class="paypanel__label">Your reference</p>
         <p class="paypanel__ref" id="pay-ref"></p>
 
-        <a class="btn btn--small btn--text paypanel__app" id="pay-open-app" href="#">Open UPI app</a>
       </div>
     </div>
 
@@ -481,9 +512,9 @@
 
 <script src="../../assets/main.js" defer></script>
 <script src="../../assets/lightbox.js" defer></script>
-<script src="../../assets/booking-config.js?v=4"></script>
+<script src="../../assets/booking-config.js?v=5"></script>
 <script src="../../assets/vendor/qrcode.min.js" defer></script>
-<script src="../../assets/book.js?v=5" defer></script>
+<script src="../../assets/book.js?v=7" defer></script>
 <script src="../../assets/cms.js" defer></script>
 <script data-goatcounter="https://ekaforest.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>

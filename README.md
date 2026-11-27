@@ -18,11 +18,12 @@ Then open http://localhost:8080/
 The public `/book/` page currently shows a coming-soon screen. The availability calendar and booking flow below stays in the repo for when booking opens.
 
 `/book/` is the availability calendar and booking flow: pick nights → guest
-details → flat **₹2,000 advance** → pay by UPI and upload the screenshot →
-confirmation.
+details → **advance (20% of the total)** → pay by UPI and upload the screenshot →
+confirmation. The form is split into four steps: guests and dates, your details,
+ID proof, then stay and finish.
 
 - Availability and bookings live in a **Notion** database.
-- No payment gateway: the page shows a UPI QR for exactly ₹2,000 and the guest
+- No payment gateway: the page shows a UPI QR for the exact advance and the guest
   uploads a screenshot, which the Worker files in the Notion row. You check the
   credit and set `Booking status = Confirmed` by hand.
 - Because GitHub Pages is static, both are reached through a small
@@ -39,9 +40,9 @@ preview mode (`demo: true`) with sample availability and a simulated payment.
 **Setup: [`docs/booking-setup.md`](docs/booking-setup.md)**, Notion schema, keys,
 Worker deploy, UPI, dashboard, testing.
 
-Tent count, capacity, advance and the API URL are in
+Tent count, capacity, advance percentage and the API URL are in
 `assets/booking-config.js`. The Worker's copy of the inventory is in
-`worker/wrangler.toml` (`UNITS`, `TENT_CAPACITY`, `ADVANCE`), keep the two in
+`worker/wrangler.toml` (`UNITS`, `TENT_CAPACITY`, `ADVANCE_PERCENT`), keep the two in
 step.
 
 ## Content
