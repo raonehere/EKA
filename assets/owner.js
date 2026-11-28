@@ -215,7 +215,8 @@
 
     lines.push('*Booking details*');
     lines.push('• Reference: ' + b.reference);
-    lines.push('• Check-in: ' + shortDay(b.checkIn) + ' (' + nights(b.checkIn, b.checkOut) + ' nights)');
+    var n = nights(b.checkIn, b.checkOut);
+    lines.push('• Check-in: ' + shortDay(b.checkIn) + ' (' + n + (n === 1 ? ' night)' : ' nights)'));
     lines.push('• Check-out: ' + shortDay(b.checkOut));
     lines.push('• Guests: ' + b.guests + (b.guests === 1 ? ' adult' : ' adults') +
       (b.children ? ' + ' + b.children + (b.children === 1 ? ' child' : ' children') : ''));

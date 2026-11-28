@@ -31,9 +31,10 @@
     gate: $('#gate'), gateForm: $('#gate-form'), gateKey: $('#gate-key'), gateError: $('#gate-error'),
     dash: $('#dash'), loading: $('#loading'), accLoading: $('#acc-loading'), accError: $('#acc-error'),
     accDemo: $('#acc-demo'), accRange: $('#acc-range'),
-    month: $('#acc-month'), refresh: $('#acc-refresh'),
+    month: $('#acc-month'), refresh: $('#acc-refresh'), share: $('#acc-share'),
     kSales: $('#k-sales'), kExp: $('#k-exp'), kNet: $('#k-net'),
     salesNote: $('#sales-note'), salesCount: $('#sales-count'), salesWaiting: $('#sales-waiting'),
+    salesDiff: $('#sales-diff'),
     salesTotal: $('#sales-total'),
     expNote: $('#exp-note'), expRunning: $('#exp-running'), expAssets: $('#exp-assets'),
     expSalaries: $('#exp-salaries'), expFood: $('#exp-food'), expTotal: $('#exp-total'),
@@ -230,8 +231,31 @@
     renderTotals();
   }
 
-  function salesTotal() {
+  /* Sales from Notion. If Notion has none for the month, the sales figure in the expenses data is used. */
+  function notionSales() {
     return rangeRows().reduce(function (sum, b) { return sum + (isSale(b) ? netOf(b) : 0); }, 0);
+  }
+
+  /* Bottom note: shown when Notion and the data file both have sales for the month and they differ. */
+  function renderSalesDiff() {
+    var n = Math.round(notionSales());
+    var f = state.sheet && typeof state.sheet.sales === 'number' ? Math.round(state.sheet.sales) : null;
+    if (!n || f === null || n === f) {
+      el.salesDiff.hidden = true;
+      return;
+    }
+    el.salesDiff.textContent = 'Sales differ: Notion shows ' + rupees(n) + ' and the expenses data shows ' +
+      rupees(f) + ' for ' + monthTitle(state.month) + ' (difference ' + rupees(Math.abs(n - f)) +
+      '). The page uses Notion when it has a figure.';
+    el.salesDiff.hidden = false;
+  }
+
+  function usingFileSales() {
+    return notionSales() === 0 && !!state.sheet && typeof state.sheet.sales === 'number';
+  }
+
+  function salesTotal() {
+    return usingFileSales() ? state.sheet.sales : notionSales();
   }
 
   function renderSales() {
@@ -242,10 +266,12 @@
     el.salesCount.textContent = String(confirmed.length);
     el.salesWaiting.textContent = rupees(waitingAmount) + (waiting.length ? ' (' + waiting.length + ')' : '');
     el.salesTotal.textContent = rupees(salesTotal());
-    el.salesNote.textContent = waiting.length
-      ? 'Waiting bookings are not counted until they are confirmed.'
-      : '';
-    el.salesNote.hidden = !el.salesNote.textContent;
+    var notes = [];
+    if (usingFileSales()) notes.push('No confirmed bookings in Notion for this month, so sales come from the expenses data.');
+    if (waiting.length) notes.push('Waiting bookings are not counted until they are confirmed.');
+    el.salesNote.textContent = notes.join(' ');
+    el.salesNote.hidden = !notes.length;
+    renderSalesDiff();
   }
 
   function renderExpenses(errorText) {
@@ -260,6 +286,7 @@
       return;
     }
     if (!s) return;
+    renderSales();
     el.expRunning.textContent = rupees(s.runningExpenses);
     el.expAssets.textContent = rupees(s.assets);
     el.expSalaries.textContent = rupees(s.salaries);
@@ -359,6 +386,19 @@
   /* ---------------- events ----------------------------------------------- */
   el.month.addEventListener('change', loadMonth);
   el.refresh.addEventListener('click', loadMonth);
+
+  /* Opens WhatsApp with a short summary. WhatsApp asks which chat or group to send it to. */
+  el.share.addEventListener('click', function () {
+    var sales = salesTotal();
+    var s = state.sheet;
+    var lines = [
+      'EKA Forest, ' + monthTitle(state.month),
+      'Sales: ' + rupees(sales),
+      'Expenses: ' + (s ? rupees(s.total) : 'not available'),
+      'Net: ' + (s ? rupees(sales - s.netCosts) : 'not available')
+    ];
+    window.open('https://wa.me/?text=' + encodeURIComponent(lines.join('\n')), '_blank', 'noopener');
+  });
 
   el.gateForm.addEventListener('submit', function (e) {
     e.preventDefault();
