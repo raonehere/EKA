@@ -181,7 +181,7 @@
     items.forEach(function (b) {
       var li = document.createElement('li');
       li.className = 'person';
-      var link = waLink(b.phone, 'Hi ' + (b.name || '') + ', this is EKA Forest.');
+      var link = waLink(b.phone, guestMessage(b));
       li.innerHTML =
         '<span class="person__name">' + escapeHTML(b.name || '') + '</span>' +
         '<span class="person__meta">' + b.guests + (b.guests === 1 ? ' guest' : ' guests') +
@@ -198,28 +198,79 @@
     });
   }
 
+  /* The WhatsApp message sent to a guest from the dashboard. Wording depends on
+     where the booking stands. *bold* is WhatsApp's own formatting. */
+  function guestMessage(b) {
+    var balance = Math.max(0, (Number(b.total) || 0) - (Number(b.discount) || 0) - (Number(b.advance) || 0));
+    var lines = ['Hi ' + (b.name || '') + ',', 'This is EKA Forest.', ''];
+
+    if (b.status === 'Confirmed') {
+      lines.push('*Your stay is confirmed.*');
+    } else if (b.status === 'Payment review') {
+      lines.push('We have your payment screenshot and are checking it. We will confirm on WhatsApp shortly.');
+    } else {
+      lines.push('Your dates are not held yet. Please pay the advance to confirm your stay.');
+    }
+    lines.push('');
+
+    lines.push('*Booking details*');
+    lines.push('• Reference: ' + b.reference);
+    lines.push('• Check-in: ' + shortDay(b.checkIn) + ' (' + nights(b.checkIn, b.checkOut) + ' nights)');
+    lines.push('• Check-out: ' + shortDay(b.checkOut));
+    lines.push('• Guests: ' + b.guests + (b.guests === 1 ? ' adult' : ' adults') +
+      (b.children ? ' + ' + b.children + (b.children === 1 ? ' child' : ' children') : ''));
+    lines.push('• A-frame tents: ' + b.tents);
+
+    if (b.total) {
+      lines.push('');
+      lines.push('*Bill*');
+      lines.push('• Total: ' + rupees(b.total));
+      if (b.discount) lines.push('• Discount' + (b.discountPercent ? ' (' + b.discountPercent + '%)' : '') + ': -' + rupees(b.discount));
+      lines.push('• Advance paid: ' + rupees(b.advance));
+      lines.push('• *Balance, pay on arrival: ' + rupees(balance) + '*');
+    }
+
+    if (b.status !== 'Confirmed') {
+      lines.push('');
+      lines.push("We'll message you on WhatsApp within a few hours with confirmation and the map pin. The balance is paid when you arrive.");
+    }
+
+    lines.push('');
+    lines.push('*Getting here*');
+    lines.push('• Map pin: https://maps.app.goo.gl/JCedDdfNPkiZp1kc8');
+    lines.push('• Contact: +91 70122 93538');
+    lines.push('• Network that works here: Jio or BSNL');
+    lines.push('');
+    lines.push('*Please bring*');
+    lines.push('• Warm clothes');
+    lines.push('• Personal medications');
+    lines.push('');
+    lines.push('*Strictly no illegal substances allowed.*');
+    return lines.join('\n');
+  }
+
   function paintRows(all) {
     var v = el.filter ? el.filter.value : '';
     var rows = all.filter(function (b) { return !v || b.status === v; });
     el.rows.innerHTML = '';
     if (!rows.length) {
       var tr = document.createElement('tr');
-      tr.innerHTML = '<td colspan="7" class="booktable__empty">No bookings in the next month.</td>';
+      tr.innerHTML = '<td colspan="8" class="booktable__empty">No bookings in the next month.</td>';
       el.rows.appendChild(tr);
       return;
     }
     rows.forEach(function (b) {
       var tr = document.createElement('tr');
       tr.className = 'status-' + String(b.status).toLowerCase().replace(/\s+/g, '-');
-      var link = waLink(b.phone, 'Hi ' + (b.name || '') + ', this is EKA Forest about your stay ' + b.reference + '.');
+      var link = waLink(b.phone, guestMessage(b));
       var pct = Number(b.discountPercent) || 0;
+      var balance = Math.max(0, (Number(b.total) || 0) - (Number(b.discount) || 0) - (Number(b.advance) || 0));
       tr.innerHTML =
         '<td data-label="Dates"><span class="cell__strong">' + shortDay(b.checkIn) + ' → ' + shortDay(b.checkOut) + '</span>' +
           '<span class="cell__sub">' + nights(b.checkIn, b.checkOut) + ' nights</span></td>' +
         '<td data-label="Guest"><span class="cell__strong">' + escapeHTML(b.name || '') + '</span>' +
           '<span class="cell__sub">' + b.guests + (b.guests === 1 ? ' guest' : ' guests') +
-          (b.children ? ' + ' + b.children + ' children' : '') +
-          (link ? ' · <a href="' + link + '" target="_blank" rel="noopener">message</a>' : '') + '</span>' +
+          (b.children ? ' + ' + b.children + ' children' : '') + '</span>' +
           '<span class="cell__disc"><label>Discount %</label>' +
             '<input type="number" min="0" max="100" step="any" inputmode="decimal" placeholder="0"' +
             ' value="' + (pct ? pct : '') + '" data-discount="' + escapeHTML(b.reference) + '"' +
@@ -227,9 +278,11 @@
         '<td data-label="A-frame tents">' + b.tents + '</td>' +
         '<td data-label="Advance">' + rupees(b.advance) + '</td>' +
         '<td data-label="Discount" data-discount-amt="' + escapeHTML(b.reference) + '">' + (b.discount ? rupees(b.discount) : '—') + '</td>' +
+        '<td data-label="Balance" data-balance="' + escapeHTML(b.reference) + '">' + (b.total ? rupees(balance) : '—') + '</td>' +
         '<td data-label="Status"><span class="chip chip--' + String(b.status).toLowerCase().replace(/\s+/g, '-') + '">' +
           statusLabel(b.status) + '</span></td>' +
         '<td class="cell__actions" data-label="Do">' +
+          (link ? '<a class="chipbtn chipbtn--wa" href="' + link + '" target="_blank" rel="noopener">Send WhatsApp</a>' : '') +
           (b.status !== 'Confirmed' ? '<button class="chipbtn" data-act="Confirmed" data-ref="' + escapeHTML(b.reference) + '">Confirm</button>' : '') +
           '<button class="chipbtn chipbtn--quiet" data-act="Cancelled" data-ref="' + escapeHTML(b.reference) + '">Cancel</button>' +
         '</td>';
@@ -275,9 +328,15 @@
 
   /* ---------------- discount ---------------------------------------------- */
 
-  function paintDiscount(b) {
+  /* Redraws the money cells for one row after a discount change. */
+  function paintRowMoney(b) {
     var cell = el.rows.querySelector('[data-discount-amt="' + b.reference + '"]');
     if (cell) cell.textContent = b.discount ? rupees(b.discount) : '—';
+    var bal = el.rows.querySelector('[data-balance="' + b.reference + '"]');
+    if (bal) {
+      var due = Math.max(0, (Number(b.total) || 0) - (Number(b.discount) || 0) - (Number(b.advance) || 0));
+      bal.textContent = b.total ? rupees(due) : '—';
+    }
   }
 
   el.rows.addEventListener('change', function (e) {
@@ -297,7 +356,7 @@
     if (DEMO) {
       b.discountPercent = pct;
       b.discount = Math.round((Number(b.total) || 0) * pct / 100);
-      paintDiscount(b);
+      paintRowMoney(b);
       return;
     }
 
@@ -315,7 +374,7 @@
       b.discountPercent = body.discountPercent;
       b.discount = body.discount;
       if (typeof body.total === 'number') b.total = body.total;
-      paintDiscount(b);
+      paintRowMoney(b);
     }).catch(function (err) {
       window.alert(err.message);
       input.value = b.discountPercent ? b.discountPercent : '';
