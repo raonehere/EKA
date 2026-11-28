@@ -12,7 +12,8 @@
   var UNITS = cfg.units || [];
   var TOTAL = UNITS.length;
   var PER_TENT = UNITS.reduce(function (m, u) { return Math.min(m, u.capacity || 3); }, 9);
-  var ADVANCE_PCT = cfg.advancePercent || 20;
+  var ADVANCE_SINGLE = cfg.advanceSingle || 1000;
+  var ADVANCE_GROUP = cfg.advanceGroup || 2000;
   var API = (cfg.apiBase || '').replace(/\/+$/, '');
   var DEMO = !!cfg.demo || !API;
   var HORIZON = cfg.horizonMonths || 12;
@@ -311,7 +312,12 @@
     var total = stay + lunch, due = advanceFor(total);
     return { stay: stay, lunch: lunch, total: total, advance: due, balance: total - due };
   }
-  function advanceFor(total) { return Math.round(total * ADVANCE_PCT / 100); }
+  /* One paying guest pays ₹1,000, two or more pay ₹2,000. Under-5s are free
+     and do not count towards the advance. */
+  function advanceFor(total) {
+    var heads = paying() + under10();
+    return Math.min(total, heads > 1 ? ADVANCE_GROUP : ADVANCE_SINGLE);
+  }
   /* The advance due right now, worked out from the form so the page never shows a stale figure. */
   function advanceDue() {
     if (!state.start || !state.end) return 0;
@@ -480,8 +486,7 @@
       el.capacity.className = 'book__capacity is-bad';
       return false;
     }
-    el.capacity.textContent = guestLine() + ' · ' + plural(need, 'A-frame tent') + ' for ' + plural(diffDays(state.start, state.end), 'night') +
-      '. Your advance is ' + ADVANCE_PCT + '% of the total.';
+    el.capacity.textContent = guestLine() + ' · ' + plural(need, 'A-frame tent') + ' for ' + plural(diffDays(state.start, state.end), 'night') + '.';
     el.capacity.className = 'book__capacity';
     return true;
   }
@@ -1025,9 +1030,6 @@
   });
   Array.prototype.forEach.call(document.querySelectorAll('[data-back]'), function (b) {
     b.addEventListener('click', goBack);
-  });
-  Array.prototype.forEach.call(document.querySelectorAll('[data-adv-pct]'), function (n) {
-    n.textContent = ADVANCE_PCT;
   });
 
   el.form.addEventListener('input', function (e) {

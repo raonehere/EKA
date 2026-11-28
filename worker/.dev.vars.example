@@ -13,8 +13,9 @@ OWNER_TOKEN=change-me-to-something-long-and-random
 # Expenses sheet, as a CSV export link. Keep it secret (use `wrangler secret put EXPENSES_CSV_URL`):
 # EXPENSES_CSV_URL=https://docs.google.com/spreadsheets/d/<sheet-id>/export?format=csv
 
-# Property manager's number for the daily update (digits, country code).
-WA_NOTIFY=917012293538
+# Optional. The dashboard's Send button opens WhatsApp's chat picker, where you
+# choose the team group, so no number is needed here.
+WA_NOTIFY=
 
 # Optional. Any long random string; signs the guest's private move/cancel link.
 MANAGE_SECRET=change-me-to-something-long-and-random
@@ -24,5 +25,6 @@ SITE_URL=https://ekaforest.com
 
 UNITS=11
 TENT_CAPACITY=2
-ADVANCE_PERCENT=20
+ADVANCE_SINGLE=1000
+ADVANCE_GROUP=2000
 CHANGE_CUTOFF_HOURS=48

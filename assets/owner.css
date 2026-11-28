@@ -103,7 +103,7 @@
 .cell__disc{display:flex;align-items:center;gap:6px;margin-top:7px}
 .cell__disc label{font:400 9px/1 var(--f-head);letter-spacing:.14em;text-transform:uppercase;opacity:.55;white-space:nowrap}
 .cell__disc input{
-  width:58px;font:400 13px/18px var(--f-body);color:var(--brown);
+  width:74px;font:400 13px/18px var(--f-body);color:var(--brown);
   background:rgba(233,237,239,.35);border:1px solid rgba(101,67,48,.32);border-radius:8px;
   padding:3px 6px;text-align:right;-moz-appearance:textfield;
 }

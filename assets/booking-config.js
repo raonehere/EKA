@@ -15,8 +15,9 @@ window.EKA_BOOKING = {
      false = use the live API above; guests pay the advance by UPI */
   demo: false,
 
-  /* Advance = this percentage of the guest's total (stay + lunch). */
-  advancePercent: 20,
+  /* Advance in rupees: one guest pays the first amount, two or more the second. */
+  advanceSingle: 1000,
+  advanceGroup: 2000,
   currency: 'INR',
 
   /* Your tents. Add, remove or rename them. capacity = how many paying guests
