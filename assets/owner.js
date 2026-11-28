@@ -488,7 +488,9 @@
       out.push('');
       out.push('Arriving today:');
       s.todayArrivals.forEach(function (b) {
-        out.push('• ' + b.name + ', ' + b.guests + ' guests, ' + b.tents + ' A-frame tent' + (b.tents === 1 ? '' : 's') + ' (' + b.reference + ')');
+        var due = b.total ? Math.max(0, (Number(b.total) || 0) - (Number(b.discount) || 0) - (Number(b.advance) || 0)) : null;
+        var pay = due === null ? '' : ', advance ' + rupees(b.advance) + ' paid, balance ' + rupees(due) + ' to take';
+        out.push('• ' + b.name + ', ' + b.guests + ' guests, ' + b.tents + ' A-frame tent' + (b.tents === 1 ? '' : 's') + ' (' + b.reference + ')' + pay);
       });
     }
     out.push('');
