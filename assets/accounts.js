@@ -101,9 +101,9 @@
   /* ---------------- sample numbers (preview only) ------------------------ */
   function demoRows(key) {
     var samples = [
-      { day: 3, nights: 2, name: 'Meera Nair', guests: 2, children: 0, tents: 1, status: 'Confirmed', total: 7400, discount: 0, discountPercent: 0, advance: 1480 },
-      { day: 12, nights: 3, name: 'Arjun & family', guests: 4, children: 2, tents: 2, status: 'Confirmed', total: 16650, discount: 1000, discountPercent: 6, advance: 3330 },
-      { day: 20, nights: 3, name: 'Lena Fischer', guests: 1, children: 0, tents: 1, status: 'Payment review', total: 5550, discount: 500, discountPercent: 9, advance: 1110 }
+      { day: 3, nights: 2, name: 'Meera Nair', guests: 2, children: 0, tents: 1, status: 'Confirmed', total: 7400, discount: 0, advance: 1480 },
+      { day: 12, nights: 3, name: 'Arjun & family', guests: 4, children: 2, tents: 2, status: 'Confirmed', total: 16650, discount: 1000, advance: 3330 },
+      { day: 20, nights: 3, name: 'Lena Fischer', guests: 1, children: 0, tents: 1, status: 'Payment review', total: 5550, discount: 500, advance: 1110 }
     ];
     return samples.map(function (s, i) {
       var inDate = dayDate(key, Math.min(s.day, daysIn(key)));
@@ -113,7 +113,7 @@
         reference: 'EKA-DEMO-' + (i + 1), name: s.name, phone: '', email: '',
         checkIn: inDate, checkOut: out.getFullYear() + '-' + pad(out.getMonth() + 1) + '-' + pad(out.getDate()),
         nights: s.nights, guests: s.guests, children: s.children, tents: s.tents,
-        status: s.status, total: s.total, discount: s.discount, discountPercent: s.discountPercent, advance: s.advance
+        status: s.status, total: s.total, discount: s.discount, advance: s.advance
       };
     });
   }

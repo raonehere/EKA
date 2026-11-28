@@ -15,14 +15,15 @@
  *   POST /owner/status        → confirm or cancel a booking from the dashboard
  *   POST /owner/block         → take tents out of sale for some nights (owner only)
  *
- * Money is settled by UPI: the guest scans a QR, pays the advance (a percentage
- * of their total), and uploads the screenshot. The Worker files it in Notion and
- * marks the row "Payment review" so the owner confirms it by hand.
+ * Money is settled by UPI: the guest scans a QR, pays a fixed advance (₹1,000
+ * for one guest, ₹2,000 for two or more), and uploads the screenshot. The
+ * Worker files it in Notion and marks the row "Payment review" so the owner
+ * confirms it by hand.
  *
  * Secrets and settings live in Worker environment variables:
  *   NOTION_TOKEN, NOTION_DB, UPI_ID, UPI_NAME, MANAGE_SECRET, SITE_URL,
- *   ALLOWED_ORIGINS, UNITS, TENT_CAPACITY, ADVANCE_PERCENT, CHANGE_CUTOFF_HOURS,
- *   OWNER_TOKEN, WA_NOTIFY, EXPENSES_CSV_URL (the expenses sheet as CSV)
+ *   ALLOWED_ORIGINS, UNITS, TENT_CAPACITY, ADVANCE_SINGLE, ADVANCE_GROUP, CHANGE_CUTOFF_HOURS,
+ *   OWNER_TOKEN, EXPENSES_CSV_URL (the expenses data as JSON)
  *
  * Notion property names live in FIELDS, just below. That map is the only place
  * this file names a column.
@@ -35,13 +36,13 @@ const NOTION_FILES_VERSION = '2026-03-11';
 const NOTION = 'https://api.notion.com/v1';
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
 /** Price in rupees. Children 5 to 10 pay half, under 5 is free. Lunches are counted per person, at most one a night. */
-function bookingPrice(env, nights, adults, fiveToTen, lunches) {
+function bookingPrice(env, nights, adults, fiveToTen, lunches, heads) {
   const perNight = Number(env.PRICE_PER_NIGHT) || 1850;
   const lunchRate = Number(env.LUNCH_PRICE) || 250;
   const stay = nights * (adults * perNight + fiveToTen * Math.round(perNight / 2));
   const lunchTotal = lunches * (adults + fiveToTen) * lunchRate;
   const total = stay + lunchTotal;
-  const due = advanceFor(env, total);
+  const due = advanceFor(env, total, heads == null ? adults + fiveToTen : heads);
   return { stay, lunch: lunchTotal, total, advance: due, balance: total - due };
 }
 
@@ -111,8 +112,14 @@ function corsHeaders(request, env) {
 
 function units(env) { return Math.max(1, parseInt(env.UNITS || '11', 10)); }
 function capacity(env) { return Math.max(1, parseInt(env.TENT_CAPACITY || '2', 10)); }
-function advancePercent(env) { return Math.min(100, Math.max(1, parseInt(env.ADVANCE_PERCENT || '20', 10))); }
-function advanceFor(env, total) { return Math.round(total * advancePercent(env) / 100); }
+/** Advance in rupees: one paying guest (adult or 5–10 child) pays ₹1,000, two or
+ *  more pay ₹2,000. Under-5s are free and do not count. Never more than the bill. */
+function advanceSingle(env) { return Math.max(0, parseInt(env.ADVANCE_SINGLE || '1000', 10)); }
+function advanceGroup(env) { return Math.max(0, parseInt(env.ADVANCE_GROUP || '2000', 10)); }
+function advanceFor(env, total, heads) {
+  const due = (Number(heads) || 1) > 1 ? advanceGroup(env) : advanceSingle(env);
+  return Math.min(total, due);
+}
 function cutoffHours(env) { return Math.max(0, parseInt(env.CHANGE_CUTOFF_HOURS || '48', 10)); }
 
 function todayIST() {
@@ -193,8 +200,7 @@ const FIELDS = {
   source:     { prop: 'Source',                      type: 'select', optional: true },
   terms:      { prop: 'Terms accepted',              type: 'date', optional: true },
   total:      { prop: 'Total amount',                type: 'number', optional: true },
-  /* Stored as a percentage (0 to 100). The rupee amount is worked out from
-     Total amount whenever a booking is read, so the two cannot drift apart. */
+  /* Rupee amount deducted from the total. */
   discount:   { prop: 'Discount',                    type: 'number', optional: true }
 };
 
@@ -365,7 +371,8 @@ async function availability(url, env, ctx) {
     from, to,
     units: total,
     capacity: capacity(env),
-    advancePercent: advancePercent(env),
+    advanceSingle: advanceSingle(env),
+    advanceGroup: advanceGroup(env),
     currency: 'INR',
     nights
   }, 200, { 'cache-control': 'public, max-age=30' });
@@ -439,7 +446,7 @@ async function createBooking(request, env) {
   // Bigger than the A-frame tents can sleep: taken as a request, priced and checked by hand on WhatsApp.
   const large = adults > total * cap;
 
-  const price = bookingPrice(env, nights, adults, childrenFiveToTen, lunches);
+  const price = bookingPrice(env, nights, adults, childrenFiveToTen, lunches, adults + childrenFiveToTen);
   const advanceDue = large ? 0 : price.advance;
   const tents = Math.max(1, Math.ceil(guests / cap));
 
@@ -619,7 +626,7 @@ function readBooking(page, env) {
   const guests = num('guests');
   const cap = env ? capacity(env) : 2;
   const total = num('total');
-  const discountPercent = Math.min(100, Math.max(0, num('discount')));
+  const discountAmount = Math.min(total, Math.max(0, num('discount')));
 
   return {
     pageId: page.id,
@@ -638,8 +645,7 @@ function readBooking(page, env) {
     type: pick(pr, P('type'))?.select?.name || 'Booking',
     advance: num('advance'),
     total,
-    discountPercent,
-    discount: Math.round(total * discountPercent / 100),
+    discount: discountAmount,
     notes: text(pick(pr, P('notes'))),
     token: text(pick(pr, P('token'))),
     moves: num('moves'),
@@ -1103,6 +1109,9 @@ async function buildSummary(env) {
   const inWindow = (d, days) => d > today && d <= addDays(today, days);
   const next7Arrivals = bookings.filter(b => inWindow(b.checkIn, 7) && stayOf(b) && b.status !== 'Cancelled').length;
   const next7Departures = bookings.filter(b => inWindow(b.checkOut, 7) && stayOf(b) && b.status !== 'Cancelled').length;
+  const tomorrow = addDays(today, 1);
+  const tomorrowArrivals = bookings.filter(b => b.checkIn === tomorrow && stayOf(b) && b.status !== 'Cancelled').length;
+  const tomorrowDepartures = bookings.filter(b => b.checkOut === tomorrow && stayOf(b) && b.status !== 'Cancelled').length;
 
   const money = bookings.reduce((m, b) => {
     if (b.status === 'Confirmed') m.confirmed += b.advance;
@@ -1124,18 +1133,20 @@ async function buildSummary(env) {
       checkIn: b.checkIn, checkOut: b.checkOut, nights: b.nights,
       guests: b.guests, children: b.childrenUnder10, tents: b.tents,
       status: b.status, advance: b.advance, total: b.total,
-      discount: b.discount, discountPercent: b.discountPercent, moves: b.moves, notes: b.notes
+      discount: b.discount, moves: b.moves, notes: b.notes
     }));
 
   return {
     today,
     units: total,
     capacity: capacity(env),
-    advancePercent: advancePercent(env),
+    advanceSingle: advanceSingle(env),
+    advanceGroup: advanceGroup(env),
     tonight: { tents: tentsTonight, free: Math.max(0, total - tentsTonight), guests: guestsTonight },
     todayArrivals: todayArrivals.map(slim),
     todayDepartures: todayDepartures.map(slim),
     next7: { arrivals: next7Arrivals, departures: next7Departures },
+    tomorrow: { arrivals: tomorrowArrivals, departures: tomorrowDepartures },
     months: monthRows,
     money,
     changes: { today: changedToday, last7: changed7 },
@@ -1150,7 +1161,7 @@ function slim(b) {
     checkIn: b.checkIn, checkOut: b.checkOut,
     guests: b.guests, children: b.childrenUnder10, tents: b.tents,
     status: b.status, advance: b.advance, total: b.total,
-    discount: b.discount, discountPercent: b.discountPercent
+    discount: b.discount
   };
 }
 
@@ -1290,7 +1301,7 @@ async function ownerMonth(request, env) {
         checkIn: b.checkIn, checkOut: b.checkOut, nights: b.nights,
         guests: b.guests, children: b.childrenUnder10, tents: b.tents,
         status: b.status, total: b.total, discount: b.discount,
-        discountPercent: b.discountPercent, advance: b.advance
+        advance: b.advance
       }));
     return json({ month: key, days: daysInMonth(key), first, last, rows });
   } catch (err) {
@@ -1314,9 +1325,10 @@ function digestText(s) {
   const lines = [];
   lines.push(`EKA Forest, ${prettyDate(s.today)}`);
   lines.push('');
-  lines.push(`Tonight: ${s.tonight.tents} of ${s.units} A-frame tents, ${s.tonight.guests} guests, ${s.tonight.free} free`);
+  lines.push(`Tonight: ${s.tonight.guests} guests`);
+  lines.push(`Tents free: ${s.tonight.free}`);
   lines.push(`Today: ${s.todayArrivals.length} arriving, ${s.todayDepartures.length} leaving`);
-  lines.push(`Next 7 days: ${s.next7.arrivals} arriving, ${s.next7.departures} leaving`);
+  lines.push(`Tomorrow: ${s.tomorrow.arrivals} arriving, ${s.tomorrow.departures} leaving`);
   lines.push('');
 
   if (s.todayArrivals.length) {
@@ -1337,15 +1349,7 @@ function digestText(s) {
     lines.push('');
   }
 
-  lines.push('Money:');
-  lines.push(`• ${money(s.money.confirmed)} advance received`);
-  lines.push(`• ${money(s.money.review)} waiting for your check`);
-  lines.push(`• ${money(s.money.pending)} not paid yet`);
-  lines.push('');
-  lines.push('Changes:');
-  lines.push(`• ${s.changes.today} date change${s.changes.today === 1 ? '' : 's'} today`);
-  lines.push(`• ${s.cancellations.upcoming} cancellation${s.cancellations.upcoming === 1 ? '' : 's'} ahead`);
-  return lines.join('\n');
+  return lines.join('\n').trim();
 }
 
 async function ownerDigest(request, env) {
@@ -1353,11 +1357,10 @@ async function ownerDigest(request, env) {
   try {
     const summary = await buildSummary(env);
     const text = digestText(summary);
-    const to = clean(env.WA_NOTIFY, 20).replace(/\D/g, '');
     return json({
       today: summary.today,
       text,
-      waLink: to ? 'https://wa.me/' + to + '?text=' + encodeURIComponent(text) : ''
+      waLink: 'https://wa.me/?text=' + encodeURIComponent(text)
     });
   } catch (err) {
     console.error('digest failed', err);
@@ -1392,9 +1395,8 @@ async function ownerStatus(request, env) {
   return json({ ok: true, reference, status });
 }
 
-/** Owner sets a discount percentage on one booking. Notion keeps the
- *  percentage; the dashboard and accounts show the rupee amount, which is
- *  total × percent ÷ 100. */
+/** Owner sets a discount amount (rupees) on one booking. Stored in Notion as
+ *  the amount, capped at the booking total. */
 async function ownerDiscount(request, env) {
   if (!ownerOk(request, env)) return json({ error: 'Not found' }, 404);
   let body;
@@ -1403,20 +1405,21 @@ async function ownerDiscount(request, env) {
   const reference = clean(body.reference, 40).toUpperCase();
   if (!reference) return json({ error: 'Missing booking reference.' }, 400);
 
-  const raw = body.percent;
-  const percent = raw === '' || raw == null ? 0 : Number(raw);
-  if (!isFinite(percent) || percent < 0 || percent > 100) {
-    return json({ error: 'Discount must be between 0 and 100.' }, 400);
-  }
-  const rounded = Math.round(percent * 100) / 100;
+  const raw = body.amount;
+  const amount = raw === '' || raw == null ? 0 : Math.round(Number(raw));
 
   const page = await findPageByReference(env, reference);
   if (!page) return json({ error: 'No booking with that reference.' }, 404);
 
+  const total = Number(pick(page.properties, P('total'))?.number) || 0;
+  if (!isFinite(amount) || amount < 0 || amount > total) {
+    return json({ error: `Discount must be between 0 and the total (₹${total}).` }, 400);
+  }
+
   try {
     await ensureColumn(env, 'discount');
     const C = await columns(env);
-    await patchPage(env, page.id, { [C.discount]: { number: rounded } });
+    await patchPage(env, page.id, { [C.discount]: { number: amount } });
   } catch (err) {
     console.error('owner discount failed', err);
     return json({
@@ -1424,14 +1427,7 @@ async function ownerDiscount(request, env) {
     }, 502);
   }
 
-  const total = Number(pick(page.properties, P('total'))?.number) || 0;
-  return json({
-    ok: true,
-    reference,
-    discountPercent: rounded,
-    discount: Math.round(total * rounded / 100),
-    total
-  });
+  return json({ ok: true, reference, discount: amount, total });
 }
 
 /** Owner takes some A-frame tents out of sale for a run of nights (e.g. booked elsewhere).
@@ -1514,7 +1510,8 @@ async function health(env) {
     notion: reachable,
     units: units(env),
     capacity: capacity(env),
-    advancePercent: advancePercent(env),
+    advanceSingle: advanceSingle(env),
+    advanceGroup: advanceGroup(env),
     blocks: ['Payment review', 'Confirmed'],
     owner: !!env.OWNER_TOKEN,
     notify: clean(env.WA_NOTIFY, 20),

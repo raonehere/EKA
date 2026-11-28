@@ -4,9 +4,9 @@ The site is static (GitHub Pages), so it cannot hold API keys. The booking page
 talks to a small Cloudflare Worker, and the Worker is the only thing that knows
 your Notion token.
 
-There is **no payment gateway**. The guest pays the advance (20% of the total) by UPI,
-uploads the screenshot, and the Worker files it in your Notion row so you can
-check the credit yourself.
+There is **no payment gateway**. The guest pays a fixed advance (₹1,000 for one
+guest, ₹2,000 for two or more) by UPI, uploads the screenshot, and the Worker
+files it in your Notion row so you can check the credit yourself.
 
 ```
 Guest
@@ -67,7 +67,7 @@ and a booking still saves.
 | Column | Type | What it buys you |
 |---|---|---|
 | `Tents` | Number | overrides the tent count. Without it: one tent per two guests, and a solo guest gets a whole tent |
-| `Advance` | Number | the advance (20% of the total) for each row |
+| `Advance` | Number | the advance paid for each row (₹1,000 one guest, ₹2,000 two or more) |
 | `Children under 10` | Number | declared children, kept out of `Number of people` |
 | `Manage token` | Text | holds the private move/cancel key. Without it one is derived from `MANAGE_SECRET`, which works just as well |
 | `Moves` | Number | how many times the guest changed dates |
@@ -77,13 +77,17 @@ and a booking still saves.
 | `Source` | Select | `Website` / `WhatsApp` / `Manual` |
 | `Terms accepted` | Date | **time on**, proof the guest accepted the advance terms |
 | `Total amount` | Number | the full price for the stay, before any discount |
-| `Discount` | Number | a **percentage**, 0 to 100, typed beside the guest's name on the dashboard. The rupee amount is worked out from `Total amount` |
+| `Discount` | Number | a **rupee amount**, typed beside the guest's name on the dashboard. It is deducted from `Total amount` and cannot be more than it |
 
-`Discount` is a percentage, not rupees, so 10 means ten percent. The dashboard
-shows the rupee amount next to it, and the monthly accounts and invoice use that
-amount. On the first save the Worker tries to add the `Discount` column itself;
-if your Notion integration is not allowed to edit the database, add a Number
-column named `Discount` by hand and it will be used from then on.
+`Discount` is the rupee amount to deduct, not a percentage. The dashboard shows
+the amount, and the guest's balance is `Total amount` minus `Discount` minus the
+advance. On the first save the Worker tries to add the `Discount` column itself;
+if Notion does not allow that, add a number column named `Discount` by hand and
+it will be used from then on.
+
+Earlier versions of the dashboard saved a percentage in this column. If any old
+rows still hold a small number such as `10`, clear it and type the rupee amount
+instead, or the guest will be shown a ₹10 discount.
 
 There is no `Nights` column: the Worker works the nights out from the two dates.
 
@@ -150,7 +154,7 @@ You need the UPI ID you actually receive money on, the same one you use in
 GPay / PhonePe / Paytm. For example `ekaforest@okhdfcbank` or
 `9876543210@ybl`.
 
-That is the only setting. The page builds a UPI link for exactly the advance (20% of the total), renders
+That is the only setting. The page builds a UPI link for exactly the advance (₹1,000 or ₹2,000), renders
 a QR from it, and shows the ID underneath for anyone who prefers to type it.
 Nothing is charged automatically; you verify each payment by hand.
 
@@ -179,11 +183,12 @@ every guest who reaches the payment step.
    | `SITE_URL` | Text | `https://ekaforest.com` |
    | `MANAGE_SECRET` | Secret | any long random string |
    | `OWNER_TOKEN` | Secret | your dashboard password, e.g. 40 random characters |
-   | `WA_NOTIFY` | Text | `917012293538`, where the daily update goes |
+   | `WA_NOTIFY` | Text | optional, no longer needed for the daily update |
    | `ALLOWED_ORIGINS` | Text | `https://ekaforest.com,https://www.ekaforest.com` |
    | `UNITS` | Text | `11` |
    | `TENT_CAPACITY` | Text | `2` |
-   | `ADVANCE_PERCENT` | Text | `20` |
+   | `ADVANCE_SINGLE` | Text | `1000`, advance for one guest |
+   | `ADVANCE_GROUP` | Text | `2000`, advance for two or more guests |
    | `CHANGE_CUTOFF_HOURS` | Text | `48` (optional) |
 
 5. **Deploy** again after adding the variables.
@@ -337,12 +342,12 @@ guest appears in the other within a refresh.
 ## 8. WhatsApp
 
 **The property-manager update.** The dashboard builds one message with tonight's
-occupancy, today's arrivals and departures, money received / waiting / unpaid,
-date changes and cancellations. Two ways to send it:
+guests, the A-frame tents still free, today's and tomorrow's arrivals and
+departures, and each arriving guest's advance paid and balance to take.
 
-- **One tap**, set `WA_NOTIFY` to the manager's number and the
-  "Send on WhatsApp" button opens WhatsApp with the whole message typed in.
-- **Copy**, no number set, you paste it anywhere.
+- **Send on WhatsApp** opens WhatsApp's chat picker with the whole message typed
+  in. Choose the team group and send. No number needs to be set.
+- **Copy** puts the same text on the clipboard for pasting anywhere.
 
 This is deliberately not an automated blast. WhatsApp only lets a business send
 free-form messages inside a 24-hour reply window; outside it you need an
@@ -402,8 +407,10 @@ before announcing it.
 
 ## 11. How the money works
 
-- Advance: **20% of the total**, whatever the group size. Eleven tents, two guests
-  each; a solo guest still takes a whole tent, so three people book two tents.
+- Advance: **₹1,000 for one paying guest, ₹2,000 for two or more**; a bigger
+  group still pays ₹2,000. Children under 5 are free and do not count, so one
+  adult with an infant still pays ₹1,000. Eleven tents, two guests each; a solo
+  guest still takes a whole tent, so three people book two tents.
   Under-10s are free, share your tent, and are only declared.
 - The guest ticks a box that accepts the advance terms, and the time is stored in
   Notion (`Terms accepted`).

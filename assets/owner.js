@@ -187,7 +187,7 @@
         '<span class="person__meta">' + b.guests + (b.guests === 1 ? ' guest' : ' guests') +
         (b.children ? ' + ' + b.children + ' children' : '') +
         ' · ' + b.tents + ' A-frame tent' + (b.tents === 1 ? '' : 's') + ' · ' + escapeHTML(b.reference) + '</span>' +
-        (link ? '<a class="person__wa" href="' + link + '" target="_blank" rel="noopener">WhatsApp</a>' : '');
+        (link ? '<a class="person__wa" data-wa="' + escapeHTML(b.reference) + '" href="' + link + '" target="_blank" rel="noopener">WhatsApp</a>' : '');
       list.appendChild(li);
     });
   }
@@ -226,7 +226,7 @@
       lines.push('');
       lines.push('*Bill*');
       lines.push('• Total: ' + rupees(b.total));
-      if (b.discount) lines.push('• Discount' + (b.discountPercent ? ' (' + b.discountPercent + '%)' : '') + ': -' + rupees(b.discount));
+      if (b.discount) lines.push('• Discount: -' + rupees(b.discount));
       lines.push('• Advance paid: ' + rupees(b.advance));
       lines.push('• *Balance, pay on arrival: ' + rupees(balance) + '*');
     }
@@ -264,7 +264,7 @@
       var tr = document.createElement('tr');
       tr.className = 'status-' + String(b.status).toLowerCase().replace(/\s+/g, '-');
       var link = waLink(b.phone, guestMessage(b));
-      var pct = Number(b.discountPercent) || 0;
+      var disc = Number(b.discount) || 0;
       var balance = Math.max(0, (Number(b.total) || 0) - (Number(b.discount) || 0) - (Number(b.advance) || 0));
       tr.innerHTML =
         '<td data-label="Dates"><span class="cell__strong">' + shortDay(b.checkIn) + ' → ' + shortDay(b.checkOut) + '</span>' +
@@ -272,10 +272,10 @@
         '<td data-label="Guest"><span class="cell__strong">' + escapeHTML(b.name || '') + '</span>' +
           '<span class="cell__sub">' + b.guests + (b.guests === 1 ? ' guest' : ' guests') +
           (b.children ? ' + ' + b.children + ' children' : '') + '</span>' +
-          '<span class="cell__disc"><label>Discount %</label>' +
-            '<input type="number" min="0" max="100" step="any" inputmode="decimal" placeholder="0"' +
-            ' value="' + (pct ? pct : '') + '" data-discount="' + escapeHTML(b.reference) + '"' +
-            ' aria-label="Discount percent for ' + escapeHTML(b.name || 'this booking') + '"></span></td>' +
+          '<span class="cell__disc"><label>Discount ₹</label>' +
+            '<input type="number" min="0" max="' + (Number(b.total) || 0) + '" step="1" inputmode="numeric" placeholder="0"' +
+            ' value="' + (disc ? disc : '') + '" data-discount="' + escapeHTML(b.reference) + '"' +
+            ' aria-label="Discount amount in rupees for ' + escapeHTML(b.name || 'this booking') + '"></span></td>' +
         '<td data-label="A-frame tents">' + b.tents + '</td>' +
         '<td data-label="Advance">' + rupees(b.advance) + '</td>' +
         '<td data-label="Discount" data-discount-amt="' + escapeHTML(b.reference) + '">' + (b.discount ? rupees(b.discount) : '—') + '</td>' +
@@ -283,7 +283,7 @@
         '<td data-label="Status"><span class="chip chip--' + String(b.status).toLowerCase().replace(/\s+/g, '-') + '">' +
           statusLabel(b.status) + '</span></td>' +
         '<td class="cell__actions" data-label="Do">' +
-          (link ? '<a class="chipbtn chipbtn--wa" href="' + link + '" target="_blank" rel="noopener">Send WhatsApp</a>' : '') +
+          (link ? '<a class="chipbtn chipbtn--wa" data-wa="' + escapeHTML(b.reference) + '" href="' + link + '" target="_blank" rel="noopener">Send WhatsApp</a>' : '') +
           (b.status !== 'Confirmed' ? '<button class="chipbtn" data-act="Confirmed" data-ref="' + escapeHTML(b.reference) + '">Confirm</button>' : '') +
           '<button class="chipbtn chipbtn--quiet" data-act="Cancelled" data-ref="' + escapeHTML(b.reference) + '">Cancel</button>' +
         '</td>';
@@ -338,6 +338,12 @@
       var due = Math.max(0, (Number(b.total) || 0) - (Number(b.discount) || 0) - (Number(b.advance) || 0));
       bal.textContent = b.total ? rupees(due) : '—';
     }
+    /* The WhatsApp message carries the bill, so its link is rebuilt too. */
+    var msg = waLink(b.phone, guestMessage(b));
+    if (msg) {
+      var links = document.querySelectorAll('[data-wa="' + b.reference + '"]');
+      for (var i = 0; i < links.length; i++) links[i].setAttribute('href', msg);
+    }
   }
 
   el.rows.addEventListener('change', function (e) {
@@ -348,15 +354,14 @@
     var b = state.data.upcoming.find(function (x) { return x.reference === reference; });
     if (!b) return;
 
-    var pct = Number(input.value);
-    if (!isFinite(pct) || pct < 0) pct = 0;
-    if (pct > 100) pct = 100;
-    pct = Math.round(pct * 100) / 100;
-    input.value = pct ? pct : '';
+    var amt = Math.round(Number(input.value));
+    if (!isFinite(amt) || amt < 0) amt = 0;
+    var cap = Number(b.total) || 0;
+    if (amt > cap) amt = cap;
+    input.value = amt ? amt : '';
 
     if (DEMO) {
-      b.discountPercent = pct;
-      b.discount = Math.round((Number(b.total) || 0) * pct / 100);
+      b.discount = amt;
       paintRowMoney(b);
       return;
     }
@@ -365,20 +370,19 @@
     fetch(API + '/owner/discount?k=' + encodeURIComponent(state.key), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ reference: reference, percent: pct })
+      body: JSON.stringify({ reference: reference, amount: amt })
     }).then(function (res) {
       return res.json().catch(function () { return {}; }).then(function (body) {
         if (!res.ok) throw new Error(body.error || 'Could not save that discount.');
         return body;
       });
     }).then(function (body) {
-      b.discountPercent = body.discountPercent;
       b.discount = body.discount;
       if (typeof body.total === 'number') b.total = body.total;
       paintRowMoney(b);
     }).catch(function (err) {
       window.alert(err.message);
-      input.value = b.discountPercent ? b.discountPercent : '';
+      input.value = b.discount ? b.discount : '';
     }).then(function () { input.disabled = false; });
   });
 
@@ -454,7 +458,7 @@
     } else {
       el.digestSend.hidden = true;
       el.digestNote.hidden = false;
-      el.digestNote.textContent = 'Set WA_NOTIFY to the property manager\'s number and this button becomes a one-tap send.';
+      el.digestNote.textContent = 'The update could not be built, so there is nothing to send.';
     }
   }
 
@@ -481,9 +485,11 @@
 
   function localDigest(s) {
     var out = ['EKA Forest, ' + day(s.today), ''];
-    out.push('Tonight: ' + s.tonight.tents + ' of ' + s.units + ' A-frame tents, ' + s.tonight.guests + ' guests, ' + s.tonight.free + ' free');
+    var tmr = s.tomorrow || { arrivals: 0, departures: 0 };
+    out.push('Tonight: ' + s.tonight.guests + ' guests');
+    out.push('Tents free: ' + s.tonight.free);
     out.push('Today: ' + s.todayArrivals.length + ' arriving, ' + s.todayDepartures.length + ' leaving');
-    out.push('Next 7 days: ' + s.next7.arrivals + ' arriving, ' + s.next7.departures + ' leaving');
+    out.push('Tomorrow: ' + tmr.arrivals + ' arriving, ' + tmr.departures + ' leaving');
     if (s.todayArrivals.length) {
       out.push('');
       out.push('Arriving today:');
@@ -493,12 +499,7 @@
         out.push('• ' + b.name + ', ' + b.guests + ' guests, ' + b.tents + ' A-frame tent' + (b.tents === 1 ? '' : 's') + ' (' + b.reference + ')' + pay);
       });
     }
-    out.push('');
-    out.push('Money:');
-    out.push('• ' + rupees(s.money.confirmed) + ' advance received');
-    out.push('• ' + rupees(s.money.review) + ' waiting for your check');
-    out.push('• ' + rupees(s.money.pending) + ' not paid yet');
-    return out.join('\n');
+    return out.join('\n').trim();
   }
 
   function demoData() {
@@ -524,20 +525,24 @@
     }
 
     var upcoming = [
-      { reference: 'EKA-261119-A1B2', name: 'Meera Nair', phone: '919000000001', checkIn: t, checkOut: plus(2), nights: 2, guests: 2, children: 0, tents: 1, status: 'Confirmed', advance: 1480, total: 7400, discount: 0, discountPercent: 0, moves: 0, notes: '' },
-      { reference: 'EKA-261120-C3D4', name: 'Arjun & family', phone: '919000000002', checkIn: t, checkOut: plus(3), nights: 3, guests: 4, children: 2, tents: 2, status: 'Payment review', advance: 3330, total: 16650, discount: 1665, discountPercent: 10, moves: 1, notes: '' },
-      { reference: 'EKA-261122-E5F6', name: 'Lena Fischer', phone: '491700000003', checkIn: plus(4), checkOut: plus(7), nights: 3, guests: 1, children: 0, tents: 1, status: 'Confirmed', advance: 1110, total: 11100, discount: 555, discountPercent: 5, moves: 0, notes: '' },
-      { reference: 'EKA-261125-G7H8', name: 'Ravi Kumar', phone: '919000000004', checkIn: plus(7), checkOut: plus(9), nights: 2, guests: 3, children: 0, tents: 2, status: 'Pending payment', advance: 2220, total: 11100, discount: 0, discountPercent: 0, moves: 2, notes: '' }
+      { reference: 'EKA-261119-A1B2', name: 'Meera Nair', phone: '919000000001', checkIn: t, checkOut: plus(2), nights: 2, guests: 2, children: 0, tents: 1, status: 'Confirmed', advance: 1480, total: 7400, discount: 0, moves: 0, notes: '' },
+      { reference: 'EKA-261120-C3D4', name: 'Arjun & family', phone: '919000000002', checkIn: t, checkOut: plus(3), nights: 3, guests: 4, children: 2, tents: 2, status: 'Payment review', advance: 3330, total: 16650, discount: 1665, moves: 1, notes: '' },
+      { reference: 'EKA-261122-E5F6', name: 'Lena Fischer', phone: '491700000003', checkIn: plus(4), checkOut: plus(7), nights: 3, guests: 1, children: 0, tents: 1, status: 'Confirmed', advance: 1110, total: 11100, discount: 555, moves: 0, notes: '' },
+      { reference: 'EKA-261125-G7H8', name: 'Ravi Kumar', phone: '919000000004', checkIn: plus(7), checkOut: plus(9), nights: 2, guests: 3, children: 0, tents: 2, status: 'Pending payment', advance: 2220, total: 11100, discount: 0, moves: 2, notes: '' }
     ];
 
     var arrive = upcoming.filter(function (b) { return b.checkIn === t; });
     var leave = upcoming.filter(function (b) { return b.checkOut === t; });
 
     return {
-      today: t, units: 11, capacity: 2, advancePercent: 20,
+      today: t, units: 11, capacity: 2,
       tonight: { tents: 7, free: 4, guests: 13 },
       todayArrivals: arrive, todayDepartures: leave,
       next7: { arrivals: 6, departures: 4 },
+      tomorrow: {
+        arrivals: upcoming.filter(function (b) { return b.checkIn === plus(1); }).length,
+        departures: upcoming.filter(function (b) { return b.checkOut === plus(1); }).length
+      },
       months: months,
       money: { confirmed: 48000, review: 4000, pending: 2220 },
       changes: { today: 1, last7: 3 },

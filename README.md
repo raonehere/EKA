@@ -18,7 +18,7 @@ Then open http://localhost:8080/
 The public `/book/` page currently shows a coming-soon screen. The availability calendar and booking flow below stays in the repo for when booking opens.
 
 `/book/` is the availability calendar and booking flow: pick nights → guest
-details → **advance (20% of the total)** → pay by UPI and upload the screenshot →
+details → **advance (₹1,000 one guest, ₹2,000 two or more)** → pay by UPI and upload the screenshot →
 confirmation. The form is split into four steps: guests and dates, your details,
 ID proof, then stay and finish.
 
@@ -40,10 +40,10 @@ preview mode (`demo: true`) with sample availability and a simulated payment.
 **Setup: [`docs/booking-setup.md`](docs/booking-setup.md)**, Notion schema, keys,
 Worker deploy, UPI, dashboard, testing.
 
-Tent count, capacity, advance percentage and the API URL are in
+Tent count, capacity, the two advance amounts and the API URL are in
 `assets/booking-config.js`. The Worker's copy of the inventory is in
-`worker/wrangler.toml` (`UNITS`, `TENT_CAPACITY`, `ADVANCE_PERCENT`), keep the two in
-step.
+`worker/wrangler.toml` (`UNITS`, `TENT_CAPACITY`, `ADVANCE_SINGLE`, `ADVANCE_GROUP`),
+keep the two in step.
 
 ## Content
 
