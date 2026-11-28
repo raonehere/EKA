@@ -1323,7 +1323,9 @@ function digestText(s) {
     lines.push('Arriving today:');
     s.todayArrivals.forEach(b => {
       const kids = b.children ? `, ${b.children} children` : '';
-      lines.push(`• ${b.name}, ${b.guests} guests${kids}, ${b.tents} A-frame tent${b.tents === 1 ? '' : 's'} (${b.reference})`);
+      const due = b.total ? Math.max(0, b.total - (b.discount || 0) - (b.advance || 0)) : null;
+      const pay = due === null ? '' : `, advance ${money(b.advance)} paid, balance ${money(due)} to take`;
+      lines.push(`• ${b.name}, ${b.guests} guests${kids}, ${b.tents} A-frame tent${b.tents === 1 ? '' : 's'} (${b.reference})${pay}`);
     });
     lines.push('');
   }
