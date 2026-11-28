@@ -711,3 +711,11 @@ html.lb-lock,body.lb-lock{overflow:hidden}
     margin-inline-end:-.8px;
   }
 }
+
+/* ---------- Header with only the logo (booking form, owner pages) ---------- */
+.nav--only{display:flex;justify-content:center;align-items:flex-end}
+.nav--only .nav__logo{order:0;margin:0;flex:none}
+@media (max-width:600px){
+  .nav--only{display:flex;justify-content:center}
+  .nav--only .nav__logo{order:0;margin:0}
+}

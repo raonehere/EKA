@@ -10,6 +10,8 @@ UPI_NAME=EKA
 
 # Required for /owner/. Your dashboard password.
 OWNER_TOKEN=change-me-to-something-long-and-random
+# Expenses sheet, as a CSV export link. Keep it secret (use `wrangler secret put EXPENSES_CSV_URL`):
+# EXPENSES_CSV_URL=https://docs.google.com/spreadsheets/d/<sheet-id>/export?format=csv
 
 # Property manager's number for the daily update (digits, country code).
 WA_NOTIFY=917012293538

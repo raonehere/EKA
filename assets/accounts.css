@@ -53,3 +53,16 @@
 .doc .sum div{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #e3d8c8}
 .doc .sum .grand{font-weight:700;font-size:14px;border-bottom:2px solid #654330;border-top:1.5px solid #654330;margin-top:4px}
 .doc .foot{margin-top:30px;font-size:10.5px;color:#6b5a4b}
+
+.acc__note{margin:0 0 14px;padding:10px 14px;border-radius:12px;font-size:13.5px;line-height:20px;background:rgba(165,90,28,.1);border:1px solid rgba(165,90,28,.4);color:#8c5a12}
+.acc__note[hidden]{display:none}
+.acc__sub-row{padding-left:18px;font-style:italic;opacity:.8}
+.booktable tfoot th{opacity:1;font:700 15px/1.4 var(--f-head);letter-spacing:.1em;text-transform:uppercase;color:var(--brown);border-top:2px solid rgba(101,67,48,.55);border-bottom:0;padding-top:14px}
+.booktable tfoot th[id]{font:700 24px/1.2 var(--f-head);letter-spacing:.02em;text-transform:none;text-align:right}
+
+/* Buttons on this page use the readable heading font, not the display font. */
+.owner .btn{
+  font:500 14px/40px var(--f-head);
+  letter-spacing:.13em;text-transform:uppercase;
+  -webkit-text-stroke:0;paint-order:normal;
+}

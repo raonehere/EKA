@@ -22,7 +22,7 @@
  * Secrets and settings live in Worker environment variables:
  *   NOTION_TOKEN, NOTION_DB, UPI_ID, UPI_NAME, MANAGE_SECRET, SITE_URL,
  *   ALLOWED_ORIGINS, UNITS, TENT_CAPACITY, ADVANCE_PERCENT, CHANGE_CUTOFF_HOURS,
- *   OWNER_TOKEN, WA_NOTIFY
+ *   OWNER_TOKEN, WA_NOTIFY, EXPENSES_CSV_URL (the expenses sheet as CSV)
  *
  * Notion property names live in FIELDS, just below. That map is the only place
  * this file names a column.
@@ -71,6 +71,7 @@ export default {
       else if (path === '/owner/discount' && request.method === 'POST') res = await ownerDiscount(request, env);
       else if (path === '/owner/block' && request.method === 'POST') res = await ownerBlock(request, env);
       else if (path === '/owner/month' && request.method === 'GET') res = await ownerMonth(request, env);
+      else if (path === '/owner/expenses' && request.method === 'GET') res = await ownerExpenses(request, env);
       else res = json({ error: 'Not found' }, 404);
 
       if (!Object.keys(cors).length) return res;
@@ -1148,7 +1149,8 @@ function slim(b) {
     reference: b.reference, name: b.name, phone: b.phone,
     checkIn: b.checkIn, checkOut: b.checkOut,
     guests: b.guests, children: b.childrenUnder10, tents: b.tents,
-    status: b.status, advance: b.advance
+    status: b.status, advance: b.advance, total: b.total,
+    discount: b.discount, discountPercent: b.discountPercent
   };
 }
 
@@ -1157,6 +1159,109 @@ function money(n) { return '₹' + Number(n || 0).toLocaleString('en-IN'); }
 function prettyDate(d) {
   return new Date(d + 'T00:00:00+05:30')
     .toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' });
+}
+
+/* ------------------------------------------------------- expenses data */
+
+let EXPENSES = { url: '', at: 0, data: null };
+
+/** Lowercase letters only, so "Running Expenses", "running_expenses" and
+ *  "Running expenses" all match the same key. */
+const keyOf = k => String(k).toLowerCase().replace(/[^a-z]/g, '');
+
+const numOf = v => {
+  if (typeof v === 'number') return v;
+  const n = Number(String(v == null ? '' : v).replace(/[^0-9.\-]/g, ''));
+  return isFinite(n) ? n : null;
+};
+
+/** Finds the record for one month. Accepts a list of records (each with a
+ *  month/period field) or an object keyed by month, e.g. { "2026-11": {...} }. */
+function monthRecord(data, month) {
+  if (!data) return null;
+  const monthly = Array.isArray(data) ? data : (Array.isArray(data.monthly) ? data.monthly : null);
+  if (monthly) {
+    return monthly.find(r => {
+      const m = r && (r.month || r.period || r.date || r.Month);
+      return m && String(m).slice(0, 7) === month;
+    }) || null;
+  }
+  if (typeof data === 'object') {
+    const hit = data[month] || Object.keys(data).find(k => k.slice(0, 7) === month);
+    return hit ? (typeof hit === 'object' ? hit : data[hit]) : null;
+  }
+  return null;
+}
+
+/** Food and groceries for one month, added up from the entries list (every
+ *  expense line with its date and category). */
+function foodFromEntries(data, month) {
+  if (!data || !Array.isArray(data.entries) || !Array.isArray(data.entries_columns)) return null;
+  const cols = data.entries_columns;
+  const iDate = cols.indexOf('date'), iCat = cols.indexOf('category'), iAmt = cols.indexOf('amount_odoo');
+  if (iDate < 0 || iCat < 0 || iAmt < 0) return null;
+  let sum = 0;
+  for (const e of data.entries) {
+    if (String(e[iDate] || '').slice(0, 7) !== month) continue;
+    if (/food\s*&\s*grocer/i.test(String(e[iCat] || ''))) sum += Number(e[iAmt]) || 0;
+  }
+  return sum;
+}
+
+/** Reads one month's expense figures from the expenses data (JSON). Sales in the
+ *  file are ignored: sales come from the bookings. */
+async function ownerExpenses(request, env) {
+  if (!ownerOk(request, env)) return json({ error: 'Not found' }, 404);
+  const url = clean(env.EXPENSES_CSV_URL, 500);
+  if (!url) return json({ error: 'The expenses data is not connected yet.' }, 503);
+
+  const month = clean(new URL(request.url).searchParams.get('month'), 7);
+  if (!/^\d{4}-\d{2}$/.test(month)) return json({ error: 'Pick a month like 2026-11.' }, 400);
+
+  let data;
+  try {
+    const now = Date.now();
+    if (!EXPENSES.data || now - EXPENSES.at > 300000 || EXPENSES.url !== url) {
+      const res = await fetch(url, { redirect: 'follow', headers: { 'user-agent': 'Mozilla/5.0 (EKA Forest owner accounts)', accept: 'application/json,*/*' } });
+      if (!res.ok) throw new Error('expenses link answered ' + res.status);
+      const text = await res.text();
+      if (/^\s*<!doctype html|^\s*<html/i.test(text)) throw new Error('expenses link returned a web page, not the JSON file (check the sharing settings)');
+      EXPENSES = { url, at: now, data: JSON.parse(text) };
+    }
+    data = EXPENSES.data;
+  } catch (err) {
+    console.error('expenses data failed', err);
+    return json({ error: 'Could not read the expenses data. ' + String(err.message || err).slice(0, 200) }, 502);
+  }
+
+  const rec = monthRecord(data, month);
+  const fig = name => {
+    if (!rec) return null;
+    const hit = Object.keys(rec).find(k => keyOf(k) === name);
+    /* Expenses may be stored as negatives (display signs), so use the size. */
+    return hit ? Math.abs(numOf(rec[hit]) ?? 0) : null;
+  };
+  /* running_expenses is the other running costs only, without salaries. Sales
+     and net in the file are ignored. */
+  const running = fig('otherexpenses') ?? fig('runningexpenses');
+  const salaries = fig('salarieswages') ?? fig('salariesandwages') ?? fig('salaries');
+  const assets = fig('assets');
+  /* Food and groceries is its own line, separate from running expenses. */
+  const food = fig('foodgroceries') ?? fig('foodandgroceries') ?? fig('food') ?? foodFromEntries(data, month);
+
+  const complete = running !== null;
+  const r0 = v => Math.round(v || 0);
+  return json({
+    month,
+    runningExpenses: r0(running),
+    netCosts: r0((running || 0) + (salaries || 0) + (food || 0)),
+    salaries: r0(salaries),
+    assets: r0(assets),
+    food: food === null ? null : r0(food),
+    total: r0((running || 0) + (assets || 0) + (salaries || 0) + (food || 0)),
+    upToDate: complete,
+    note: complete ? '' : `These dates are not updated. The expenses data has no running expenses for ${month} yet.`
+  });
 }
 
 /** Every booking that checks in during one calendar month, for the monthly accounts. */
