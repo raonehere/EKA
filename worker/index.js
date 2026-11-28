@@ -1175,6 +1175,14 @@ const numOf = v => {
   return isFinite(n) ? n : null;
 };
 
+/** Turns a Google Drive share link (.../file/d/ID/view) into the file's direct
+ *  address. Other links are used as they are. */
+function directLink(url) {
+  const m = url.match(/drive\.google\.com\/file\/d\/([^/?#]+)/) || url.match(/drive\.google\.com\/open\?id=([^&#]+)/);
+  if (m) return `https://drive.google.com/uc?export=download&id=${m[1]}`;
+  return url;
+}
+
 /** Finds the record for one month. Accepts a list of records (each with a
  *  month/period field) or an object keyed by month, e.g. { "2026-11": {...} }. */
 function monthRecord(data, month) {
@@ -1222,7 +1230,7 @@ async function ownerExpenses(request, env) {
   try {
     const now = Date.now();
     if (!EXPENSES.data || now - EXPENSES.at > 300000 || EXPENSES.url !== url) {
-      const res = await fetch(url, { redirect: 'follow', headers: { 'user-agent': 'Mozilla/5.0 (EKA Forest owner accounts)', accept: 'application/json,*/*' } });
+      const res = await fetch(directLink(url), { redirect: 'follow', headers: { 'user-agent': 'Mozilla/5.0 (EKA Forest owner accounts)', accept: 'application/json,*/*' } });
       if (!res.ok) throw new Error('expenses link answered ' + res.status);
       const text = await res.text();
       if (/^\s*<!doctype html|^\s*<html/i.test(text)) throw new Error('expenses link returned a web page, not the JSON file (check the sharing settings)');
@@ -1253,6 +1261,7 @@ async function ownerExpenses(request, env) {
   const r0 = v => Math.round(v || 0);
   return json({
     month,
+    sales: fig('sales') === null ? null : r0(fig('sales')),
     runningExpenses: r0(running),
     netCosts: r0((running || 0) + (salaries || 0) + (food || 0)),
     salaries: r0(salaries),
